@@ -1,0 +1,4 @@
+.forge-briefs/
+*.bak
+*.bak-*
+__pycache__/
