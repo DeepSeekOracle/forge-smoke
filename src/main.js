@@ -185,7 +185,15 @@ const fxController = typeof fxModule?.createFx === "function" ? fxModule.createF
 const menuController = typeof menuModule?.createMenu === "function" ? menuModule.createMenu(renderer.domElement, {}) : null;
 let audioController = null;
 if (typeof audioModule?.initAudio === "function") {
-  audioModule.initAudio().then((ctrl) => { audioController = ctrl; }).catch(() => {});
+  audioModule.initAudio().then((ctrl) => {
+  audioController = ctrl;
+  window.__fsSfx = (key, opts) => { try { return ctrl.playSfx(key, opts); } catch (e) { return false; } };
+  ctrl.preload().then((n) => { window.__fsSfxLoaded = n; }).catch(() => {});
+  // the browser will not start audio before a gesture: arm it on the first click/key
+  const arm = () => { try { ctrl.playSfx("click", { volume: 0.0001 }); } catch (e) {} window.removeEventListener("pointerdown", arm); window.removeEventListener("keydown", arm); };
+  window.addEventListener("pointerdown", arm, { once: true });
+  window.addEventListener("keydown", arm, { once: true });
+}).catch(() => {});
 }
 if (typeof levelModule?.loadLevel === "function") {
   levelModule.loadLevel("arena1").catch(() => {});
@@ -935,6 +943,7 @@ function startRun(arenaId = "arena1") {
     pilotMode: "hold",
     cardsPlayed: 0,
   });
+  audioController?.playSfx("launch", { volume: 0.7 });
   // manager stat block -> real gameplay multipliers (integrity, speed, reload, damage, crit, tech)
   applyStatsToRun(state, statsForLevel((state.cyborgProfile && state.cyborgProfile.level) || 1,
     (state.cyborgProfile && state.cyborgProfile.equipped) || {}));
@@ -1087,6 +1096,8 @@ function shoot(target) {
 
   const fireData = weaponManager.fire(state.aimMode);
   if (!fireData) return;
+  const lightShot = typeof isLightGunStyle === "function" && isLightGunStyle(weaponManager.active?.styleKey);
+  audioController?.playSfx(lightShot ? "laser" : "fire", { volume: 0.55, pitch: 0.9 + state.rng() * 0.25 });
 
   // Spawn tracers + Travelling Light-Orb Projectiles
   const pelletCount = fireData.pellets || 1;
@@ -1200,6 +1211,7 @@ function shoot(target) {
     damageDealt = fireData.damage;
     if (result.killed) {
       state.kills++;
+      audioController?.playSfx("kill", { volume: 0.6, pitch: 0.95 + state.rng() * 0.1 });
       scoreSystem.recordKill(target.getScoreValue());
       cardSystem.addXp(target.getXpValue());
       state.runXp = (state.runXp || 0) + target.getXpValue() * 1.5;
@@ -1234,6 +1246,7 @@ function bankRun(cleared = false) {
   }
   if (legendary) prof = grantLegacy(prof, legendary);
   prof.bestRunTime = Math.max(prof.bestRunTime || 0, beatDirector.runTime);
+  if (res.levelled > 0) audioController?.playSfx("levelup", { volume: 0.7 });
   state.cyborgProfile = saveProfile(prof);
   state.lastBank = { gained, levelled: res.levelled, legendary, cleared };
   return state.lastBank;
@@ -1242,6 +1255,7 @@ function bankRun(cleared = false) {
 function hurt(amount) {
   if (state.phase !== "playing") return;
   state.health = Math.max(0, state.health - amount);
+  audioController?.playSfx("hurt", { volume: 0.45, pitch: 1.0 });
   globalThis.__studio?.hud?.flash("#e5313b", 0.22);
   if (state.health <= 0) {
     state.phase = "dead";
@@ -1254,6 +1268,9 @@ function hurt(amount) {
 const held = (ctx, names) => names.some((name) => ctx.keys.has(name));
 
 function update(dt, ctx) {
+  const dockEl = globalThis.document?.getElementById?.("siteDock");
+  if (dockEl) dockEl.classList.toggle("bare", state.phase === "playing");
+
   // start menu is up exactly while the title phase is active
   if (state.phase === "title") {
     if (state._startShown !== true) { startMenuUI.show(); state._startShown = true; }
@@ -1539,7 +1556,7 @@ function update(dt, ctx) {
 
     // Reload (manual R or automatic when magazine hits 0)
     if (held(ctx, ["KeyR", "r", "R"])) {
-      weaponManager.tryReload();
+      if (weaponManager.tryReload()) audioController?.playSfx("reload", { volume: 0.5, pitch: 1.05 });
     }
     weaponManager.updateReload(dt);
     updateOperatorAnimation(soldier, gunPivot, dt, mx !== 0 || mz !== 0, weaponManager.active);
@@ -1712,6 +1729,7 @@ function update(dt, ctx) {
     if (state.health <= 0) {
       state.phase = "results";
       state.showResults = true;
+      audioController?.playSfx("death", { volume: 0.8 });
       if (!state.banked) { state.banked = true; bankRun(false); }
       state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex);
       state.cardPickWindow = false;
@@ -1805,6 +1823,7 @@ function pickCard(index) {
   state.showCards = false;
   state.currentCardOptions = null;
   state.cardsPlayed = (state.cardsPlayed || 0) + 1;
+  audioController?.playSfx("click", { volume: 0.5, pitch: 1.15 });
 
   if (option.type === "weapon") {
     const inactiveSlot = weaponManager.activeSlot === "primary" ? "secondary" : "primary";

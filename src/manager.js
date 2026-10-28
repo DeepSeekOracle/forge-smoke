@@ -140,6 +140,7 @@ export function createManager(opts = {}) {
       <div class="mg-weap" data-weapons></div>
       <h3 style="margin-top:16px">PERKS</h3>
       <div data-perks></div>
+      <div class="mg-ad" data-ad></div>
       <h3 style="margin-top:16px">LEGACY</h3>
       <div data-legacy class="mg-hint">nothing unlocked yet</div>
     </div>
@@ -253,15 +254,26 @@ export function createManager(opts = {}) {
     onChange(profile);
   }
 
-  q("[data-launch]").onclick = () => {
+  q("[data-launch]").onclick = () => { try { window.__fsSfx?.("click", { volume: 0.5 }); } catch (e) {}
     const equipped = { ...(profile.equipped || {}) };
     hide();
     onLaunch({ arenaId: selectedArena, equipped, stats: statsForLevel(profile.level, equipped), profile });
   };
 
+  function mountAd() {
+    const box = q("[data-ad]");
+    if (!box || box.dataset.mounted === "1") return;
+    box.dataset.mounted = "1";
+    box.innerHTML = '<div class="ad-label">ADVERTISEMENT</div>' +
+      '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-0646320966060599" ' +
+      'data-ad-format="auto" data-full-width-responsive="true"></ins>';
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) { /* blocked or offline */ }
+  }
+
   function show(nextProfile) {
     if (nextProfile) profile = nextProfile;
     render();
+    mountAd();
     root.classList.add("open");
   }
   function hide() { root.classList.remove("open"); }

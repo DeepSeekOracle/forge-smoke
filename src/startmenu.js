@@ -58,8 +58,6 @@ const CSS = `
 #fs-start .stats .gold b{color:#FFD166}
 #fs-start .foot{margin-top:30px;font:600 8px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:rgba(126,147,166,.55)}
 
-#fs-start .right{position:absolute;right:clamp(20px,3vw,46px);bottom:clamp(18px,3vh,34px);text-align:right;
-  font:600 8.5px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:rgba(232,241,248,.42);pointer-events:none}
 #fs-start .right b{display:block;color:rgba(255,179,71,.75);margin-bottom:4px}
 
 /* how to play */
@@ -98,6 +96,7 @@ export function createStartMenu(opts = {}) {
         <button data-help>HOW TO PLAY<span class="sub">THE LOOP · CARDS · LEGENDARIES</span></button>
         <button data-options>OPTIONS<span class="sub">AUDIO · CONTROLS · VIDEO</span></button>
       </div>
+      <div class="adwrap" data-ad></div>
       <div class="stats">
         <div><b data-level>1</b>LEVEL</div>
         <div><b data-runs>0</b>RUNS</div>
@@ -106,7 +105,6 @@ export function createStartMenu(opts = {}) {
       </div>
       <div class="foot">[ENTER] ENTER THE BAY · [ESC] OPTIONS</div>
     </div>
-    <div class="right"><b>EXCAVATIONPRO.CA/GAMES</b>FORGE SMOKE v2.0 · BAY TERMINAL</div>
     <div class="modal" data-modal>
       <div class="card">
         <h2>HOW THE BAY WORKS</h2>
@@ -134,14 +132,28 @@ export function createStartMenu(opts = {}) {
     q("[data-legacy]").textContent = (p.legacy || []).length;
   }
 
-  q("[data-enter]").onclick = () => onEnter();
-  q("[data-options]").onclick = () => onOptions();
-  q("[data-help]").onclick = () => modal.classList.add("open");
+  // AdSense kit: auto-format unit, mounted only when the screen is actually visible
+  function mountAd() {
+    const box = q("[data-ad]");
+    if (!box || box.dataset.mounted === "1") return;
+    box.dataset.mounted = "1";
+    box.innerHTML = '<div class="ad-label">ADVERTISEMENT</div>' +
+      '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-0646320966060599" ' +
+      'data-ad-format="auto" data-full-width-responsive="true"></ins>';
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) { /* blocked or offline */ }
+  }
+
+  const sfx = (k) => { try { window.__fsSfx?.(k, { volume: 0.5 }); } catch (e) {} };
+
+  q("[data-enter]").onclick = () => { sfx("click"); onEnter(); };
+  q("[data-options]").onclick = () => { sfx("click"); onOptions(); };
+  q("[data-help]").onclick = () => { sfx("click"); modal.classList.add("open"); };
   q("[data-close]").onclick = () => modal.classList.remove("open");
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
 
   function show() {
     render();
+    mountAd();
     root.classList.add("open");
     // probe the art once; if it is missing the gradient stands in
     const img = new Image();
