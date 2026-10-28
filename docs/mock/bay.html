@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Forge Smoke — Bay (UI mock)</title>
+<style>
+  /* ── tokens (mirror these into theme.js when adopted) ─────────────────────── */
+  :root{
+    --void:#07090C; --plate:#0E1319; --plate2:#131A22; --hairline:#1E2A35; --steel:#2C3A47;
+    --text:#E8F1F8; --muted:#7E93A6; --amber:#FFB347; --amber-dim:#8C5E1F;
+    --cyan:#6FE3FF; --mint:#7CE6A8; --danger:#F2545B; --gold:#FFD166; --magenta:#FF6FD6;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+    --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    --cond:"Barlow Condensed","Oswald",ui-sans-serif,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--void);color:var(--text);font:14px/1.45 var(--sans);overflow:hidden}
+  body{background:
+      radial-gradient(1200px 600px at 70% -10%,rgba(111,227,255,.06),transparent 60%),
+      radial-gradient(900px 500px at 10% 110%,rgba(255,179,71,.07),transparent 60%),
+      var(--void);}
+  .app{position:fixed;inset:0;display:grid;grid-template-rows:64px 40px 1fr 76px;gap:0}
+
+  /* ── top bar ─────────────────────────────────────────────────────────────── */
+  .top{display:flex;align-items:center;gap:20px;padding:0 22px;background:var(--plate);
+       border-bottom:1px solid var(--hairline);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .mark{width:30px;height:30px;border:1px solid var(--amber);color:var(--amber);display:grid;place-items:center;
+        font:700 12px var(--mono);letter-spacing:.08em;border-radius:2px;box-shadow:0 0 14px rgba(255,179,71,.18)}
+  .who{display:flex;flex-direction:column;gap:2px}
+  .who b{font:700 15px var(--cond);letter-spacing:.14em}
+  .who span{font:500 9px var(--mono);letter-spacing:.22em;color:var(--muted)}
+  .lvl{font:700 26px var(--mono);color:var(--amber);margin-left:6px;line-height:1}
+  .lvl small{display:block;font:500 8px var(--mono);letter-spacing:.2em;color:var(--muted)}
+  .xp{flex:1;max-width:460px}
+  .xp .row{display:flex;justify-content:space-between;font:500 9px var(--mono);letter-spacing:.16em;color:var(--muted);margin-bottom:5px}
+  .track{height:9px;border-radius:2px;background:var(--hairline);overflow:hidden}
+  .fill{height:100%;width:76%;background:linear-gradient(90deg,var(--mint),var(--cyan));box-shadow:0 0 12px rgba(124,230,168,.35)}
+  .credits{margin-left:auto;display:flex;gap:16px;font:700 12px var(--mono);color:var(--text)}
+  .credits i{color:var(--gold);font-style:normal}
+
+  /* ── tabs ────────────────────────────────────────────────────────────────── */
+  .tabs{display:flex;align-items:stretch;gap:2px;padding:0 18px;background:rgba(19,26,34,.6);
+        backdrop-filter:blur(10px) saturate(1.1);border-bottom:1px solid var(--hairline)}
+  .tab{padding:0 18px;display:flex;align-items:center;font:700 11px var(--mono);letter-spacing:.18em;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+  .tab:hover{color:var(--text)}
+  .tab[aria-selected="true"]{color:var(--amber);border-bottom-color:var(--amber);box-shadow:0 2px 12px -6px var(--amber)}
+
+  /* ── body: three columns ─────────────────────────────────────────────────── */
+  .body{display:grid;grid-template-columns:300px 1fr 296px;gap:14px;padding:14px 18px;min-height:0}
+  .panel{background:var(--plate);border:1px solid var(--hairline);border-radius:3px;display:flex;flex-direction:column;min-height:0;
+         box-shadow:inset 0 1px 0 rgba(255,255,255,.045), 0 10px 30px -20px #000}
+  .head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--hairline);
+        font:800 9.5px var(--mono);letter-spacing:.2em;color:var(--muted)}
+  .head b{color:var(--amber);font-weight:800}
+  .pad{padding:12px;overflow:auto}
+
+  /* attribute rows */
+  .attr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px dashed rgba(44,58,71,.5)}
+  .attr:last-child{border-bottom:0}
+  .attr label{font:600 10px var(--mono);letter-spacing:.2em;color:var(--muted)}
+  .attr .num{font:700 24px var(--mono);font-variant-numeric:tabular-nums}
+  .plusbtn{width:22px;height:22px;border:1px solid var(--steel);background:transparent;color:var(--muted);border-radius:2px;cursor:pointer;
+           font:700 13px var(--mono);line-height:1}
+  .plusbtn:hover:not(:disabled){border-color:var(--amber);color:var(--amber);box-shadow:0 0 10px rgba(255,179,71,.25)}
+  .plusbtn:disabled{opacity:.35;cursor:not-allowed}
+
+  /* viewport */
+  .stage{position:relative;border:1px solid var(--hairline);border-radius:3px;overflow:hidden;
+        background:
+          radial-gradient(600px 320px at 46% 30%,rgba(255,179,71,.10),transparent 62%),
+          radial-gradient(700px 420px at 70% 80%,rgba(111,227,255,.07),transparent 65%),
+          linear-gradient(180deg,#0A0E13,#0C1117)}
+  .stage .grid{position:absolute;inset:0;opacity:.5;background-image:
+      linear-gradient(rgba(44,58,71,.25) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(44,58,71,.25) 1px,transparent 1px);
+      background-size:44px 44px;mask-image:radial-gradient(70% 60% at 50% 45%,#000 40%,transparent 100%)}
+  .figure{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:190px;height:330px}
+  .figure .torso{position:absolute;left:44px;top:58px;width:100px;height:120px;border-radius:14px;
+      background:linear-gradient(160deg,#3A4B5C,#1A232C 60%,#111820);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 18px 40px -18px #000}
+  .figure .head{position:absolute;left:70px;top:16px;width:48px;height:44px;border-radius:10px;
+      background:linear-gradient(160deg,#44586B,#1B242D);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+  .figure .visor{position:absolute;left:74px;top:32px;width:40px;height:12px;border-radius:3px;background:var(--amber);
+      box-shadow:0 0 18px rgba(255,179,71,.75);animation:pulse 3.6s ease-in-out infinite}
+  .figure .leg{position:absolute;width:36px;height:132px;top:176px;border-radius:8px;background:linear-gradient(180deg,#2C3A47,#151D24)}
+  .figure .leg.l{left:48px} .figure .leg.r{left:104px}
+  .figure .arm{position:absolute;width:26px;height:118px;top:70px;border-radius:8px;background:linear-gradient(180deg,#33475A,#18212A)}
+  .figure .arm.l{left:16px;transform:rotate(6deg)} .figure .arm.r{left:146px;transform:rotate(-6deg)}
+  @keyframes pulse{0%,100%{opacity:.85}50%{opacity:.45}}
+  .padlabel{position:absolute;right:12px;bottom:10px;text-align:right;font:700 9px var(--mono);letter-spacing:.2em;color:rgba(126,147,166,.75)}
+  .orbit{position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0 92%,rgba(111,227,255,.10) 96%,transparent 100%);
+      animation:spin 18s linear infinite;pointer-events:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* slots + rarity */
+  .slots{position:absolute;left:14px;bottom:14px;display:flex;gap:8px}
+  .slot{width:76px;height:76px;border-radius:3px;position:relative;display:grid;place-items:center;cursor:pointer;
+        background:linear-gradient(var(--plate2),var(--plate2)) padding-box;border:1px solid var(--steel)}
+  .slot span{font:700 8px var(--mono);letter-spacing:.14em;color:var(--muted);position:absolute;bottom:4px}
+  .slot .glyph{font:700 22px var(--mono);opacity:.9}
+  .slot.empty{border-style:dashed;color:var(--muted)}
+  .r-rare{border:2px solid transparent;
+     background:linear-gradient(var(--plate2),var(--plate2)) padding-box,
+                conic-gradient(from 210deg,#3E7FA8,#6FE3FF,#3E7FA8) border-box;
+     box-shadow:0 0 14px rgba(111,227,255,.18)}
+  .r-epic{border:2px solid transparent;
+     background:linear-gradient(var(--plate2),var(--plate2)) padding-box,
+                conic-gradient(from 210deg,#6FE3FF,#A66BFF,#6FE3FF) border-box;
+     box-shadow:0 0 18px rgba(166,107,255,.28)}
+  .r-legendary{border:2px solid transparent;
+     background:linear-gradient(var(--plate2),var(--plate2)) padding-box,
+                conic-gradient(from 210deg,#FFD166,#FF9F1C,#FFD166) border-box;
+     box-shadow:0 0 22px rgba(255,209,102,.38);animation:legendPulse 3s ease-in-out infinite}
+  @keyframes legendPulse{0%,100%{box-shadow:0 0 18px rgba(255,209,102,.30)}50%{box-shadow:0 0 30px rgba(255,209,102,.55)}}
+
+  /* equipped column */
+  .eq{display:flex;flex-direction:column;gap:10px}
+  .eqitem{position:relative;padding:10px 12px;border-radius:3px;background:var(--plate2);border:1px solid var(--hairline);cursor:pointer;overflow:hidden}
+  .eqitem .t{font:700 12px var(--sans);letter-spacing:.04em}
+  .eqitem .s{font:600 8.5px var(--mono);letter-spacing:.16em;color:var(--muted);margin-top:3px}
+  .eqitem .sheen{position:absolute;inset:-40% -60%;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.10) 50%,transparent 58%);
+      transform:translateX(-60%);animation:sheen 5.2s linear infinite}
+  @keyframes sheen{to{transform:translateX(60%)}}
+  .eqitem.r-legendary .sheen{animation-duration:3.2s}
+
+  /* launch bar */
+  .launch{display:flex;align-items:center;gap:14px;padding:0 18px;background:var(--plate);border-top:1px solid var(--hairline);
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .arenas{display:flex;gap:8px;flex:1}
+  .arena{padding:9px 14px;border-radius:3px;border:1px solid var(--hairline);background:var(--plate2);cursor:pointer;min-width:150px}
+  .arena b{display:block;font:700 11.5px var(--sans);letter-spacing:.05em}
+  .arena span{font:600 8.5px var(--mono);letter-spacing:.14em;color:var(--muted)}
+  .arena[aria-pressed="true"]{border-color:var(--amber);box-shadow:0 0 14px rgba(255,179,71,.18)}
+  .arena.locked{opacity:.45;cursor:not-allowed}
+  .cta{position:relative;width:250px;height:58px;border:0;border-radius:3px;cursor:pointer;
+       background:linear-gradient(180deg,#FFC063,#E99732);color:#0A0D11;font:800 13px var(--sans);letter-spacing:.2em;
+       box-shadow:0 0 22px rgba(255,179,71,.28),inset 0 1px 0 rgba(255,255,255,.4);overflow:hidden}
+  .cta:hover{box-shadow:0 0 34px rgba(255,179,71,.42),inset 0 1px 0 rgba(255,255,255,.5)}
+  .cta .arc{position:absolute;inset:0;background:conic-gradient(rgba(7,9,12,.55) var(--p,0turn),transparent 0);pointer-events:none}
+  .hint{position:fixed;right:18px;bottom:7px;text-align:right;font:600 9px var(--mono);letter-spacing:.18em;color:rgba(126,147,166,.6)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="mark">Δ9</div>
+    <div class="who"><b>FORGE-1 // OLIVE SPEC-OPS</b><span>AUTONOMOUS FIGHTER · BAY TERMINAL</span></div>
+    <div class="lvl">12<small>LEVEL</small></div>
+    <div class="xp">
+      <div class="row"><span>312 / 410 XP</span><span>NEXT: LV 13 · +1 POINT</span></div>
+      <div class="track"><div class="fill"></div></div>
+    </div>
+    <div class="credits"><span><i>⬢</i> 3 POINTS</span><span><i>◈</i> 1 LEGENDARY</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <div class="tab" role="tab" aria-selected="true">BAY</div>
+    <div class="tab" role="tab" aria-selected="false">ARSENAL</div>
+    <div class="tab" role="tab" aria-selected="false">POWER-UPS</div>
+    <div class="tab" role="tab" aria-selected="false">UPGRADES</div>
+    <div class="tab" role="tab" aria-selected="false">ARCHIVE <span style="color:var(--gold);margin-left:6px">●</span></div>
+  </nav>
+
+  <main class="body">
+    <!-- attributes -->
+    <section class="panel">
+      <div class="head"><span>ATTRIBUTES</span><b>3 PTS</b></div>
+      <div class="pad">
+        <div class="attr"><label>POWER</label><div class="num">24</div><button class="plusbtn">+</button></div>
+        <div class="attr"><label>ARMOR</label><div class="num">21</div><button class="plusbtn">+</button></div>
+        <div class="attr"><label>AGILITY</label><div class="num">18</div><button class="plusbtn">+</button></div>
+        <div class="attr"><label>HANDLING</label><div class="num">19</div><button class="plusbtn">+</button></div>
+        <div class="attr"><label>TECH</label><div class="num">22</div><button class="plusbtn">+</button></div>
+        <div class="attr"><label>SIGNAL</label><div class="num">16</div><button class="plusbtn">+</button></div>
+        <div class="head" style="border:0;padding:12px 0 6px"><span>LIGHT MODS</span><span style="color:var(--cyan)">CARD-GATED</span></div>
+        <div class="eqitem r-rare" style="margin-bottom:8px"><div class="sheen"></div><div class="t">LUMEN-X FLOODLIGHT</div><div class="s">RARE · +85% BEAM</div></div>
+        <div class="eqitem r-epic"><div class="sheen"></div><div class="t">SOLAR AURA RIG</div><div class="s">EPIC · 360° AURA</div></div>
+      </div>
+    </section>
+
+    <!-- viewport -->
+    <section class="stage">
+      <div class="grid"></div>
+      <div class="orbit"></div>
+      <div class="figure">
+        <div class="head"></div><div class="visor"></div>
+        <div class="torso"></div>
+        <div class="arm l"></div><div class="arm r"></div>
+        <div class="leg l"></div><div class="leg r"></div>
+      </div>
+      <div class="padlabel">TURNTABLE · 3D OPERATOR · SLOW ORBIT</div>
+      <div class="slots">
+        <div class="slot empty"><div class="glyph">◇</div><span>SUIT</span></div>
+        <div class="slot r-epic"><div class="glyph" style="color:var(--cyan)">⌁</div><span>PRIMARY</span></div>
+        <div class="slot r-legendary"><div class="glyph" style="color:var(--gold)">◈</div><span>LEGENDARY</span></div>
+      </div>
+    </section>
+
+    <!-- equipped -->
+    <section class="panel">
+      <div class="head"><span>EQUIPPED</span><b>READY</b></div>
+      <div class="pad eq">
+        <div class="eqitem r-epic"><div class="sheen"></div><div class="t">NEON LASER // BEAM</div><div class="s">EPIC · 18 DMG · 7/S</div></div>
+        <div class="eqitem r-rare"><div class="sheen"></div><div class="t">THUMPER // ARC</div><div class="s">RARE · LOBBED BLAST</div></div>
+        <div class="eqitem r-legendary"><div class="sheen"></div><div class="t">◈ JETPACK FRAME</div><div class="s">LEGENDARY · MOVEMENT: VERTICAL</div></div>
+        <div class="head" style="border:0;padding:8px 0 4px"><span>PERKS</span></div>
+        <div class="eqitem"><div class="t">REINFORCED PLATING</div><div class="s">COMMON · +20 INTEGRITY</div></div>
+        <div class="eqitem"><div class="t">SERVO BOOST</div><div class="s">COMMON · +12% SPEED</div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="launch">
+    <div class="arenas">
+      <div class="arena" aria-pressed="true"><b>PERIMETER</b><span>BEATS 1–3 · TREELINE</span></div>
+      <div class="arena locked"><b>BREACH YARD 🔒</b><span>NEEDS BEST 1000</span></div>
+      <div class="arena locked"><b>GUNSHIP PAD 🔒</b><span>NEEDS BEST 5000</span></div>
+    </div>
+    <button class="cta" id="cta">▶ LAUNCH CYBORG<span class="arc"></span></button>
+  </footer>
+</div>
+<div class="hint">HOLD TO LAUNCH 0.6s · E EQUIP · U UPGRADE · ESC BACK</div>
+
+<script>
+  // hold-to-launch arc, exactly the 600 ms commitment from the spec
+  const cta = document.getElementById('cta');
+  const arc = cta.querySelector('.arc');
+  let raf = null, start = 0;
+  const HOLD = 600;
+  function tick(t){
+    const p = Math.min(1, (t - start) / HOLD);
+    arc.style.setProperty('--p', (p * 1).toFixed(3) + 'turn');
+    if (p < 1) raf = requestAnimationFrame(tick);
+    else { cta.textContent = 'DEPLOYING…'; }
+  }
+  function begin(e){ e.preventDefault(); if (raf) return; start = performance.now(); raf = requestAnimationFrame(tick); }
+  function end(){ if (!raf) return; cancelAnimationFrame(raf); raf = null; arc.style.setProperty('--p','0turn'); }
+  cta.addEventListener('pointerdown', begin);
+  cta.addEventListener('pointerup', end);
+  cta.addEventListener('pointerleave', end);
+</script>
+</body>
+</html>
