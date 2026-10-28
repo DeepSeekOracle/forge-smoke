@@ -896,7 +896,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "MGR-09"
+      ]
     },
     {
       "id": "MGR-11",
@@ -910,7 +912,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "MGR-10"
+      ]
     },
     {
       "id": "MGR-12",
@@ -924,7 +928,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "MGR-11"
+      ]
     },
     {
       "id": "MGR-13",
@@ -939,7 +945,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "MGR-12"
+      ]
     },
     {
       "id": "MGR-14",
@@ -951,6 +959,69 @@
         "Space accepts forgesmoke",
         "row appears in arcade.json",
         "bay panel ranks by level"
+      ],
+      "evidence": [],
+      "status": "done",
+      "depends_on": [
+        "MGR-13"
+      ]
+    },
+    {
+      "id": "TAL-01",
+      "phase": "production",
+      "title": "Special Operations tree (8 spokes, 81 nodes)",
+      "owner": "systems-designer",
+      "description": "Military passive tree: hub, 8 branches (Spec Ops, Assault, Demolition, Armour, Recon, Drone Ops, Logistics, Command), notables + keystones, cheapest-chain allocation.",
+      "acceptance": [
+        "81 nodes / 96 edges",
+        "clicking a far node buys the chain",
+        "right-click refunds dependents"
+      ],
+      "evidence": [],
+      "status": "done",
+      "depends_on": []
+    },
+    {
+      "id": "TAL-02",
+      "phase": "production",
+      "title": "Tree window with board art",
+      "owner": "game-designer",
+      "description": "Own window with the rendered command-board background, pan/zoom, tooltips, animated allocation.",
+      "acceptance": [
+        "art loads",
+        "pan and zoom",
+        "glow + dash animation on allocated"
+      ],
+      "evidence": [],
+      "status": "done",
+      "depends_on": []
+    },
+    {
+      "id": "TAL-03",
+      "phase": "production",
+      "title": "Talent points from runs",
+      "owner": "systems-designer",
+      "description": "Runs pay points generously: 2 per run, +6 per arena clear, +level/2, + tree bonuses.",
+      "acceptance": [
+        "points awarded on death",
+        "points awarded on clear",
+        "balance shown in the bay"
+      ],
+      "evidence": [],
+      "status": "done",
+      "depends_on": []
+    },
+    {
+      "id": "TAL-04",
+      "phase": "production",
+      "title": "Trials engine (BONK-style)",
+      "owner": "systems-designer",
+      "description": "Deterministic round-based auto-battler with three bosses that punish different lazy builds.",
+      "acceptance": [
+        "same seed same result",
+        "armour boss needs crit",
+        "shield boss needs explosives",
+        "adds boss needs sustained DPS"
       ],
       "evidence": [],
       "status": "done",

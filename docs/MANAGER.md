@@ -67,3 +67,20 @@ autonomous cyborg:
   (0, −32) to x 10.67, while open ground at (0, 0) is untouched.
 - **Public leaderboard.** Cyborg designation (18 chars) + highest level posted to the arcade ledger
   Space; the bay shows the top 8, and `/games/` gained a Forge Smoke hall card.
+
+## v2.2.0 — Special Operations tree + Trials
+
+Researched the PoE 2 passive tree (poe2ref.com, fextralife) and rebuilt the *structure*, not the lore:
+
+- **81 nodes across 8 spokes** (Spec Ops, Assault, Demolition, Armour, Recon, Drone Ops, Logistics,
+  Command), following the eight conduits etched into the command board render. 16 notables,
+  8 keystones (each with a real tradeoff), a central COMMAND CORE.
+- **Cheapest-chain allocation**: clicking a distant node buys the path to it (Dijkstra over the graph),
+  exactly like the reference. Right-click refunds a node and anything only reachable through it.
+- **Generous points**: 6 to start, then 2 per run, +6 per arena clear, +level/2, plus tree bonuses.
+- **Modifiers are wired**, not decorative: damage, fire rate, integrity, speed, plus tree-only effects
+  (crit, blast, shield pierce, drones, XP, bonus points).
+- **Trials** (`src/battles.js`): deterministic auto-battler, three bosses with different answers —
+  FOUNDRY WARDEN (armour → crit/pierce), SCRAP COLOSSUS (frontal shield → explosives),
+  DRONE HIVE (adds → sustained DPS). Measured at level 1 with 4 points: WARDEN cleared in 18 rounds,
+  COLOSSUS and HIVE lost, which is the intended gate.
