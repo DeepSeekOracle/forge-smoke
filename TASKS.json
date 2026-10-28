@@ -1,104 +1,6 @@
 {
   "project": "forge-smoke",
-  "updated": "2026-10-28",
-  "canonical_state": ".forge/STATE.md",
-  "rules": "AGENTS.md",
-  "verify": ".forge/VERIFY.md",
-  "desk": ".forge/DESK.md",
-  "invariants": [
-    "talent economy: 0 before 60s, 1 after, 5 on clear, +1 boss - no new faucets",
-    "shieldbearer invincible from the front; explosive 55%; grenade full bypass",
-    "talent tree stays a constellation disc, 8 keystones, gated masteries",
-    "start screen keeps the operator-supplied backdrop and a build tag",
-    "save schema additive only",
-    "every module import carries the same ?v= as index.html main.js"
-  ],
-  "completed": [
-    {
-      "id": "CORE-01",
-      "title": "Phases title/loadout/playing/results"
-    },
-    {
-      "id": "CORE-02",
-      "title": "Autonomous pilot + cards"
-    },
-    {
-      "id": "UI-01",
-      "title": "Start menu with operator-supplied GIF backdrop"
-    },
-    {
-      "id": "UI-02",
-      "title": "Build tag for cache diagnosis"
-    },
-    {
-      "id": "UI-03",
-      "title": "Manager bay: portraits, naming, loadout, control mode"
-    },
-    {
-      "id": "UI-04",
-      "title": "Constellation-disc talent tree (969 nodes)"
-    },
-    {
-      "id": "UI-05",
-      "title": "Skinned card tray with generated art"
-    },
-    {
-      "id": "UI-06",
-      "title": "Run report on results"
-    },
-    {
-      "id": "UI-07",
-      "title": "Attribute points in the bay"
-    },
-    {
-      "id": "SYS-01",
-      "title": "Per-style weapon VFX table (12 styles)"
-    },
-    {
-      "id": "SYS-02",
-      "title": "Grenade lobs with blast ring"
-    },
-    {
-      "id": "SYS-03",
-      "title": "Graded shield (0 / 55% / full bypass)"
-    },
-    {
-      "id": "SYS-04",
-      "title": "Boss with animated BrainStem rig"
-    },
-    {
-      "id": "SYS-05",
-      "title": "Boss telegraph + salvo, pilot dodges"
-    },
-    {
-      "id": "SYS-06",
-      "title": "Air targets at real altitude + anti-air aim"
-    },
-    {
-      "id": "SYS-07",
-      "title": "Zone objectives for the autopilot"
-    },
-    {
-      "id": "SYS-08",
-      "title": "Event barks with UK male Piper voice"
-    },
-    {
-      "id": "SYS-09",
-      "title": "Rain and foliage tick in the bay"
-    },
-    {
-      "id": "ECON-01",
-      "title": "Stingy talent economy (60 s floor)"
-    },
-    {
-      "id": "ECON-02",
-      "title": "Trials removed (free-point faucet)"
-    },
-    {
-      "id": "AUD-01",
-      "title": "Drone hum removed"
-    }
-  ],
+  "profile": "web-2d",
   "tasks": [
     {
       "id": "DBG-01",
@@ -153,7 +55,7 @@
         "prints the new version"
       ],
       "depends_on": [
-        "DBG-01"
+        "DBG-02"
       ],
       "priority": "high",
       "risk": "low",
@@ -169,11 +71,10 @@
         "tools/regress.mjs"
       ],
       "acceptance": [
-        "start→bay→play→card→boss→death→summary",
+        "start\u2192bay\u2192play\u2192card\u2192boss\u2192death\u2192summary",
         "non-zero exit on any pageerror"
       ],
       "depends_on": [
-        "DBG-02",
         "DBG-03"
       ],
       "priority": "high",
@@ -216,7 +117,7 @@
         "no canvas banner string remains"
       ],
       "depends_on": [
-        "DBG-04"
+        "DBG-05"
       ],
       "priority": "high",
       "risk": "low",
@@ -236,7 +137,9 @@
         "one visible in a forced card drop",
         "licences recorded"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "DBG-06"
+      ],
       "priority": "high",
       "risk": "low",
       "status": "todo",
@@ -274,7 +177,7 @@
         "12 PNGs 512x256 alpha"
       ],
       "depends_on": [
-        "ART-01"
+        "ART-02"
       ],
       "priority": "normal",
       "risk": "low",
@@ -293,7 +196,7 @@
         "5 PNGs 256px used visibly"
       ],
       "depends_on": [
-        "ART-01"
+        "ART-03"
       ],
       "priority": "normal",
       "risk": "low",
@@ -312,7 +215,7 @@
         "under 250 KB"
       ],
       "depends_on": [
-        "ART-01"
+        "ART-04"
       ],
       "priority": "normal",
       "risk": "low",
@@ -330,7 +233,9 @@
       "acceptance": [
         "1536x864, used for reduced-motion"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "ART-05"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -350,7 +255,9 @@
         "fades with run",
         "licence recorded"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "ART-06"
+      ],
       "priority": "high",
       "risk": "low",
       "status": "todo",
@@ -367,10 +274,12 @@
       ],
       "acceptance": [
         "6+ families x3 variants",
-        "random with ±6% pitch",
+        "random with \u00b16% pitch",
         "under 4 MB"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "AUD-02"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -388,7 +297,9 @@
         "shield hit audibly distinct",
         "mix table documented"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "AUD-03"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -407,7 +318,7 @@
         "screenshot"
       ],
       "depends_on": [
-        "ART-02"
+        "AUD-04"
       ],
       "priority": "normal",
       "risk": "low",
@@ -425,7 +336,9 @@
       "acceptance": [
         "no overlap at 1440x900 or 1280x720"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "UI-08"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -444,7 +357,9 @@
         "screenshot at 390x844",
         "cards usable"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "UI-09"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -462,7 +377,9 @@
         "tab walk printed",
         "reduced-motion uses the still"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "UI-10"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -480,7 +397,9 @@
         "armourSoak/shieldGate/spread/falloff/xpForRun/bossHp/timeToKill",
         "unit table printed"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "UI-11"
+      ],
       "priority": "high",
       "risk": "med",
       "status": "todo",
@@ -521,7 +440,7 @@
         "level-1 kill 60-90 s or explained"
       ],
       "depends_on": [
-        "MATH-01"
+        "MATH-02"
       ],
       "priority": "high",
       "risk": "med",
@@ -541,7 +460,7 @@
         "economy untouched"
       ],
       "depends_on": [
-        "MATH-01"
+        "MATH-03"
       ],
       "priority": "normal",
       "risk": "low",
@@ -562,7 +481,9 @@
         "TTK row",
         "screenshot"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "MATH-04"
+      ],
       "priority": "high",
       "risk": "med",
       "status": "todo",
@@ -599,7 +520,7 @@
         "hits up to 3 in a line"
       ],
       "depends_on": [
-        "WPN-01"
+        "WPN-02"
       ],
       "priority": "normal",
       "risk": "low",
@@ -620,7 +541,6 @@
         "weapon weight 0.6, no repeats"
       ],
       "depends_on": [
-        "WPN-02",
         "WPN-03"
       ],
       "priority": "normal",
@@ -640,9 +560,11 @@
       "acceptance": [
         "pooled sprite 60-90 ms",
         "per-kind impacts",
-        "≥6 style screenshots"
+        "\u22656 style screenshots"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "WPN-04"
+      ],
       "priority": "high",
       "risk": "med",
       "status": "todo",
@@ -660,7 +582,9 @@
         "pooled, right-down",
         "no per-shot allocation"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "FX-01"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -676,11 +600,13 @@
         "src/fx.js"
       ],
       "acceptance": [
-        "shake ≤2px @1080p",
+        "shake \u22642px @1080p",
         "taper visible",
-        "≤+2 ms frame time"
+        "\u2264+2 ms frame time"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "FX-02"
+      ],
       "priority": "normal",
       "risk": "low",
       "status": "todo",
@@ -698,9 +624,11 @@
       "acceptance": [
         "cover radius 18-30 only",
         "collider count printed",
-        "camera displacement ≤1 m"
+        "camera displacement \u22641 m"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "FX-03"
+      ],
       "priority": "high",
       "risk": "med",
       "status": "todo",
@@ -738,7 +666,7 @@
         "10 props radius 17-26, clear centre"
       ],
       "depends_on": [
-        "MAP-01"
+        "MAP-02"
       ],
       "priority": "normal",
       "risk": "low",
@@ -759,7 +687,6 @@
         "deterministic by seed"
       ],
       "depends_on": [
-        "MAP-02",
         "MAP-03"
       ],
       "priority": "normal",
@@ -779,7 +706,9 @@
         "no zero-velocity frames while a target exists",
         "55-90 m per 60 s"
       ],
-      "depends_on": [],
+      "depends_on": [
+        "MAP-04"
+      ],
       "priority": "high",
       "risk": "high",
       "status": "todo",
@@ -794,7 +723,7 @@
         "src/enemies.js"
       ],
       "acceptance": [
-        "mean spacing ≥2.2 m",
+        "mean spacing \u22652.2 m",
         "shield takes the front slot"
       ],
       "depends_on": [
@@ -814,11 +743,11 @@
         "src/main.js"
       ],
       "acceptance": [
-        "max displacement ≤1 m",
+        "max displacement \u22641 m",
         "screenshot near cover"
       ],
       "depends_on": [
-        "MOV-01"
+        "MOV-02"
       ],
       "priority": "high",
       "risk": "high",
@@ -834,11 +763,11 @@
         "src/autopilot.js"
       ],
       "acceptance": [
-        "≥4 m during telegraph",
+        "\u22654 m during telegraph",
         "metric printed"
       ],
       "depends_on": [
-        "MOV-01"
+        "MOV-03"
       ],
       "priority": "normal",
       "risk": "low",
@@ -857,7 +786,7 @@
         "20 seeded runs tabulated"
       ],
       "depends_on": [
-        "DBG-04"
+        "MOV-04"
       ],
       "priority": "high",
       "risk": "high",
@@ -919,7 +848,7 @@
         "fires from altitude"
       ],
       "depends_on": [
-        "TUNE-02"
+        "TUNE-03"
       ],
       "priority": "high",
       "risk": "med",
