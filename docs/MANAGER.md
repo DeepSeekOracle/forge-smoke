@@ -49,3 +49,21 @@ autonomous cyborg:
 - One arena per run. Death is the loop, not a failure state.
 - Lights stay card-gated (verified both ways in v1.1.0).
 - Every change is verified in the preview (0 console errors + a screenshot) before it is committed.
+
+## v2.1.0 — the fixes that came out of playing it
+
+- **Bay is a stance, not a demo.** The attract-mode firefight behind the manager panels is gone: the
+  cyborg stands still facing the bay, breathing, holding the weapon two-handed. Enemies are cleared on
+  entry. A fight behind panels read as glitchy, and shield units that could not die read as broken.
+- **Explosives answer shields.** `shieldbearer` takes **0** damage from the front while shielded. Two
+  cards now exist to beat that: **Frag Rounds** (rare) and **Breach Grenade Rig** (epic). Both set
+  `hasExplosiveMod`, which (a) adds +15 % damage and (b) passes damage as *flank*, which the shield
+  check exempts. Measured: 60 hp shieldbearer took 0 frontal, 50 from an explosive hit.
+- **Character switching changes the character.** Picking a suit in the bay rebuilds the rig immediately
+  (`onSkinChange` → `buildOperatorRig`) instead of waiting for the next launch.
+- **Large props are solid.** `fitCollider` measures each spawned asset's own geometry and registers a
+  collider per visible piece, skipping flat ground pieces and anything over 26 units. Colliders reset
+  when an arena is rebuilt, so they stop stacking. Measured: the ruins wall pushes a probe from
+  (0, −32) to x 10.67, while open ground at (0, 0) is untouched.
+- **Public leaderboard.** Cyborg designation (18 chars) + highest level posted to the arcade ledger
+  Space; the bay shows the top 8, and `/games/` gained a Forge Smoke hall card.
