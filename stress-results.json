@@ -1,0 +1,785 @@
+{
+  "timestamp": "2026-10-27T16:55:44.189Z",
+  "url": "http://127.0.0.1:8796/preview/forge-smoke/?low=1&test=1",
+  "resolution": "1280x720",
+  "preset": "low",
+  "durationMs": 15000,
+  "sampleCount": 75,
+  "testType": "sustained",
+  "fps": {
+    "average": 58,
+    "p95FrameTimeMs": 17.24137931034483,
+    "target": 60,
+    "p95TargetMs": 18,
+    "pass": true
+  },
+  "drawCalls": {
+    "max": 1,
+    "target": 90,
+    "pass": true
+  },
+  "triangles": {
+    "max": 2,
+    "target": 150000,
+    "pass": true
+  },
+  "textureMemory": {
+    "bytes": 43646976,
+    "mb": 41.63,
+    "targetMB": 96,
+    "pass": true
+  },
+  "maxEnemies": 0,
+  "samples": [
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 0
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 1000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 1200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 1400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 1600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 1800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 2000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 2200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 2400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 2600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 2800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 3000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 3200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 3400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 3600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 3800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 4000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 4200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 4400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 4600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 4800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 5000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 5200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 5400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 5600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 5800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 6000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 6200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 6400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 6600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 6800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 7000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 7200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 7400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 7600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 7800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 8000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 8200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 8400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 8600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 8800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 9000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 9200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 9400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 9600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 9800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 10000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 10200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 10400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 10600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 10800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 11000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 11200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 11400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 11600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 11800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 12000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 12200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 12400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 12600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 12800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 13000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 13200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 13400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 13600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 13800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 14000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 14200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 14400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 14600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "enemies": 0,
+      "time": 14800
+    }
+  ]
+}

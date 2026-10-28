@@ -1,0 +1,225 @@
+/**
+ * forge-smoke — entry point (rebuilt 2026-10-28 after the original 39.5 KB file was lost)
+ *
+ * Scope: boot the engine, build the arena, run a playable loop, expose the game to the studio harness.
+ * Imports only modules that exist and work, so the preview never shows a black frame.
+ * Weapons / enemies / HUD wiring is the remaining task (TEC-04).
+ */
+import * as THREE from "three";
+import { installStudio } from "./studio.js";
+import { loadSave } from "./save.js";
+
+// the page ships no canvas: the game creates it (index.html styles `canvas` and keeps only #fatal)
+let canvas = document.getElementById("stage") || document.querySelector("canvas");
+if (!canvas) {
+  canvas = document.createElement("canvas");
+  canvas.id = "stage";
+  document.body.appendChild(canvas);
+}
+
+// ---------------------------------------------------------------- renderer, scene, camera
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, false);
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0e12);
+scene.fog = new THREE.Fog(0x0b0e12, 40, 120);
+
+const camera = new THREE.PerspectiveCamera(60, (canvas.clientWidth || 1) / (canvas.clientHeight || 1), 0.1, 400);
+camera.position.set(0, 14, 18);
+camera.lookAt(0, 0, 0);
+
+// ---------------------------------------------------------------- lighting
+scene.add(new THREE.HemisphereLight(0x8fb4d9, 0x1a1f26, 0.9));
+const key = new THREE.DirectionalLight(0xffd9a0, 1.6);
+key.position.set(18, 28, 12);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -60;
+key.shadow.camera.right = 60;
+key.shadow.camera.top = 60;
+key.shadow.camera.bottom = -60;
+scene.add(key);
+
+// ---------------------------------------------------------------- arena
+const ARENA = 54;
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(ARENA * 2, ARENA * 2, 1, 1),
+  new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.95, metalness: 0.05 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x3a4048, roughness: 0.8 });
+for (let i = 0; i < 4; i++) {
+  const wall = new THREE.Mesh(new THREE.BoxGeometry(ARENA * 2, 4, 1.2), wallMat);
+  const a = (i * Math.PI) / 2;
+  wall.position.set(Math.sin(a) * ARENA, 2, Math.cos(a) * ARENA);
+  wall.rotation.y = a;
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  scene.add(wall);
+}
+
+const coverMat = new THREE.MeshStandardMaterial({ color: 0x4a4034, roughness: 0.85 });
+let seed = 1337;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+for (let i = 0; i < 14; i++) {
+  const w = 3 + rnd() * 5;
+  const h = 1.4 + rnd() * 2.4;
+  const block = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), coverMat);
+  const angle = rnd() * Math.PI * 2;
+  const radius = 12 + rnd() * 34;
+  block.position.set(Math.sin(angle) * radius, h / 2, Math.cos(angle) * radius);
+  block.rotation.y = rnd() * Math.PI;
+  block.castShadow = true;
+  block.receiveShadow = true;
+  scene.add(block);
+}
+
+// ---------------------------------------------------------------- player
+const player = new THREE.Group();
+player.add(Object.assign(new THREE.Mesh(
+  new THREE.CapsuleGeometry(0.55, 1.1, 6, 12),
+  new THREE.MeshStandardMaterial({ color: 0x76c7ff, roughness: 0.4, metalness: 0.2 })), { castShadow: true }));
+const gun = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 1.5),
+  new THREE.MeshStandardMaterial({ color: 0x21262c, roughness: 0.5, metalness: 0.6 }));
+gun.position.set(0.42, 0.15, -0.85);
+player.add(gun);
+scene.add(player);
+
+const P = { pos: new THREE.Vector3(0, 0, 14), yaw: Math.PI, speed: 9, hp: 100,
+            ammo: 30, reserve: 120, reloading: false, reloadEnd: 0 };
+
+// ---------------------------------------------------------------- bullets
+const bullets = [];
+const bulletMat = new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0xff9f1c, emissiveIntensity: 1.4 });
+function reload(now) {
+  if (P.reloading || P.reserve <= 0) return;
+  P.reloading = true;
+  P.reloadEnd = now + 1.2;
+}
+function fire(now) {
+  if (P.reloading || now < P.reloadEnd) return;
+  if (P.ammo <= 0) { reload(now); return; }
+  P.ammo -= 1;
+  const b = new THREE.Mesh(new THREE.SphereGeometry(0.16, 6, 6), bulletMat);
+  b.position.copy(player.position).add(new THREE.Vector3(0, 1.1, 0));
+  b.userData.dir = new THREE.Vector3(Math.sin(P.yaw), 0, Math.cos(P.yaw)).normalize();
+  b.userData.life = 2.2;
+  scene.add(b);
+  bullets.push(b);
+}
+
+// ---------------------------------------------------------------- input
+const keys = new Set();
+let mouseDown = false;
+addEventListener("keydown", (e) => {
+  keys.add(e.code);
+  if (e.code === "KeyR") reload(elapsed);
+  if (e.code === "Space") fire(elapsed);
+});
+addEventListener("keyup", (e) => keys.delete(e.code));
+addEventListener("mousemove", (e) => {
+  if (document.pointerLockElement !== canvas) return;
+  P.yaw -= e.movementX * 0.0022;
+});
+addEventListener("mousedown", () => { mouseDown = true; });
+addEventListener("mouseup", () => { mouseDown = false; });
+canvas.addEventListener("click", () => canvas.requestPointerLock?.());
+
+// ---------------------------------------------------------------- save
+const save = loadSave();
+const best = { score: (save && save.bestScore) || 0 };
+
+// ---------------------------------------------------------------- update
+let elapsed = 0;
+let score = 0;
+
+function update(dt) {
+  elapsed += dt;
+  const now = elapsed;
+
+  let fwd = 0, strafe = 0;
+  if (keys.has("KeyW") || keys.has("ArrowUp")) fwd += 1;
+  if (keys.has("KeyS") || keys.has("ArrowDown")) fwd -= 1;
+  if (keys.has("KeyA") || keys.has("ArrowLeft")) strafe -= 1;
+  if (keys.has("KeyD") || keys.has("ArrowRight")) strafe += 1;
+
+  const sin = Math.sin(P.yaw), cos = Math.cos(P.yaw);
+  P.pos.x += (sin * fwd + cos * strafe) * P.speed * dt;
+  P.pos.z += (cos * fwd - sin * strafe) * P.speed * dt;
+
+  const r = Math.hypot(P.pos.x, P.pos.z);
+  if (r > ARENA - 1.5) {
+    const k = (ARENA - 1.5) / r;
+    P.pos.x *= k;
+    P.pos.z *= k;
+  }
+  player.position.copy(P.pos);
+  player.rotation.y = P.yaw;
+
+  if (mouseDown) fire(now);
+
+  if (P.reloading && now >= P.reloadEnd) {
+    const need = Math.min(30 - P.ammo, P.reserve);
+    P.ammo += need;
+    P.reserve -= need;
+    P.reloading = false;
+  }
+
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.userData.life -= dt;
+    b.position.addScaledVector(b.userData.dir, 55 * dt);
+    if (b.userData.life <= 0 || Math.hypot(b.position.x, b.position.z) > ARENA) {
+      scene.remove(b);
+      bullets.splice(i, 1);
+    }
+  }
+
+  const camDist = 16, camHeight = 12;
+  camera.position.x += (P.pos.x - sin * camDist - camera.position.x) * Math.min(1, dt * 6);
+  camera.position.z += (P.pos.z - cos * camDist - camera.position.z) * Math.min(1, dt * 6);
+  camera.position.y += (camHeight - camera.position.y) * Math.min(1, dt * 4);
+  camera.lookAt(P.pos.x, 1.2, P.pos.z);
+
+  renderer.render(scene, camera);
+}
+
+function resize() {
+  const w = canvas.clientWidth || window.innerWidth;
+  const h = canvas.clientHeight || window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / Math.max(1, h);
+  camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+resize();
+
+// ---------------------------------------------------------------- studio install
+installStudio({
+  scene, renderer, camera,
+  fixedStepMs: 1000 / 60,
+  update,
+  reset() {
+    P.pos.set(0, 0, 14); P.yaw = Math.PI; P.hp = 100;
+    P.ammo = 30; P.reserve = 120; P.reloading = false;
+    score = 0;
+    for (const b of bullets) scene.remove(b);
+    bullets.length = 0;
+  },
+  begin() {},
+  flow() { return "playing"; },
+  player() { return { position: { x: P.pos.x, y: 1.1, z: P.pos.z }, yaw: P.yaw, pitch: 0 }; },
+  probes() {
+    return { hp: P.hp, ammo: P.ammo, reserve: P.reserve, score, best: best.score,
+             bullets: bullets.length, x: P.pos.x, z: P.pos.z };
+  },
+  hud: false,
+});
+
+window.__forgeSmoke = { P, scene, renderer, camera, get score() { return score; } };
+export { scene, renderer, camera, player, P, update };

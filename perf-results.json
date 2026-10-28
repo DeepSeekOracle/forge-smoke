@@ -1,0 +1,933 @@
+{
+  "timestamp": "2026-10-27T16:45:34.761Z",
+  "url": "http://127.0.0.1:8796/preview/forge-smoke/?low=1&test=1",
+  "resolution": "1280x720",
+  "preset": "low",
+  "durationMs": 10000,
+  "sampleCount": 100,
+  "fps": {
+    "average": 58,
+    "p95FrameTimeMs": 17.24137931034483,
+    "target": 60,
+    "p95TargetMs": 18,
+    "pass": true
+  },
+  "drawCalls": {
+    "max": 1,
+    "target": 90,
+    "pass": true
+  },
+  "triangles": {
+    "max": 2,
+    "target": 150000,
+    "pass": true
+  },
+  "textureMemory": {
+    "bytes": 43646976,
+    "mb": 41.63,
+    "targetMB": 96,
+    "pass": true
+  },
+  "samples": [
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 0
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 1900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 2900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 3900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 4900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 5900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 6900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 7900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 8900
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9000
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9100
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9200
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9300
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9400
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9500
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9600
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9700
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9800
+    },
+    {
+      "calls": 1,
+      "triangles": 2,
+      "points": 0,
+      "lines": 0,
+      "frame": 67,
+      "fps": 58,
+      "time": 9900
+    }
+  ]
+}

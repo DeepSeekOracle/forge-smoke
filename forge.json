@@ -1,0 +1,9 @@
+{
+  "name": "Forge Smoke",
+  "kind": "web",
+  "created": 1792655993.5255914,
+  "profile": "web-2d",
+  "mode": "2D",
+  "engine": "Canvas 2D or Phaser/PixiJS",
+  "harness": "0.2"
+}
