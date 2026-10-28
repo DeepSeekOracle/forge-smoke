@@ -9,7 +9,7 @@
  * behind it, so the character model IS the preview.
  */
 import { ARENAS, isArenaUnlocked } from "./menu.js";
-import { STARTER_LOADOUTS } from "./models.js";
+import { STARTER_LOADOUTS, PLAYER_SKINS } from "./models.js";
 import { addProfileXp, grantLegacy, saveProfile, xpForLevel } from "./save.js";
 
 /** Light mods are cards. `starter` ones can be taken as equipped cards; the rest are found/earned. */
@@ -128,7 +128,9 @@ export function createManager(opts = {}) {
       </div>
     </div>
     <div class="mg-col mg-left">
-      <h3>ATTRIBUTES</h3>
+      <h3>CHARACTER</h3>
+      <div data-skins></div>
+      <h3 style="margin-top:16px">ATTRIBUTES</h3>
       <div class="mg-stats" data-stats></div>
       <h3>LIGHT MODS <span class="mg-tag">CARD-GATED</span></h3>
       <div data-lightmods></div>
@@ -166,6 +168,17 @@ export function createManager(opts = {}) {
     q("[data-xptext]").textContent = `${p.xp} / ${need} XP`;
     q("[data-xpfill]").style.width = `${Math.min(100, (p.xp / need) * 100)}%`;
     q("[data-record]").textContent = `${p.runs || 0} runs · ${p.arenasCleared || 0} arenas cleared`;
+
+    // character roster: the suit the cyborg launches in
+    q("[data-skins]").innerHTML = "";
+    const skinIdx = p.equipped?.skin ?? 0;
+    PLAYER_SKINS.forEach((skin, i) => {
+      const on = i === skinIdx;
+      const item = el("div", `mg-item${on ? " on" : ""}`,
+        `<div><div class="nm">${skin.name}</div><div class="ds">${skin.badge}${on ? " · SELECTED" : ""}</div></div>`);
+      item.onclick = () => { p.equipped.skin = i; persist(); };
+      q("[data-skins]").appendChild(item);
+    });
 
     const stats = statsForLevel(p.level, p.equipped || {});
     q("[data-stats]").innerHTML = STAT_KEYS

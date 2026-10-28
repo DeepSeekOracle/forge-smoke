@@ -20,6 +20,7 @@ import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js";
 import { pilot } from "./autopilot.js";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js";
+import { createStartMenu } from "./startmenu.js";
 import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js";
 import {
   PLAYER_SKINS,
@@ -534,6 +535,22 @@ if (testMode) {
 // Between runs the player manages the fighter here; the run itself is autonomous.
 state.cyborgProfile = loadSave().profile;
 state.autopilot = true;
+const startMenuUI = createStartMenu({
+  getProfile: () => state.cyborgProfile,
+  onEnter: () => {
+    state.phase = "loadout";
+    state._managerShown = false;
+    state.menuCooldown = 0.25;
+    hudPhase = null;
+  },
+  onOptions: () => {
+    state.optionsCaller = "title";
+    state.phase = "options";
+    state.menuCooldown = 0.25;
+    hudPhase = null;
+  },
+});
+
 const managerUI = createManager({
   getProfile: () => state.cyborgProfile,
   arenaId: "arena1",
@@ -544,6 +561,7 @@ const managerUI = createManager({
     state.autopilot = true;
     const idx = STARTER_LOADOUTS.findIndex((w) => w.id === equipped.weapon);
     state.loadoutIndex = idx >= 0 ? idx : 0;
+    state.skinIndex = Number.isInteger(equipped.skin) ? equipped.skin : 0;
     const arenaIdx = menuModule.ARENAS.findIndex((a) => a.id === arenaId);
     if (arenaIdx >= 0) state.selectedArenaIndex = arenaIdx;
     startRun(arenaId);
@@ -557,6 +575,13 @@ let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat 
 function syncHud() {
   // The DOM manager is the loadout screen now: clear the canvas HUD so its text does not bleed
   // through the overlay, and let the 3D operator turntable show behind the panels.
+  if (state.phase === "title" && state._startShown) {
+    const hs = globalThis.__studio?.hud;
+    if (hs) { try { hs.clear(); } catch (e) {} try { hs.compose?.(); } catch (e) {} }
+    hudPhase = null;
+    return;
+  }
+
   if (state.phase === "loadout" && state._managerShown) {
     const h = globalThis.__studio?.hud;
     if (h) {
@@ -1229,6 +1254,13 @@ function hurt(amount) {
 const held = (ctx, names) => names.some((name) => ctx.keys.has(name));
 
 function update(dt, ctx) {
+  // start menu is up exactly while the title phase is active
+  if (state.phase === "title") {
+    if (state._startShown !== true) { startMenuUI.show(); state._startShown = true; }
+  } else if (state._startShown) {
+    startMenuUI.hide(); state._startShown = false;
+  }
+
   // manager terminal is up exactly while the loadout phase is active
   if (state.phase === "loadout") {
     if (state._managerShown !== true) { managerUI.show(state.cyborgProfile); state._managerShown = true; }
@@ -1263,7 +1295,7 @@ function update(dt, ctx) {
       state.menuCooldown = 0.22;
       hudPhase = null;
     } else if (held(ctx, ["KeyW", "w", "W", "Space", "Enter", "ArrowRight"])) {
-      state.phase = "arenaSelect";
+      state.phase = "loadout";   // straight into the cyborg manager
       state.menuCooldown = 0.22;
       hudPhase = null;
     }
