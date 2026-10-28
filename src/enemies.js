@@ -430,7 +430,8 @@ export class EnemyManager {
       enemy._lastX = enemy.position.x;
       enemy._lastZ = enemy.position.z;
       enemy._stuck = enemy._stuck || 0;
-      if (movedNow < 0.02 && distance > 6) enemy._stuck += dt;
+      const distNow = Math.hypot(playerPos.x - enemy.position.x, playerPos.z - enemy.position.z);
+      if (movedNow < 0.02 && distNow > 6) enemy._stuck += dt;
       else enemy._stuck = 0;
       if (enemy._stuck > 1.0) {
         const side = Math.sin((enemy.phase || 0) * 3.1) > 0 ? 1 : -1;
