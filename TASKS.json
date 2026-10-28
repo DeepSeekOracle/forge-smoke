@@ -5,7 +5,7 @@
     {
       "id": "DBG-01",
       "title": "tools/patch.py assertive replace helper",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "tools/patch.py"
       ],
@@ -24,7 +24,7 @@
     {
       "id": "DBG-02",
       "title": "Global error surface strip",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "src/main.js"
       ],
@@ -44,7 +44,7 @@
     {
       "id": "DBG-03",
       "title": "tools/bump.py bumps every import + index together",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "tools/bump.py",
         "src/main.js",
@@ -66,12 +66,12 @@
     {
       "id": "DBG-04",
       "title": "tools/regress.mjs end-to-end gate",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "tools/regress.mjs"
       ],
       "acceptance": [
-        "start\u2192bay\u2192play\u2192card\u2192boss\u2192death\u2192summary",
+        "start→bay→play→card→boss→death→summary",
         "non-zero exit on any pageerror"
       ],
       "depends_on": [
@@ -86,7 +86,7 @@
     {
       "id": "DBG-05",
       "title": "Close the known-defect list (D4)",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "src/main.js",
         "assets/**"
@@ -107,7 +107,7 @@
     {
       "id": "DBG-06",
       "title": "Card tray opens on a real level-up",
-      "brief": ".forge-briefs/08-debug.md",
+      "brief": ".forge/briefs/08-debug.md",
       "files": [
         "src/cardsui.js",
         "src/main.js"
@@ -128,7 +128,7 @@
     {
       "id": "ART-01",
       "title": "6 new card art plates",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/cards/"
       ],
@@ -149,7 +149,7 @@
     {
       "id": "ART-02",
       "title": "Painted zone marker decals",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/zones/"
       ],
@@ -169,7 +169,7 @@
     {
       "id": "ART-03",
       "title": "Weapon silhouette icons (12 styles)",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/icons/"
       ],
@@ -188,7 +188,7 @@
     {
       "id": "ART-04",
       "title": "Enemy portraits (5 archetypes)",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/portraits/enemies/"
       ],
@@ -207,7 +207,7 @@
     {
       "id": "ART-05",
       "title": "Boss OG plate 1200x630",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/og-boss.jpg"
       ],
@@ -226,7 +226,7 @@
     {
       "id": "ART-06",
       "title": "Start-screen fallback stills",
-      "brief": ".forge-briefs/01-assets.md",
+      "brief": ".forge/briefs/01-assets.md",
       "files": [
         "assets/start-still-*.jpg"
       ],
@@ -245,7 +245,7 @@
     {
       "id": "AUD-02",
       "title": "CC0 rain/wind ambience bed",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/audio.js",
         "assets/sfx/"
@@ -267,14 +267,14 @@
     {
       "id": "AUD-03",
       "title": "Per-style weapon reports (3 variants)",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/audio.js",
         "assets/sfx/"
       ],
       "acceptance": [
         "6+ families x3 variants",
-        "random with \u00b16% pitch",
+        "random with ±6% pitch",
         "under 4 MB"
       ],
       "depends_on": [
@@ -289,7 +289,7 @@
     {
       "id": "AUD-04",
       "title": "Impact set: light / heavy / shield tink",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/audio.js"
       ],
@@ -309,7 +309,7 @@
     {
       "id": "UI-08",
       "title": "Ground zone markers wired to objZones",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/main.js"
       ],
@@ -329,7 +329,7 @@
     {
       "id": "UI-09",
       "title": "HUD stack slots (health/mag/objective/boss)",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/main.js"
       ],
@@ -348,7 +348,7 @@
     {
       "id": "UI-10",
       "title": "Mobile layout 390x844",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/cardsui.js",
         "src/main.js"
@@ -369,7 +369,7 @@
     {
       "id": "UI-11",
       "title": "Tab order, focus ring, reduced-motion",
-      "brief": ".forge-briefs/09-audio-ui.md",
+      "brief": ".forge/briefs/09-audio-ui.md",
       "files": [
         "src/startmenu.js"
       ],
@@ -389,7 +389,7 @@
     {
       "id": "MATH-01",
       "title": "src/math.js pure combat module",
-      "brief": ".forge-briefs/03-engine-math.md",
+      "brief": ".forge/briefs/03-engine-math.md",
       "files": [
         "src/math.js"
       ],
@@ -409,7 +409,7 @@
     {
       "id": "MATH-02",
       "title": "Route enemies.js damage through math.js",
-      "brief": ".forge-briefs/03-engine-math.md",
+      "brief": ".forge/briefs/03-engine-math.md",
       "files": [
         "src/enemies.js",
         "src/math.js"
@@ -430,7 +430,7 @@
     {
       "id": "MATH-03",
       "title": "Boss HP formula + scaling",
-      "brief": ".forge-briefs/03-engine-math.md",
+      "brief": ".forge/briefs/03-engine-math.md",
       "files": [
         "src/main.js",
         "src/math.js"
@@ -451,7 +451,7 @@
     {
       "id": "MATH-04",
       "title": "XP curve + card pacing constants",
-      "brief": ".forge-briefs/03-engine-math.md",
+      "brief": ".forge/briefs/03-engine-math.md",
       "files": [
         "src/tuning.js"
       ],
@@ -471,7 +471,7 @@
     {
       "id": "WPN-01",
       "title": "AA FLAK weapon (air-only profile)",
-      "brief": ".forge-briefs/05-weapons.md",
+      "brief": ".forge/briefs/05-weapons.md",
       "files": [
         "src/weapons.js",
         "src/models.js"
@@ -493,7 +493,7 @@
     {
       "id": "WPN-02",
       "title": "BREACHER shotgun, +pierce vs shields",
-      "brief": ".forge-briefs/05-weapons.md",
+      "brief": ".forge/briefs/05-weapons.md",
       "files": [
         "src/weapons.js"
       ],
@@ -512,7 +512,7 @@
     {
       "id": "WPN-03",
       "title": "RAIL variant with 3-target penetration",
-      "brief": ".forge-briefs/05-weapons.md",
+      "brief": ".forge/briefs/05-weapons.md",
       "files": [
         "src/weapons.js"
       ],
@@ -531,7 +531,7 @@
     {
       "id": "WPN-04",
       "title": "Roster balance table + card weights",
-      "brief": ".forge-briefs/05-weapons.md",
+      "brief": ".forge/briefs/05-weapons.md",
       "files": [
         "src/weapons.js",
         "src/models.js"
@@ -552,7 +552,7 @@
     {
       "id": "FX-01",
       "title": "spark1.png muzzle sprite + impact bursts",
-      "brief": ".forge-briefs/04-weapon-fx.md",
+      "brief": ".forge/briefs/04-weapon-fx.md",
       "files": [
         "src/fx.js",
         "src/main.js"
@@ -560,7 +560,7 @@
       "acceptance": [
         "pooled sprite 60-90 ms",
         "per-kind impacts",
-        "\u22656 style screenshots"
+        "≥6 style screenshots"
       ],
       "depends_on": [
         "WPN-04"
@@ -574,7 +574,7 @@
     {
       "id": "FX-02",
       "title": "Shell casings for ballistic styles",
-      "brief": ".forge-briefs/04-weapon-fx.md",
+      "brief": ".forge/briefs/04-weapon-fx.md",
       "files": [
         "src/fx.js"
       ],
@@ -594,15 +594,15 @@
     {
       "id": "FX-03",
       "title": "Per-style screen kick + tracer taper",
-      "brief": ".forge-briefs/04-weapon-fx.md",
+      "brief": ".forge/briefs/04-weapon-fx.md",
       "files": [
         "src/weapons.js",
         "src/fx.js"
       ],
       "acceptance": [
-        "shake \u22642px @1080p",
+        "shake ≤2px @1080p",
         "taper visible",
-        "\u2264+2 ms frame time"
+        "≤+2 ms frame time"
       ],
       "depends_on": [
         "FX-02"
@@ -616,7 +616,7 @@
     {
       "id": "MAP-01",
       "title": "src/maps.js + DEPOT layout",
-      "brief": ".forge-briefs/02-maps.md",
+      "brief": ".forge/briefs/02-maps.md",
       "files": [
         "src/maps.js",
         "src/models.js"
@@ -624,7 +624,7 @@
       "acceptance": [
         "cover radius 18-30 only",
         "collider count printed",
-        "camera displacement \u22641 m"
+        "camera displacement ≤1 m"
       ],
       "depends_on": [
         "FX-03"
@@ -638,7 +638,7 @@
     {
       "id": "MAP-02",
       "title": "YARD layout",
-      "brief": ".forge-briefs/02-maps.md",
+      "brief": ".forge/briefs/02-maps.md",
       "files": [
         "src/maps.js"
       ],
@@ -658,7 +658,7 @@
     {
       "id": "MAP-03",
       "title": "FOUNDRY layout",
-      "brief": ".forge-briefs/02-maps.md",
+      "brief": ".forge/briefs/02-maps.md",
       "files": [
         "src/maps.js"
       ],
@@ -677,7 +677,7 @@
     {
       "id": "MAP-04",
       "title": "Map rotation + spawn safety",
-      "brief": ".forge-briefs/02-maps.md",
+      "brief": ".forge/briefs/02-maps.md",
       "files": [
         "src/main.js",
         "src/maps.js"
@@ -698,7 +698,7 @@
     {
       "id": "MOV-01",
       "title": "Arrive+seek+separation steering",
-      "brief": ".forge-briefs/06-movement.md",
+      "brief": ".forge/briefs/06-movement.md",
       "files": [
         "src/autopilot.js"
       ],
@@ -718,12 +718,12 @@
     {
       "id": "MOV-02",
       "title": "Enemy slot flanking + separation",
-      "brief": ".forge-briefs/06-movement.md",
+      "brief": ".forge/briefs/06-movement.md",
       "files": [
         "src/enemies.js"
       ],
       "acceptance": [
-        "mean spacing \u22652.2 m",
+        "mean spacing ≥2.2 m",
         "shield takes the front slot"
       ],
       "depends_on": [
@@ -738,12 +738,12 @@
     {
       "id": "MOV-03",
       "title": "Camera spring arm, no clipping",
-      "brief": ".forge-briefs/06-movement.md",
+      "brief": ".forge/briefs/06-movement.md",
       "files": [
         "src/main.js"
       ],
       "acceptance": [
-        "max displacement \u22641 m",
+        "max displacement ≤1 m",
         "screenshot near cover"
       ],
       "depends_on": [
@@ -758,12 +758,12 @@
     {
       "id": "MOV-04",
       "title": "Boss dodge distance measured",
-      "brief": ".forge-briefs/06-movement.md",
+      "brief": ".forge/briefs/06-movement.md",
       "files": [
         "src/autopilot.js"
       ],
       "acceptance": [
-        "\u22654 m during telegraph",
+        "≥4 m during telegraph",
         "metric printed"
       ],
       "depends_on": [
@@ -778,7 +778,7 @@
     {
       "id": "TUNE-01",
       "title": "20-run harness + baseline table",
-      "brief": ".forge-briefs/07-tuning.md",
+      "brief": ".forge/briefs/07-tuning.md",
       "files": [
         "tools/sim.mjs"
       ],
@@ -797,7 +797,7 @@
     {
       "id": "TUNE-02",
       "title": "Curve pass: spawn/HP/boss threshold",
-      "brief": ".forge-briefs/07-tuning.md",
+      "brief": ".forge/briefs/07-tuning.md",
       "files": [
         "src/tuning.js",
         "src/main.js"
@@ -818,7 +818,7 @@
     {
       "id": "TUNE-03",
       "title": "Card pool weights + pacing",
-      "brief": ".forge-briefs/07-tuning.md",
+      "brief": ".forge/briefs/07-tuning.md",
       "files": [
         "src/tuning.js",
         "src/weapons.js"
@@ -838,7 +838,7 @@
     {
       "id": "TUNE-04",
       "title": "Aerial retune: gunship TTK + attack range",
-      "brief": ".forge-briefs/07-tuning.md",
+      "brief": ".forge/briefs/07-tuning.md",
       "files": [
         "src/enemies.js",
         "src/tuning.js"
@@ -856,5 +856,6 @@
       "owner": "free-agent",
       "evidence": []
     }
-  ]
+  ],
+  "briefs_dir": ".forge/briefs"
 }
