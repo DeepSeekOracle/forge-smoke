@@ -84,3 +84,22 @@ Researched the PoE 2 passive tree (poe2ref.com, fextralife) and rebuilt the *str
   FOUNDRY WARDEN (armour → crit/pierce), SCRAP COLOSSUS (frontal shield → explosives),
   DRONE HIVE (adds → sustained DPS). Measured at level 1 with 4 points: WARDEN cleared in 18 rounds,
   COLOSSUS and HIVE lost, which is the intended gate.
+
+## v2.3.0 — the tree at scale, plus the arena boss
+
+Read the Maxroll beginner guide as well; the piece I had missed was the **cluster model**:
+
+- A cluster is a ring of small passives capped by **one notable**, with a **mastery** at its centre
+  that only opens once that cluster's notable is taken (Maxroll: "allocating any Notable also allows
+  you to take the corresponding mastery").
+- No jewel sockets (by request).
+
+Rebuilt on that model: **8 regions × 16 clusters × (8 small + 1 notable + 1 mastery) + 8 keystones +
+hub = 1,289 nodes, 1,560 edges.** 1,024 smalls, 128 notables, 128 masteries, 8 keystones.
+Mastery gating verified: clicking a mastery before its notable allocates nothing (0 nodes), after the
+chain + notable it allocates (3 → 4). Search box filters 1,289 nodes live; layout compacted so clusters
+read at the default zoom.
+
+**Arena boss** (the loose end): after 75 seconds or 18 kills a named boss enters — FOUNDRY WARDEN or
+GUNSHIP OVERSEER at roughly 7× normal HP plus 900. HUD callout, launch sound, and killing it pays
+**+4 talent points** exactly once. Measured: spawned at 2,738 HP, kill moved points 6 → 10.
