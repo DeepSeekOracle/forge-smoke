@@ -1157,18 +1157,18 @@ export function populateArenaProps(arenaKey, propGroup, texSize = 256) {
     ]);
 
     // ── expansion set: extra cover so the arena reads as a depot, not an empty yard ──
+    // keep cover OUT of the centre bowl: anything inside ~14m walled the spawn point in
     const crates = [
-      { x: -8, z: -12, scale: 1.0, rotY: 0.3 },
-      { x: 9, z: 13, scale: 1.0, rotY: -0.5 },
-      { x: -16, z: 17, scale: 1.0, rotY: 1.1 },
-      { x: 18, z: -14, scale: 1.0, rotY: -1.2 },
+      { x: -18, z: -22, scale: 1.0, rotY: 0.3 },
+      { x: 19, z: 21, scale: 1.0, rotY: -0.5 },
+      { x: -24, z: 17, scale: 1.0, rotY: 1.1 },
+      { x: 24, z: -18, scale: 1.0, rotY: -1.2 },
     ];
     spawnGlbProp(propGroup, "container", crates.map((c) => ({ ...c, fitCollider: true, y: 0 })));
 
     const barriers = [
-      { x: -4, z: 22, rot: 0.2 }, { x: 6, z: -22, rot: -0.3 },
-      { x: -22, z: -6, rot: 1.2 }, { x: 22, z: 8, rot: -1.4 },
-      { x: 0, z: 12, rot: 0.6 }, { x: -12, z: -2, rot: -0.8 },
+      { x: -6, z: 26, rot: 0.2 }, { x: 8, z: -26, rot: -0.3 },
+      { x: -26, z: -8, rot: 1.2 }, { x: 26, z: 10, rot: -1.4 },
     ];
     spawnGlbProp(propGroup, "container", barriers.map((b) => ({
       x: b.x, y: 0, z: b.z, scale: 0.72, rotY: b.rot, centerAndGround: true,

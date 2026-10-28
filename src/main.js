@@ -38,6 +38,7 @@ import {
   populateArenaProps,
   arenaColliders,
   resolveObstacleCollision,
+  steerAroundObstacles,
   segmentHitsCollider,
   warmGlbAssets,
 } from "./models.js?v=20261029t";
@@ -1749,7 +1750,9 @@ function update(dt, ctx) {
     // CYBORG AUTOPILOT: the fighter flies itself, the player supplies power-ups
     if (state.autopilot && state.controlMode !== "manual") {
       const c = pilot(state, enemyManager, dt);
-      mx = c.mx; mz = c.mz;
+      // route the autopilot around props, otherwise it walks into cover and looks frozen
+      const steered = steerAroundObstacles(state.pos, c.mx, c.mz, 0.55, arenaColliders);
+      mx = steered.x; mz = steered.z;
       state.pilotMode = c.mode;
       state.pilotDistance = c.distance;
     }
