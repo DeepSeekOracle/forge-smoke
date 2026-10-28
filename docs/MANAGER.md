@@ -103,3 +103,15 @@ read at the default zoom.
 **Arena boss** (the loose end): after 75 seconds or 18 kills a named boss enters — FOUNDRY WARDEN or
 GUNSHIP OVERSEER at roughly 7× normal HP plus 900. HUD callout, launch sound, and killing it pays
 **+4 talent points** exactly once. Measured: spawned at 2,738 HP, kill moved points 6 → 10.
+
+## v2.3.1 — Trials deleted
+
+The trials were a free-point faucet: the warden died at level 1 in 18 rounds, and even a loss paid a
+consolation point, so talent points could be farmed without ever finishing a run. Removed outright —
+the tab, the panel, the resolution engine (`src/battles.js`) and the save field.
+
+Points now come only from playing:
+- 2 per run, +6 per arena clear, +level/2, plus any tree bonuses
+- +4 for killing the in-arena boss (once per run, and you have to kill it)
+
+A node purchase can only ever spend. Verified: 6 points → buy → 5.
