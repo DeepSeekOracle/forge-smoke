@@ -8,8 +8,8 @@ import { weaponStatsWithParts, rollAirdropOptions } from "./balance.js";
 
 export class Weapon {
   constructor(styleKey, parts = []) {
-    this.styleKey = styleKey;
-    this.baseConfig = TUNING.weapons[styleKey];
+    this.styleKey = styleKey || "spray";
+    this.baseConfig = TUNING.weapons[this.styleKey] || { ...TUNING.weapons.spray, style: this.styleKey };
     this.parts = parts;
     this.config = weaponStatsWithParts(this.baseConfig, parts);
     this.magazine = this.config.magazine;

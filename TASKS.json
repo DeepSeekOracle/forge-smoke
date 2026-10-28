@@ -289,8 +289,10 @@
         "baseline measurement recorded",
         "fail condition defined (what makes a perf task fail)"
       ],
-      "evidence": [],
-      "status": "pending",
+      "evidence": [
+        "job JOB-C920768C (hermes-master): SUMMARY: Updated performance budget in TECH_SPEC.md with frame budget, draw-call and particle caps, texture memory ceiling, and baseline measurement [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- TECH_SPEC.md (19376 bytes)"
+      ],
+      "status": "done",
       "depends_on": [
         "TEC-01"
       ]

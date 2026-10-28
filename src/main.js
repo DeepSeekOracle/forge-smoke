@@ -19,6 +19,15 @@ import { EnemyManager, ENEMY_TYPES } from "./enemies.js";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, DEFAULT_SAVE } from "./save.js";
 import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js";
+import {
+  PLAYER_SKINS,
+  STARTER_LOADOUTS,
+  buildOperatorRig,
+  rebuildWeaponMesh,
+  createEnemyMaterialBank,
+  populateArenaProps,
+  warmGlbAssets,
+} from "./models.js";
 import * as levelModule from "./level.js";
 import * as menuModule from "./menu.js";
 import * as audioModule from "./audio.js";
@@ -229,26 +238,27 @@ function part(geo, mat, tag, x = 0, y = 0, z = 0) {
 }
 const soldier = new THREE.Group();
 soldier.userData.tag = "soldier";
-const cloth = standardMaterial({ ...MATERIAL_RECIPES.playerCloth, size: TEX_SIZE });
-const flesh = standardMaterial({ ...MATERIAL_RECIPES.playerFlesh, size: TEX_SIZE });
 const steel = standardMaterial({ ...MATERIAL_RECIPES.playerSteel, size: TEX_SIZE });
-soldier.add(part(new THREE.BoxGeometry(1.2, 1.5, 1.2), cloth, "player-body", 0, 0.8, 0));
-soldier.add(part(new THREE.BoxGeometry(0.8, 0.95, 0.4), cloth, "pack", 0, 0.95, -0.78));
-soldier.add(part(new THREE.BoxGeometry(0.72, 0.66, 0.72), flesh, "player-head", 0, 1.87, 0));
-soldier.add(part(new THREE.BoxGeometry(0.54, 0.16, 0.08), steel, "visor", 0, 1.91, 0.37));
 const gunPivot = new THREE.Group();
 gunPivot.position.set(0.46, 1.24, 0.34);
-soldier.add(gunPivot);
-const rifle = part(new THREE.BoxGeometry(0.2, 0.22, 1.35), steel, "rifle", 0, 0, 0.52);
-gunPivot.add(part(new THREE.BoxGeometry(0.28, 0.28, 0.22), steel, "muzzle-brake", 0, 0, 1.22));
-gunPivot.add(part(new THREE.BoxGeometry(0.16, 0.3, 0.34), steel, "magazine", 0, -0.26, 0.18));
-gunPivot.add(rifle);
+buildOperatorRig(soldier, gunPivot, TEX_SIZE, 0);
+let rifle = rebuildWeaponMesh(gunPivot, "spray", steel);
+const operatorKeyLight = new THREE.PointLight(0xffc988, 4.8, 14, 1.5);
+operatorKeyLight.position.set(0.9, 2.6, 1.9);
+operatorKeyLight.userData.tag = "operator-key-light";
+soldier.add(operatorKeyLight);
 scene.add(soldier);
+
+const arenaPropsGroup = new THREE.Group();
+arenaPropsGroup.userData.tag = "arena-props";
+scene.add(arenaPropsGroup);
+warmGlbAssets();
 
 const enemyGeo = new THREE.BoxGeometry(1.05, 1.05, 1.05);
 const enemyMat = standardMaterial({ ...MATERIAL_RECIPES.enemyChitin, size: TEX_SIZE });
 enemyMat.emissive = new THREE.Color(hexInt(PALETTE.enemyEmissive));
 enemyMat.emissiveIntensity = 0.75;
+const enemyMaterials = createEnemyMaterialBank(enemyMat, TEX_SIZE);
 
 const tracerGeo = new THREE.BoxGeometry(0.055, 0.055, 1);
 const tracerMat = new THREE.MeshBasicMaterial({ color: hexInt(PALETTE.tracerDefault), transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -279,6 +289,7 @@ let lightsOff = false;
 function applyArenaLighting(key) {
   const cfg = ARENA_LIGHTING[key] ? ARENA_LIGHTING[key] : ARENA_LIGHTING.perimeter;
   arenaKey = ARENA_LIGHTING[key] ? key : "perimeter";
+  populateArenaProps(arenaKey, arenaPropsGroup, TEX_SIZE);
   renderer.toneMappingExposure = cfg.exposure;
   scene.background.set(hexInt(cfg.background));
   scene.fog.color.set(hexInt(cfg.fog.color));
@@ -342,7 +353,7 @@ const rng = makeRng(initialSeed);
 
 const weaponManager = new WeaponManager(rng);
 const cardSystem = new CardSystem(rng);
-const enemyManager = new EnemyManager(rng, scene, { enemyMat, enemyGeo }, ENEMY_CAP);
+const enemyManager = new EnemyManager(rng, scene, enemyMaterials, ENEMY_CAP);
 const beatDirector = new BeatDirector(rng);
 const scoreSystem = new ScoreSystem();
 
@@ -363,6 +374,7 @@ const state = {
   seed: initialSeed,
   weaponManager,
   cardSystem,
+  enemyManager,
   beatDirector,
   scoreSystem,
   resultsScreen: null,
@@ -377,6 +389,10 @@ const state = {
   blackoutTimer: 0,
   airdropState: null,
   showResults: false,
+  skinIndex: 0,
+  loadoutIndex: 0,
+  menuCooldown: 0,
+  lastRenderedWeaponStyle: "spray",
 };
 
 if (testMode) {
@@ -415,7 +431,7 @@ if (testMode) {
 }
 
 const vMuzzle = new THREE.Vector3(), vTarget = new THREE.Vector3(), vDesired = new THREE.Vector3();
-let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat = null, hudScore = null, hudAirdrop = null;
+let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat = null, hudScore = null, hudAirdrop = null, hudCards = null, hudBoss = null;
 
 function syncHud() {
   const h = globalThis.__studio?.hud;
@@ -431,26 +447,31 @@ function syncHud() {
     hudBeat = null;
     hudScore = null;
     hudAirdrop = null;
+    hudCards = null;
+    hudBoss = null;
   }
+
+  const activeSkin = PLAYER_SKINS[state.skinIndex || 0] || PLAYER_SKINS[0];
+  const activeLoadout = STARTER_LOADOUTS[state.loadoutIndex || 0] || STARTER_LOADOUTS[0];
 
   if (state.phase === "playing") {
     const color = state.health > 60 ? PALETTE.healthOk : state.health > 30 ? PALETTE.healthWarn : PALETTE.healthCrit;
     if (hudHealth !== state.health) {
       hudHealth = state.health;
-      P("vitals", { x: 0.022, y: 0.03, w: 0.55, h: 0.155, radius: 0.014, fill: PALETTE.panels.status, stroke: PALETTE.strokes.status, width: 0.002 });
-      T("vitals-title", "FORGE SMOKE // ARMORY", { x: 0.032, y: 0.042, size: TYPE_SCALE.label, color: PALETTE.hudLabel, weight: 700 });
+      P("vitals", { x: 0.022, y: 0.03, w: 0.68, h: 0.165, radius: 0.014, fill: PALETTE.panels.status, stroke: PALETTE.strokes.status, width: 0.002 });
+      T("vitals-title", `FORGE SMOKE // ${activeSkin.name}`, { x: 0.032, y: 0.042, size: TYPE_SCALE.label, color: PALETTE.hudLabel, weight: 700 });
       B("health", state.health / state.maxHealth, { x: 0.032, y: 0.069, w: 0.18, h: 0.023, color, back: PALETTE.strokes.barBack });
       T("health-num", String(state.health), { x: 0.218, y: 0.064, size: TYPE_SCALE.numeral, color, weight: 800 });
     }
-    if (hudKills !== state.kills) {
-      hudKills = state.kills;
-      T("kills", `THREATS DOWN  ${state.kills}`, { x: 0.032, y: 0.125, size: TYPE_SCALE.small, color: PALETTE.hudSecondary });
+    const killsKey = `${state.kills}:${cardSystem.level}`;
+    if (hudKills !== killsKey) {
+      hudKills = killsKey;
+      T("kills", `THREATS DOWN  ${state.kills}   ·   LV ${cardSystem.level}`, { x: 0.032, y: 0.125, size: TYPE_SCALE.small, color: PALETTE.hudSecondary });
     }
 
     const activeConfig = weaponManager.getActiveConfig();
     const inactiveConfig = weaponManager.getInactiveConfig();
     const activeWeapon = weaponManager.active;
-    const inactiveWeapon = weaponManager.inactive;
 
     let ammoText = activeWeapon.isReloading ? "RELOADING..." : `MAG  ${activeWeapon.magazine} / ${activeWeapon.maxMagazine}`;
     if (activeWeapon.isHeatWeapon) {
@@ -462,14 +483,16 @@ function syncHud() {
     }
 
     // Weapon plates (ART-01 iconography): name + 48 px silhouette, one per style.
-    const activeName = activeConfig.style.toUpperCase();
-    const inactiveName = inactiveConfig.style.toUpperCase();
+    const activeStyle = activeConfig?.style || activeWeapon?.styleKey || "spray";
+    const inactiveStyle = inactiveConfig?.style || weaponManager.inactive?.styleKey || "pierce";
+    const activeName = String(activeStyle).toUpperCase();
+    const inactiveName = String(inactiveStyle).toUpperCase();
     T("weapon-active", `${activeName}`, { x: 0.325, y: 0.045, size: TYPE_SCALE.micro, color: PALETTE.ui, weight: 700 });
     T("weapon-inactive", `${inactiveName}`, { x: 0.325, y: 0.088, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 500 });
 
     // Weapon icons, drawn at 28 px from the 48 px sheet cells.
-    const activeIconSrc = weaponIconDataUrls[activeConfig.style];
-    const inactiveIconSrc = weaponIconDataUrls[inactiveConfig.style];
+    const activeIconSrc = weaponIconDataUrls[activeStyle];
+    const inactiveIconSrc = weaponIconDataUrls[inactiveStyle];
     if (activeIconSrc && h.get("weapon-icon-active")?.src !== activeIconSrc) {
       h.image("weapon-icon-active", activeIconSrc, { x: 0.278, y: 0.038, h: 0.039 });
     }
@@ -509,23 +532,86 @@ function syncHud() {
       h.remove("airdrop");
     }
 
+    // Boss HP readout when Mech or Gunship is active
+    const boss = enemyManager.getEnemies().find((e) => e.type === "gunship" || e.type === "mech");
+    if (boss) {
+      const bossKey = `${boss.type}:${Math.round(boss.hp)}`;
+      if (hudBoss !== bossKey) {
+        hudBoss = bossKey;
+        const bossLabel = boss.type === "gunship" ? "BOSS // ASSAULT GUNSHIP" : "ELITE // SIEGE MECH";
+        T("boss-label", `${bossLabel}  (${Math.max(0, Math.round(boss.hp))} HP)`, { x: 0.5, y: 0.11, size: TYPE_SCALE.micro, color: PALETTE.deadPrompt, weight: 700, align: "center" });
+        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.39, y: 0.132, w: 0.22, h: 0.014, color: PALETTE.healthCrit, back: PALETTE.strokes.barBack });
+      }
+    } else if (hudBoss !== null) {
+      hudBoss = null;
+      h.remove("boss-label");
+      h.remove("boss-bar");
+    }
+
+    // 3-Choice Tactical Upgrade Card Overlay
+    if (state.cardPickWindow && state.currentCardOptions && state.currentCardOptions.length > 0) {
+      const cardSig = state.currentCardOptions.map((c) => c.name || c.style || "card").join("|");
+      if (hudCards !== cardSig) {
+        hudCards = cardSig;
+        P("card-panel", { anchor: "bottom", x: 0, y: 0.11, w: 0.92, h: 0.14, radius: 0.014, fill: PALETTE.panels.title, stroke: PALETTE.strokes.title, width: 0.002 });
+        T("card-hdr", "TACTICAL FIELD UPGRADE READY — PRESS [1] [2] OR [3]", { anchor: "bottom", x: 0, y: 0.205, size: TYPE_SCALE.micro, color: PALETTE.healthOk, weight: 700 });
+        const line = state.currentCardOptions
+          .map((opt, idx) => `[${idx + 1}] ${(opt.name || opt.style || "UPGRADE").toUpperCase()}`)
+          .join("     ·     ");
+        T("card-options", line, { anchor: "bottom", x: 0, y: 0.145, size: TYPE_SCALE.label, color: PALETTE.titleText, weight: 800 });
+      }
+    } else if (hudCards !== null) {
+      hudCards = null;
+      h.remove("card-panel");
+      h.remove("card-hdr");
+      h.remove("card-options");
+    }
+
     if (!changed) return;
   }
 
   if (changed) {
-    const hint = state.phase === "dead" ? "R / SPACE / ENTER  ·  REDEPLOY" : state.phase === "results" ? "R / SPACE / ENTER  ·  REDEPLOY" : "WASD MOVE  ·  AUTO-FIRE  ·  R RELOAD  ·  Q SWAP  ·  M2 AIM  ·  1/2/3 CARDS";
-    P("hint-panel", { x: 0.012, y: 0.902, w: 0.40, h: 0.045, radius: 0.008, fill: PALETTE.panels.hint, stroke: PALETTE.strokes.hint, width: 0.0015 });
-    T("hint", hint, { x: 0.022, y: 0.928, size: TYPE_SCALE.small, color: PALETTE.hudSecondary, weight: 600 });
+    const hint = state.phase === "dead"
+      ? "R / SPACE / ENTER  ·  REDEPLOY"
+      : state.phase === "results"
+        ? "R / SPACE / ENTER  ·  REDEPLOY"
+        : state.phase === "title"
+          ? "[C] CYCLE SUIT SKIN  ·  [V] CYCLE STARTER WEAPON  ·  [W / SPACE] DEPLOY"
+          : "WASD MOVE  ·  AUTO-FIRE  ·  R RELOAD  ·  Q SWAP  ·  M2 AIM  ·  1/2/3 CARDS";
+    P("hint-panel", { x: 0.012, y: 0.902, w: 0.68, h: 0.048, radius: 0.008, fill: PALETTE.panels.hint, stroke: PALETTE.strokes.hint, width: 0.0015 });
+    T("hint", hint, { x: 0.022, y: 0.916, size: TYPE_SCALE.micro, color: PALETTE.hudSecondary, weight: 600 });
   }
 
   if (state.phase === "title") {
-    P("title-panel", { anchor: "center", x: 0, y: 0, w: 0.72, h: 0.3, radius: 0.02, fill: PALETTE.panels.title, stroke: PALETTE.strokes.title, width: 0.002 });
-    T("title", "FORGE SMOKE", { anchor: "center", x: 0, y: -0.075, size: TYPE_SCALE.display, color: PALETTE.titleText, weight: 800 });
-    T("title-sub", "Hold the perimeter. The armory is winning.", { anchor: "center", x: 0, y: 0.002, size: TYPE_SCALE.subhead, color: PALETTE.hudSubtitle });
-    T("title-prompt", "PRESS  W  OR  SPACE  TO DEPLOY", { anchor: "center", x: 0, y: 0.075, size: TYPE_SCALE.prompt, color: PALETTE.healthOk, weight: 700 });
+    // Top-Center Tactical Command Header (leaves center viewport clear for 3D Operator turntable)
+    P("title-panel", { anchor: "top", x: 0, y: 0.025, w: 0.78, h: 0.25, radius: 0.018, fill: PALETTE.panels.title, stroke: PALETTE.strokes.title, width: 0.002 });
+    T("title-kicker", "LYGO FORGE TACTICAL DIVISION // SECTOR 09", { anchor: "top", x: 0, y: 0.042, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 700 });
+    T("title", "FORGE SMOKE", { anchor: "top", x: 0, y: 0.072, size: TYPE_SCALE.display, color: PALETTE.titleText, weight: 800 });
+    T("title-sub", "Hold the perimeter. 3 Arenas · 8 Hostile Classes · 12 Weapons.", { anchor: "top", x: 0, y: 0.165, size: TYPE_SCALE.small, color: PALETTE.hudSubtitle });
+    T("title-prompt", "PRESS  W  OR  SPACE  TO DEPLOY", { anchor: "top", x: 0, y: 0.212, size: TYPE_SCALE.prompt, color: PALETTE.healthOk, weight: 700 });
     if (saved.bestScore > 0) {
-      T("best-score", `BEST  ${saved.bestScore}`, { anchor: "center", x: 0, y: 0.12, size: TYPE_SCALE.label, color: PALETTE.hudSecondary });
+      T("best-score", `BEST  ${saved.bestScore}`, { anchor: "top", x: 0, y: 0.248, size: TYPE_SCALE.micro, color: PALETTE.hudSecondary });
     }
+
+    // Left Flank Operator Suit Selector Panel
+    P("skin-panel", { x: 0.022, y: 0.32, w: 0.54, h: 0.20, radius: 0.014, fill: PALETTE.panels.status, stroke: PALETTE.strokes.status, width: 0.002 });
+    T("skin-hdr", "OPERATOR SUIT  [PRESS C]", { x: 0.034, y: 0.338, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 700 });
+    T("skin-name", activeSkin.name, { x: 0.034, y: 0.374, size: TYPE_SCALE.subhead, color: PALETTE.titleText, weight: 800 });
+    T("skin-role", activeSkin.desc, { x: 0.034, y: 0.418, size: TYPE_SCALE.micro, color: PALETTE.healthOk, weight: 700 });
+    T("skin-idx", `SUIT ${(state.skinIndex || 0) + 1} / ${PLAYER_SKINS.length}  ·  ARMORED RIG READY`, { x: 0.034, y: 0.458, size: TYPE_SCALE.micro, color: PALETTE.hudSecondary });
+
+    // Right Flank Starter Weapon Loadout Selector Panel
+    P("loadout-panel", { anchor: "top-right", x: 0.022, y: 0.32, w: 0.56, h: 0.20, radius: 0.014, fill: PALETTE.panels.status, stroke: PALETTE.strokes.status, width: 0.002 });
+    T("loadout-hdr", "PRIMARY LOADOUT  [PRESS V]", { anchor: "top-right", x: 0.034, y: 0.338, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 700 });
+    T("loadout-name", `${activeLoadout.name}`, { anchor: "top-right", x: 0.034, y: 0.374, size: TYPE_SCALE.subhead, color: PALETTE.ui, weight: 800 });
+    T("loadout-role", `ROLE: ${activeLoadout.role}  ·  SEC: PIERCE RAIL`, { anchor: "top-right", x: 0.034, y: 0.418, size: TYPE_SCALE.micro, color: PALETTE.hudSubtitle, weight: 700 });
+    T("loadout-idx", `WEAPON ${(state.loadoutIndex || 0) + 1} / ${STARTER_LOADOUTS.length}  ·  12 STYLES ARMED`, { anchor: "top-right", x: 0.034, y: 0.458, size: TYPE_SCALE.micro, color: PALETTE.hudSecondary });
+
+    // Bottom-Right Threat & Campaign Briefing Panel
+    P("briefing-panel", { anchor: "bottom-right", x: 0.022, y: 0.048, w: 0.72, h: 0.145, radius: 0.012, fill: PALETTE.panels.hint, stroke: PALETTE.strokes.status, width: 0.0018 });
+    T("briefing-1", "ARENAS: PERIMETER RAIN -> BREACH YARD -> GUNSHIP HELIPAD", { anchor: "bottom-right", x: 0.034, y: 0.142, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 700 });
+    T("briefing-2", "HOSTILES: RIFLEMAN · SAPPER · SHIELD · SPOTTER · DRONE · MORTAR · MECH · GUNSHIP", { anchor: "bottom-right", x: 0.034, y: 0.105, size: TYPE_SCALE.micro, color: PALETTE.hudSecondary });
+    T("briefing-3", "ARMORY READY: 3D OPERATOR SKINS & WEAPON ATTACHMENTS ACTIVE", { anchor: "bottom-right", x: 0.034, y: 0.068, size: TYPE_SCALE.micro, color: PALETTE.healthOk, weight: 700 });
   } else if (state.phase === "dead") {
     P("dead-panel", { anchor: "center", x: 0, y: 0, w: 0.62, h: 0.27, radius: 0.02, fill: PALETTE.panels.dead, stroke: PALETTE.strokes.dead, width: 0.002 });
     T("dead-title", "PERIMETER LOST", { anchor: "center", x: 0, y: -0.065, size: TYPE_SCALE.deathTitle, color: PALETTE.deadTitle, weight: 800 });
@@ -575,6 +661,8 @@ function startRun() {
   clearEffects();
   const seed = state.seed;
   state.rng = makeRng(seed);
+  const chosenStyle = STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray";
+  const secondaryStyle = chosenStyle === "pierce" ? "spray" : "pierce";
   Object.assign(state, {
     phase: "playing",
     health: 100,
@@ -597,16 +685,21 @@ function startRun() {
     airdropState: null,
     showResults: false,
     resultsScreen: null,
+    lastRenderedWeaponStyle: chosenStyle,
   });
   state.pos.set(0, 0, 0);
   soldier.position.set(0, 0, 0);
   soldier.rotation.y = 0;
   gunPivot.rotation.y = 0;
-  weaponManager.primary = new (weaponManager.primary.constructor)("spray");
-  weaponManager.secondary = new (weaponManager.secondary.constructor)("pierce");
+  buildOperatorRig(soldier, gunPivot, TEX_SIZE, state.skinIndex || 0);
+  rifle = rebuildWeaponMesh(gunPivot, chosenStyle, steel);
+  weaponManager.rng = state.rng;
+  weaponManager.primary = new Weapon(chosenStyle);
+  weaponManager.secondary = new Weapon(secondaryStyle);
   weaponManager.activeSlot = "primary";
   weaponManager.isSwapping = false;
   weaponManager.swapTimer = 0;
+  cardSystem.rng = state.rng;
   cardSystem.xp = 0;
   cardSystem.level = 1;
   cardSystem.nextLevelXp = TUNING.progression.levelBaseXp;
@@ -632,19 +725,10 @@ function startRun() {
   scoreSystem.evolutions = 0;
   scoreSystem.airdropsTaken = 0;
   scoreSystem.runStartTime = Date.now();
+  applyArenaLighting("perimeter");
+  setLightsEnabled(true);
   placeCamera();
   syncHud();
-  weaponManager.rng = state.rng;
-  weaponManager.primary = new Weapon("spray");
-  weaponManager.secondary = new Weapon("pierce");
-  weaponManager.activeSlot = "primary";
-  weaponManager.isSwapping = false;
-  weaponManager.swapTimer = 0;
-  cardSystem.rng = state.rng;
-  cardSystem.xp = 0;
-  cardSystem.level = 1;
-  cardSystem.nextLevelXp = TUNING.progression.levelBaseXp;
-  cardSystem.queuedCards = [];
 }
 
 function reset(seed) {
@@ -652,6 +736,8 @@ function reset(seed) {
   state.rng = makeRng(state.seed);
   clearEnemies();
   clearEffects();
+  const chosenStyle = STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray";
+  const secondaryStyle = chosenStyle === "pierce" ? "spray" : "pierce";
   Object.assign(state, {
     phase: "title",
     health: 100,
@@ -674,23 +760,21 @@ function reset(seed) {
     airdropState: null,
     showResults: false,
     resultsScreen: null,
+    lastRenderedWeaponStyle: chosenStyle,
   });
   state.pos.set(0, 0, 0);
   soldier.position.set(0, 0, 0);
   soldier.rotation.y = 0;
   gunPivot.rotation.y = 0;
+  buildOperatorRig(soldier, gunPivot, TEX_SIZE, state.skinIndex || 0);
+  rifle = rebuildWeaponMesh(gunPivot, chosenStyle, steel);
   weaponManager.rng = state.rng;
-  weaponManager.primary = new Weapon("spray");
-  weaponManager.secondary = new Weapon("pierce");
+  weaponManager.primary = new Weapon(chosenStyle);
+  weaponManager.secondary = new Weapon(secondaryStyle);
   weaponManager.activeSlot = "primary";
   weaponManager.isSwapping = false;
   weaponManager.swapTimer = 0;
   cardSystem.rng = state.rng;
-  cardSystem.xp = 0;
-  cardSystem.level = 1;
-  cardSystem.nextLevelXp = TUNING.progression.levelBaseXp;
-  cardSystem.queuedCards = [];
-  weaponManager.swapTimer = 0;
   cardSystem.xp = 0;
   cardSystem.level = 1;
   cardSystem.nextLevelXp = TUNING.progression.levelBaseXp;
@@ -715,6 +799,8 @@ function reset(seed) {
   scoreSystem.blackoutsSurvived = 0;
   scoreSystem.evolutions = 0;
   scoreSystem.airdropsTaken = 0;
+  applyArenaLighting("perimeter");
+  setLightsEnabled(true);
   placeCamera();
   syncHud();
 }
@@ -723,27 +809,13 @@ function spawnEnemy() {
   const beat = beatDirector.getCurrentBeat();
   const types = beat.enemyTypes || ["rifleman"];
   const type = types[Math.floor(state.rng() * types.length)];
-  const angle = state.rng() * TAU;
-  const radius = 18 + state.rng() * 10;
-  const position = new THREE.Vector3(state.pos.x + Math.cos(angle) * radius, 0.72, state.pos.z + Math.sin(angle) * radius);
-  const enemy = enemyManager.spawn(type, state.pos, beatDirector.runTime / 60);
-  if (enemy) {
-    enemy.position.copy(position);
-    // Create mesh
-    const mesh = new THREE.Mesh(enemyGeo, enemyMat);
-    mesh.position.copy(position);
-    mesh.castShadow = true;
-    mesh.userData.tag = "enemy";
-    scene.add(mesh);
-    enemy.mesh = mesh;
-    enemyManager.enemyMeshes.set(enemy, mesh);
-  }
+  enemyManager.spawn(type, state.pos, beatDirector.runTime / 60);
 }
 
 function shoot(target) {
   soldier.updateMatrixWorld(true);
-  vMuzzle.set(0, 0, 0.52);
-  rifle.localToWorld(vMuzzle);
+  vMuzzle.set(0, 0, 1.05);
+  gunPivot.localToWorld(vMuzzle);
   vTarget.set(target.mesh.position.x, target.mesh.position.y + 0.15, target.mesh.position.z);
 
   const fireData = weaponManager.fire(state.aimMode);
@@ -868,8 +940,30 @@ function hurt(amount) {
 const held = (ctx, names) => names.some((name) => ctx.keys.has(name));
 
 function update(dt, ctx) {
+  state.menuCooldown = Math.max(0, (state.menuCooldown || 0) - dt);
   if (state.phase === "title") {
-    if (held(ctx, ["KeyW", "w", "W", "KeyA", "a", "A", "KeyS", "s", "S", "KeyD", "d", "D", "Space", "Enter"])) startRun();
+    state.t += dt;
+    state.orbit += dt * 0.26;
+    soldier.rotation.y = Math.sin(state.t * 0.65) * 0.35;
+    camera.position.set(Math.sin(state.orbit) * 5.6, 2.75, Math.cos(state.orbit) * 5.6);
+    camera.lookAt(0, 1.25, 0);
+
+    if (state.menuCooldown <= 0 && held(ctx, ["KeyC", "c", "C"])) {
+      state.skinIndex = ((state.skinIndex || 0) + 1) % PLAYER_SKINS.length;
+      buildOperatorRig(soldier, gunPivot, TEX_SIZE, state.skinIndex);
+      const chosenStyle = STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray";
+      rifle = rebuildWeaponMesh(gunPivot, chosenStyle, steel);
+      state.menuCooldown = 0.22;
+      hudPhase = null;
+    } else if (state.menuCooldown <= 0 && held(ctx, ["KeyV", "v", "V"])) {
+      state.loadoutIndex = ((state.loadoutIndex || 0) + 1) % STARTER_LOADOUTS.length;
+      const chosenStyle = STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray";
+      rifle = rebuildWeaponMesh(gunPivot, chosenStyle, steel);
+      state.menuCooldown = 0.22;
+      hudPhase = null;
+    } else if (held(ctx, ["KeyW", "w", "W", "KeyA", "a", "A", "KeyS", "s", "S", "KeyD", "d", "D", "Space", "Enter"])) {
+      startRun();
+    }
   } else if (state.phase === "dead" || state.phase === "results") {
     if (held(ctx, ["KeyR", "r", "R", "Space", "Enter", "Mouse1"])) {
       if (state.phase === "results") {
@@ -936,6 +1030,10 @@ function update(dt, ctx) {
     weaponManager.updateSwap(dt);
     state.isSwapping = weaponManager.isSwapping;
     state.swapProgress = weaponManager.getSwapProgress();
+    if (state.lastRenderedWeaponStyle !== weaponManager.active.styleKey) {
+      state.lastRenderedWeaponStyle = weaponManager.active.styleKey;
+      rifle = rebuildWeaponMesh(gunPivot, weaponManager.active.styleKey, steel);
+    }
 
     // Reload
     if (held(ctx, ["KeyR", "r", "R"])) {
@@ -1161,7 +1259,16 @@ installStudio({
   begin: startRun,
   flow: () => (state.phase === "playing" ? FlowPhase.Playing : state.phase === "dead" || state.phase === "results" ? FlowPhase.Results : FlowPhase.Menu),
   player: () => ({ x: state.pos.x, y: 0, z: state.pos.z, yaw: state.yaw }),
-  probes: () => ({ health: state.health, kills: state.kills, enemies: enemyManager.getCount(), phase: state.phase, score: scoreSystem.getCurrentScore(beatDirector.runTime), multiplier: scoreSystem.getMultiplier() }),
+  probes: () => ({
+    health: state.health,
+    kills: state.kills,
+    enemies: enemyManager.getCount(),
+    phase: state.phase,
+    score: scoreSystem.getCurrentScore(beatDirector.runTime),
+    multiplier: scoreSystem.getMultiplier(),
+    skin: PLAYER_SKINS[state.skinIndex || 0]?.id || "olive",
+    loadout: STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray",
+  }),
   cameras: { default: placeCamera },
   render() {
     renderer.render(scene, camera);

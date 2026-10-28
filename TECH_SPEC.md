@@ -215,3 +215,11 @@ Risk register for TECH-03. Each row has an owner, a measurable trigger and a fal
 No multiplayer, accounts, leaderboards, cloud saves, monetisation, realistic ballistics, licensed
 names/models, paid/downloaded art, runtime network calls, mobile-specific layout, classes,
 procedural maps, mod support, bundler or framework.
+
+## 11. Performance Budget
+- Frame budget: 16.6 ms at 720p resolution (1280x720)
+- Draw-call cap: 90 per frame
+- Triangle cap: 150,000 triangles per frame
+- Texture memory ceiling: 96 MB
+- Baseline measurement: TBD (to be measured on low-end reference device)
+- Fail condition: Any frame exceeding 16.6 ms frame time, draw-call count exceeding 90, triangle count exceeding 150,000, or texture memory exceeding 96 MB triggers a performance failure. Baseline must be measured on low-end hardware (e.g., Intel UHD 620 or equivalent) at 1280x720.

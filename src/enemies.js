@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import { TUNING } from "./tuning.js";
 import { enemyHpAt, enemySpeedAt, damageAfterArmour } from "./balance.js";
+import { buildEnemyMesh, animateEnemyMesh } from "./models.js";
 
 export const ENEMY_TYPES = {
   rifleman: "rifleman",
@@ -316,14 +317,11 @@ export class EnemyManager {
     };
     const enemy = new Enemy(type, position, this.rng, timeMinutes);
     this.enemies.push(enemy);
-    // Create render mesh so spawned enemies are visible and targetable
-    const geo = this.materials?.enemyGeo;
+    // Create role-specific 3D model & skin so each enemy class reads at 32px+
     const mat = this.materials?.enemyMat;
-    if (geo && mat && this.scene) {
-      const mesh = new THREE.Mesh(geo, mat);
+    if (mat && this.scene) {
+      const mesh = buildEnemyMesh(type, this.materials);
       mesh.position.set(position.x, 0.72, position.z);
-      mesh.castShadow = true;
-      mesh.userData.tag = "enemy";
       this.scene.add(mesh);
       enemy.mesh = mesh;
       this.enemyMeshes.set(enemy, mesh);
@@ -363,6 +361,7 @@ export class EnemyManager {
       if (mesh) {
         mesh.position.set(enemy.position.x, enemy.position.y, enemy.position.z);
         mesh.rotation.y = Math.atan2(playerPos.x - enemy.position.x, playerPos.z - enemy.position.z);
+        animateEnemyMesh(enemy, mesh, dt);
       }
 
       // Remove dead enemies
