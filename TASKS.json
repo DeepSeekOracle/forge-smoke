@@ -31,14 +31,14 @@
       "owner": "producer",
       "description": "Write the M2 done-list as a checklist a person can verify in the preview, and mirror it into BUILD.md. Scope is everything the design can actually do; the only exclusions allowed are technical ones, each with its number.",
       "acceptance": [
-        "BUILD.md Â§1 matches GAME.md scope",
+        "BUILD.md \u00c2\u00a71 matches GAME.md scope",
         "every row has a check that can be seen or heard in the preview",
         "no capability removed for preference; any exclusion cites a measured technical limit",
         "the list may grow during production - growth is not a scope violation"
       ],
       "evidence": [
-        "BUILD.md Â§1 rewritten as the M2 done-list (2026-10-27): 24 preview-verifiable rows covering entry page, title/options/pause/game-over screens, HUD, visual identity, assets, authored data-driven level, effects, audio, feel, full run flow, arena progression, 8-beat ladder + overtime, Blackout, enemy roster (7 + Gunship boss), 12 weapon styles, 8 cards, airdrops, scoring, save/progression, performance budget, determinism.",
-        "BUILD.md Â§1 scope matches GAME.md (3-arena campaign, 8-beat ladder + overtime, 7 enemy types + Gunship boss, 3 weapon families/12 styles, 8 cards, full menus and audio; local leaderboards, progression, individual play built).",
+        "BUILD.md \u00c2\u00a71 rewritten as the M2 done-list (2026-10-27): 24 preview-verifiable rows covering entry page, title/options/pause/game-over screens, HUD, visual identity, assets, authored data-driven level, effects, audio, feel, full run flow, arena progression, 8-beat ladder + overtime, Blackout, enemy roster (7 + Gunship boss), 12 weapon styles, 8 cards, airdrops, scoring, save/progression, performance budget, determinism.",
+        "BUILD.md \u00c2\u00a71 scope matches GAME.md (3-arena campaign, 8-beat ladder + overtime, 7 enemy types + Gunship boss, 3 weapon families/12 styles, 8 cards, full menus and audio; local leaderboards, progression, individual play built).",
         "Technical exclusions section cites measured limits with numbers: co-op play (22 ms/frame at 720p > 16.67 ms budget; no signaling/relay server), shareable leaderboards (no backend; no cross-origin shared storage without server), mods (no sandboxed module loading/filesystem write; no mod endpoint; beyond 96 MB/150k tris/400-enemy cap). Each states the change required to allow it.",
         "Design non-goals listed separately (classes, procedural maps, realistic ballistics, licensed names/models, paid/downloaded art, runtime network calls, mobile-specific layout, bundler/framework) as not-capabilities with no technical-limit citation.",
         "Growth clause recorded: the list may grow during production; growth is not a scope violation; no capability removed for preference.",
@@ -57,7 +57,7 @@
       "owner": "game-director",
       "description": "Document the 30-second loop (aim, fire, swap, upgrade, hold) and prove each decision is meaningful: every wave forces at least two of them.",
       "acceptance": [
-        "loop diagram in GDD Â§2",
+        "loop diagram in GDD \u00c2\u00a72",
         "three concrete moments where a swap or card changes the outcome",
         "no decision is cosmetic"
       ],
@@ -79,14 +79,14 @@
       "owner": "game-director",
       "description": "Map the eight beats and overtime onto three arenas: Perimeter (beats 1-3), Breach Yard (4-6, both Blackouts), Gunship Pad (7-8 + overtime). Define what unlocks the next arena.",
       "acceptance": [
-        "GDD Â§8 lists three arenas with beat ranges and timings",
+        "GDD \u00c2\u00a78 lists three arenas with beat ranges and timings",
         "unlock rule stated (e.g. clear beat 3 to open Breach Yard)",
         "each arena names its signature moment"
       ],
       "evidence": [
-        "GDD.md Â§8 updated (2026-10-27): three arenas table now carries beat range, time window, signature moment and unlock rule â€” Perimeter 0:00-2:30 (beats 1-3; signature: first airdrop + first elite / the sapper charge; unlock: clear beat 3 -> Breach Yard); Breach Yard 2:30-8:00 (beats 4-6, both Blackouts; signature: the lights die twice; unlock: clear beat 6 -> Gunship Pad); Gunship Pad 8:00-12:00+ (beats 7-8 + overtime; signature: mechs, then the Gunship boss; unlock: defeat Gunship to complete campaign, overtime optional).",
-        "GAME.md 'Campaign â€” 3 arenas, 8 beats, then overtime' section updated with the same arena table (beat range, time window, signature moment, unlock rule).",
-        "Unlock rule stated in GDD.md Â§8 and GAME.md: clear beat 3 to open Breach Yard; clear beat 6 to open Gunship Pad; defeat the Gunship (beat 8) completes the campaign; overtime is optional scoring; a run always starts in Perimeter.",
+        "GDD.md \u00c2\u00a78 updated (2026-10-27): three arenas table now carries beat range, time window, signature moment and unlock rule \u00e2\u20ac\u201d Perimeter 0:00-2:30 (beats 1-3; signature: first airdrop + first elite / the sapper charge; unlock: clear beat 3 -> Breach Yard); Breach Yard 2:30-8:00 (beats 4-6, both Blackouts; signature: the lights die twice; unlock: clear beat 6 -> Gunship Pad); Gunship Pad 8:00-12:00+ (beats 7-8 + overtime; signature: mechs, then the Gunship boss; unlock: defeat Gunship to complete campaign, overtime optional).",
+        "GAME.md 'Campaign \u00e2\u20ac\u201d 3 arenas, 8 beats, then overtime' section updated with the same arena table (beat range, time window, signature moment, unlock rule).",
+        "Unlock rule stated in GDD.md \u00c2\u00a78 and GAME.md: clear beat 3 to open Breach Yard; clear beat 6 to open Gunship Pad; defeat the Gunship (beat 8) completes the campaign; overtime is optional scoring; a run always starts in Perimeter.",
         "DECISIONS.md appended: CON-02 campaign ladder entry (time windows, signature moments, unlock rule; ties to pillars 2 and 3).",
         "PLAN.md updated: CON-02 marked done; Concept phase locked (CON-01 + CON-02 done).",
         "Runtime fix: enemies spawned via EnemyManager.updateSpawning now create and register render meshes (enemyGeo/enemyMat passed into EnemyManager), eliminating null target.mesh in main.js targeting/shoot paths (TypeError: Cannot read properties of null (reading 'position')).",
@@ -110,8 +110,8 @@
         "8 cards defined with effect and rarity"
       ],
       "evidence": [
-        "GDD.md §7 Card pool (8) table added with id/slot/rarity/effect; matches TUNING.cards (8).",
-        "GDD.md §13.5 card pool updated to 8 cards; airdrop cadence and scoring tables unchanged and match tuning.js.",
+        "GDD.md \u00a77 Card pool (8) table added with id/slot/rarity/effect; matches TUNING.cards (8).",
+        "GDD.md \u00a713.5 card pool updated to 8 cards; airdrop cadence and scoring tables unchanged and match tuning.js.",
         "src/tuning.js: TUNING.enemies now holds the 7 non-boss enemy types, each with a behaviour field naming implemented AI (rifleman, sapper, shieldbearer, spotter, drone, mortar, mech); Gunship moved to TUNING.boss.gunship; TUNING.cards/CARD_POOL defines 8 cards with effect and rarity.",
         "src/enemies.js: Enemy config lookup falls back to TUNING.boss for gunship.",
         "TECH_SPEC.md: BT-01 updated to 12 styles vs 7 enemies + Gunship boss."
@@ -130,7 +130,7 @@
       "acceptance": [
         "assets/levels/arena1.json, arena2.json, arena3.json exist",
         "each defines spawns, cover, bounds, beat timing hooks",
-        "layout sketch per arena in GDD Â§8"
+        "layout sketch per arena in GDD \u00c2\u00a78"
       ],
       "evidence": [
         "assets/levels/arena1.json, arena2.json, arena3.json created with bounds, playerSpawn, spawns, cover, chokepoints, objective, pickups, lighting, beats/beatHooks/beat_timing_hooks.",
@@ -154,12 +154,12 @@
         "power curve table present"
       ],
       "evidence": [
-        "GDD.md §11.9 Economy and pacing (GDD-03) added: airdrop cadence table (crate #1-9+ with landing times and beat context; 90 s fixed, no catch-up, warning at 88 s, type roll Weapon 35/Part 65, slot weights 20/20/15/15/15/15, rarity 70/25/5).",
-        "GDD.md §11.9 card weighting table: XP thresholds 100*L, XP sources +10 kill/+1 per 25 dmg/+2 per s, max 2 queued, airdrop grants card, rarity 70/25/5 with reroll.",
-        "GDD.md §11.9 overtime difficulty curve table with numbers: t=12..20, HP mult 3.16..4.60, speed 1.45, spawn budget 46..72, interval 0.50, elite 0.35; formulas from §11.6, no overtime exception.",
-        "GDD.md §11.9 score formula restated and pointed at src/balance.js (score, multiplier functions already implemented); clamp [1.0,3.0]; meta tokens 1 per 25000, max 3/run, 12 total.",
-        "GDD.md §11.9 power curve table present: minute 2/5/10 -> airdrops 1/3/6, level 3/5/8, parts 4/8/14, armour 0-15/15-30/30-45, evolutions 0/0-1/1-2, multiplier 1.05/1.33/1.66, enemy HP mult 1.36/1.90/2.80.",
-        "TECH_SPEC.md §3 and §8 updated: economy (GDD-03) reference, BT-02 economy verification hook.",
+        "GDD.md \u00a711.9 Economy and pacing (GDD-03) added: airdrop cadence table (crate #1-9+ with landing times and beat context; 90 s fixed, no catch-up, warning at 88 s, type roll Weapon 35/Part 65, slot weights 20/20/15/15/15/15, rarity 70/25/5).",
+        "GDD.md \u00a711.9 card weighting table: XP thresholds 100*L, XP sources +10 kill/+1 per 25 dmg/+2 per s, max 2 queued, airdrop grants card, rarity 70/25/5 with reroll.",
+        "GDD.md \u00a711.9 overtime difficulty curve table with numbers: t=12..20, HP mult 3.16..4.60, speed 1.45, spawn budget 46..72, interval 0.50, elite 0.35; formulas from \u00a711.6, no overtime exception.",
+        "GDD.md \u00a711.9 score formula restated and pointed at src/balance.js (score, multiplier functions already implemented); clamp [1.0,3.0]; meta tokens 1 per 25000, max 3/run, 12 total.",
+        "GDD.md \u00a711.9 power curve table present: minute 2/5/10 -> airdrops 1/3/6, level 3/5/8, parts 4/8/14, armour 0-15/15-30/30-45, evolutions 0/0-1/1-2, multiplier 1.05/1.33/1.66, enemy HP mult 1.36/1.90/2.80.",
+        "TECH_SPEC.md \u00a73 and \u00a78 updated: economy (GDD-03) reference, BT-02 economy verification hook.",
         "balance.js already implements score(), multiplier(), spawnBudget(), eliteChance(), spawnInterval(), enemyHpAt(), enemySpeedAt(), xpThreshold(); no new balance numbers introduced."
       ],
       "status": "done",
@@ -179,7 +179,7 @@
         "no dead end (can always return to title)"
       ],
       "evidence": [
-        "GDD.md §9.5 (GDD-04) added: UX state machine with state diagram (Title -> Arena Select -> Loadout -> Playing -> Results -> Retry) plus Pause and Options; transition/key table for every state; card window treated as overlay; reachability and escape guarantees (every state reachable/escapable by keyboard; no dead end; Title reachable from all in <=2 keys); abandon path Q/Backspace from Pause to Title.",
+        "GDD.md \u00a79.5 (GDD-04) added: UX state machine with state diagram (Title -> Arena Select -> Loadout -> Playing -> Results -> Retry) plus Pause and Options; transition/key table for every state; card window treated as overlay; reachability and escape guarantees (every state reachable/escapable by keyboard; no dead end; Title reachable from all in <=2 keys); abandon path Q/Backspace from Pause to Title.",
         "DECISIONS.md appended: GDD-04 UX flow entry (state diagram, key-driven transitions, no dead end).",
         "PLAN.md updated: GDD-04 marked done; Design phase locked (GDD-01..GDD-04 done)."
       ],
@@ -623,7 +623,7 @@
       "phase": "qa",
       "title": "Visual acceptance",
       "owner": "qa-lead",
-      "description": "Accept against BUILD.md Â§1 with screenshots: title, each arena mid-fight, blackout, pause, results. Verify the REFRESH readout shows 0 files newer.",
+      "description": "Accept against BUILD.md \u00c2\u00a71 with screenshots: title, each arena mid-fight, blackout, pause, results. Verify the REFRESH readout shows 0 files newer.",
       "acceptance": [
         "5+ screenshots covering all arenas and the blackout",
         "BUILD.md checklist fully ticked",
@@ -642,14 +642,14 @@
       "phase": "qa",
       "title": "Balance and feel",
       "owner": "game-director",
-      "description": "Three playtests end to end. Tune numbers until the difficulty curve matches GDD Â§8. Record what changed and why.",
+      "description": "Three playtests end to end. Tune numbers until the difficulty curve matches GDD \u00c2\u00a78. Record what changed and why.",
       "acceptance": [
         "three full runs recorded with scores",
         "numbers adjusted and justified in DECISIONS.md",
         "no run ends to a bug"
       ],
       "evidence": [
-        "job JOB-3CC7A1A2 (hermes-master): SUMMARY: Adjusted difficulty curve based on three playtests; tuned firing rates and heat mechanics to match GDD §8 balance requirements. [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/qa_03.js (1989 bytes)"
+        "job JOB-3CC7A1A2 (hermes-master): SUMMARY: Adjusted difficulty curve based on three playtests; tuned firing rates and heat mechanics to match GDD \u00a78 balance requirements. [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/qa_03.js (1989 bytes)"
       ],
       "status": "done",
       "depends_on": [
@@ -979,7 +979,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "MGR-14"
+      ]
     },
     {
       "id": "TAL-02",
@@ -994,7 +996,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "TAL-01"
+      ]
     },
     {
       "id": "TAL-03",
@@ -1009,7 +1013,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "TAL-02"
+      ]
     },
     {
       "id": "TAL-04",
@@ -1025,7 +1031,9 @@
       ],
       "evidence": [],
       "status": "done",
-      "depends_on": []
+      "depends_on": [
+        "TAL-03"
+      ]
     }
   ]
 }
