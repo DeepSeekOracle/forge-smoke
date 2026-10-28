@@ -255,9 +255,7 @@
         "fades with run",
         "licence recorded"
       ],
-      "depends_on": [
-        "ART-06"
-      ],
+      "depends_on": [],
       "priority": "high",
       "risk": "low",
       "status": "todo",
