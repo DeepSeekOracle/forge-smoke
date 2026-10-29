@@ -1250,7 +1250,7 @@
       "phase": "production",
       "title": "Start-screen fallback stills",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/01-assets.md",
       "acceptance": [
         "1536x864, used for reduced-motion"
@@ -1263,21 +1263,22 @@
       "files": [
         "assets/start-still-*.jpg"
       ],
-      "evidence": [
-        "build 70bca49523d7 (local/lygo-engine): SUMMARY: Added start-screen fallback stills for 1536x864 resolution with 90 draw calls and under 150k triangles as per reduced-motion requirements. [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/art_06.js (726 bytes)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in"
     },
     {
       "id": "AUD-02",
       "phase": "production",
-      "title": "CC0 rain/wind ambience bed",
+      "title": "Ambience bed in src/audio.js from assets/sfx/",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "looped, lowpass ~1.8kHz, gain 0.10",
-        "fades with run",
-        "licence recorded"
+        "audio.js playAmbience() loops a file from assets/sfx/ at gain 0.10",
+        "the file used exists on disk and is 8-30s long",
+        "no oscillator-based drone is reintroduced",
+        "source licence recorded in docs/ASSETS-SOURCES.md"
       ],
       "depends_on": [
         "ART-06"
@@ -1288,21 +1289,22 @@
         "src/audio.js",
         "assets/sfx/"
       ],
-      "evidence": [
-        "build d200cf03ed35 (local/lygo-engine): SUMMARY: Added CC0 rain/wind ambience bed with looped lowpass ~1.8kHz, gain 0.10, fades with run, licensed for free use [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/aud_02.js (1563 bytes)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "AUD-03",
       "phase": "production",
-      "title": "Per-style weapon reports (3 variants)",
+      "title": "Per-style weapon reports in src/audio.js SAMPLE_MAP",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "6+ families x3 variants",
-        "random with ±6% pitch",
-        "under 4 MB"
+        "at least 6 styles map to distinct sample files",
+        "playSfx applies +/-6% pitch variation",
+        "total added audio under 4 MB"
       ],
       "depends_on": [
         "AUD-02"
@@ -1313,20 +1315,21 @@
         "src/audio.js",
         "assets/sfx/"
       ],
-      "evidence": [
-        "build d745cfaceb04 (local/lygo-engine): SUMMARY: Added per-style weapon reports with 3 variants, random pitch ±6%, under 4MB limit [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/aud_03.js (1064 bytes)\nSKIPPED: TECH_SPEC.md (edit old snippet not found)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "AUD-04",
       "phase": "production",
-      "title": "Impact set: light / heavy / shield tink",
+      "title": "Impact set (light/heavy/shield tink) in src/audio.js",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "shield hit audibly distinct",
-        "mix table documented"
+        "shield hit uses a distinct sample from body hit",
+        "mix table written as a comment in audio.js"
       ],
       "depends_on": [
         "AUD-03"
@@ -1334,22 +1337,25 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/audio.js"
+        "src/audio.js",
+        "assets/sfx/"
       ],
-      "evidence": [
-        "build d651e13dd43d (local/lygo-engine): SUMMARY: Shield hit audibly distinct and mix table documented as per AUD-04 task scope [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/aud_04.js (734 bytes)\nSKIPPED: TECH_SPEC.md (edit old snippet not found)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "UI-08",
       "phase": "production",
-      "title": "Ground zone markers wired to objZones",
+      "title": "Ground zone markers in src/main.js using assets/zones/",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "ring per zone, amber current, pulse on hold",
-        "screenshot"
+        "a ring mesh is placed at each objZones centre",
+        "current zone is amber, held zones dim",
+        "screenshot of the arena shows the rings"
       ],
       "depends_on": [
         "AUD-04"
@@ -1357,21 +1363,24 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/main.js"
+        "src/main.js",
+        "assets/zones"
       ],
-      "evidence": [
-        "build 5fb182686003 (local/lygo-engine): SUMMARY: Ground zone markers now wired to objZones with ring, amber current, and pulse on hold [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/ui_08.js (2218 bytes)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "UI-09",
       "phase": "production",
-      "title": "HUD stack slots (health/mag/objective/boss)",
+      "title": "Fixed HUD slots in src/main.js syncHud",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "no overlap at 1440x900 or 1280x720"
+        "health/mag/objective/boss bar use named y slots in one constants block",
+        "objective text never overlaps the boss name at 1280x720 and 1440x900"
       ],
       "depends_on": [
         "UI-08"
@@ -1381,20 +1390,21 @@
       "files": [
         "src/main.js"
       ],
-      "evidence": [
-        "build 61369597b3cd (local/lygo-engine): SUMMARY: Implemented HUD stack slots for health, magic, objective, and boss status with no overlap at 1440x900 or 1280x720, meeting low-end budget constraints of 90 draw calls, 150K triangles, and 96MB textures. [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/ui_09.js (1055 bytes)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "UI-10",
       "phase": "production",
-      "title": "Mobile layout 390x844",
+      "title": "Card tray at 390x844 in src/cardsui.js",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
-        "screenshot at 390x844",
-        "cards usable"
+        "cards fit 390px wide without horizontal scroll",
+        "screenshot at 390x844 attached"
       ],
       "depends_on": [
         "UI-09"
@@ -1402,12 +1412,12 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/cardsui.js",
-        "src/main.js"
+        "src/cardsui.js"
       ],
-      "evidence": [
-        "build 1e9769b58d8f (local/lygo-engine): SUMMARY: Mobile layout 390x844 implemented with Web 2D, cards functional [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/ui_10.js (2232 bytes)\nSKIPPED: TECH_SPEC.md (edit old snippet not found)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "UI-11",
@@ -1435,13 +1445,15 @@
     {
       "id": "MATH-01",
       "phase": "production",
-      "title": "src/math.js pure combat module",
+      "title": "Extend src/balance.js: shieldGate + timeToKill (no new file)",
       "owner": "free-agent",
-      "status": "done",
+      "status": "todo",
       "description": ".forge/briefs/03-engine-math.md",
       "acceptance": [
-        "armourSoak/shieldGate/spread/falloff/xpForRun/bossHp/timeToKill",
-        "unit table printed"
+        "src/balance.js exports shieldGate and timeToKill",
+        "node --check src/balance.js passes",
+        "a node -e import of balance.js prints a 5-row TTK table into docs/TTK.md",
+        "no new src/math*.js file exists"
       ],
       "depends_on": [
         "UI-11"
@@ -1449,22 +1461,27 @@
       "priority": "high",
       "risk": "med",
       "files": [
-        "src/math.js"
+        "src/balance.js",
+        "src/enemies.js",
+        "docs/TTK.md"
       ],
-      "evidence": [
-        "build 4c24690b7c95 (local/lygo-engine): SUMMARY: Implemented core combat math functions for armour soak, shield gate, spread, falloff, xp for run, boss HP, and time to kill with unit table printed [via Qwen3-4B-Instruct-2507]\nFILES CHANGED:\n- src/math_01.js (4171 bytes)"
-      ]
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "MATH-02",
       "phase": "production",
-      "title": "Route enemies.js damage through math.js",
+      "title": "Route enemies.js shield maths through balance.shieldGate",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/03-engine-math.md",
       "acceptance": [
-        "shield logic only in shieldGate",
-        "TTK before/after"
+        "takeDamage imports shieldGate from ./balance.js",
+        "no inline isShielded/pierce arithmetic remains in enemies.js",
+        "boot test: start menu -> playing, 0 page errors",
+        "shield TTK row in docs/TTK.md matches the pre-change value"
       ],
       "depends_on": [
         "MATH-01"
@@ -1473,20 +1490,25 @@
       "risk": "med",
       "files": [
         "src/enemies.js",
-        "src/math.js"
+        "src/balance.js"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "MATH-03",
       "phase": "production",
-      "title": "Boss HP formula + scaling",
+      "title": "Boss HP curve in balance.js, used by main.js",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/03-engine-math.md",
       "acceptance": [
-        "bossHp() used",
-        "level-1 kill 60-90 s or explained"
+        "balance.js exports bossHp(baseHp, level)",
+        "main.js calls bossHp instead of inline *2+2600 arithmetic",
+        "docs/TTK.md records measured level-1 boss kill time",
+        "no new src/math*.js file exists"
       ],
       "depends_on": [
         "MATH-02"
@@ -1494,21 +1516,26 @@
       "priority": "high",
       "risk": "med",
       "files": [
+        "src/balance.js",
         "src/main.js",
-        "src/math.js"
+        "docs/TTK.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "MATH-04",
       "phase": "production",
-      "title": "XP curve + card pacing constants",
+      "title": "XP + card pacing constants in src/tuning.js",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/03-engine-math.md",
       "acceptance": [
-        "3-5 cards per run in a 20-run table",
-        "economy untouched"
+        "tuning.js keeps levelBaseXp and cardChoices as named constants",
+        "a 3-run measurement in docs/TTX.md shows 3-5 cards offered per run",
+        "economy unchanged: 0 before 60s, 1 after, 5 clear, +1 boss"
       ],
       "depends_on": [
         "MATH-03"
@@ -1516,21 +1543,26 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/tuning.js"
+        "src/tuning.js",
+        "docs/TTX.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "WPN-01",
       "phase": "production",
-      "title": "AA FLAK weapon (air-only profile)",
+      "title": "Add AA FLAK to src/weapons.js (WEAPON list + STYLE_VFX row)",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
-        "strong vs air, weak vs ground",
-        "TTK row",
-        "screenshot"
+        "weapons.js WEAPONS contains an entry with styleKey 'flak'",
+        "STYLE_VFX.flak exists with colour/tracer/flash/sound",
+        "docs/ROSTER.md row shows flak air TTK < ground TTK at level 1",
+        "no new src/wpn_0*.js file exists"
       ],
       "depends_on": [
         "MATH-04"
@@ -1539,19 +1571,25 @@
       "risk": "med",
       "files": [
         "src/weapons.js",
-        "src/models.js"
+        "docs/ROSTER.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "WPN-02",
       "phase": "production",
-      "title": "BREACHER shotgun, +pierce vs shields",
+      "title": "Add BREACHER to src/weapons.js with shieldPierce 0.7",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
-        "close, slow, pierce 0.7"
+        "WEAPONS has styleKey 'breach'",
+        "STYLE_VFX.breach exists",
+        "docs/ROSTER.md shows breach vs shieldbearer shorter than spray",
+        "no new src/wpn_0*.js file exists"
       ],
       "depends_on": [
         "WPN-01"
@@ -1559,19 +1597,25 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/weapons.js"
+        "src/weapons.js",
+        "docs/ROSTER.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "WPN-03",
       "phase": "production",
-      "title": "RAIL variant with 3-target penetration",
+      "title": "Add rail variant with 3-target penetration in src/weapons.js",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
-        "hits up to 3 in a line"
+        "WEAPONS has styleKey 'rail2' with pierce target count 3",
+        "docs/ROSTER.md row lists penetration 3",
+        "boot test 0 errors"
       ],
       "depends_on": [
         "WPN-02"
@@ -1579,20 +1623,25 @@
       "priority": "normal",
       "risk": "low",
       "files": [
-        "src/weapons.js"
+        "src/weapons.js",
+        "docs/ROSTER.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "WPN-04",
       "phase": "production",
-      "title": "Roster balance table + card weights",
+      "title": "Weapon roster table + card weights in src/weapons.js",
       "owner": "free-agent",
       "status": "todo",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
-        "12+ weapons, weakness stated",
-        "weapon weight 0.6, no repeats"
+        "every weapon entry has a one-line weakness string",
+        "card pool weight for weapon cards is 0.6",
+        "docs/ROSTER.md regenerated from the code, not hand-written"
       ],
       "depends_on": [
         "WPN-03"
@@ -1601,16 +1650,19 @@
       "risk": "low",
       "files": [
         "src/weapons.js",
-        "src/models.js"
+        "docs/ROSTER.md"
       ],
-      "evidence": []
+      "evidence": [],
+      "artifacts": [],
+      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
       "id": "FX-01",
       "phase": "production",
       "title": "spark1.png muzzle sprite + impact bursts",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/04-weapon-fx.md",
       "acceptance": [
         "pooled sprite 60-90 ms",
@@ -1626,7 +1678,9 @@
         "src/fx.js",
         "src/main.js"
       ],
-      "evidence": []
+      "evidence": [
+        "job JOB-B30BF3D5 (hermes-master): SUMMARY: generated 1200x630 image locally [via Qwen-Image]\nFILES CHANGED:\n- assets/fx-01.jpg (38871 bytes)"
+      ]
     },
     {
       "id": "FX-02",

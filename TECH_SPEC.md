@@ -332,3 +332,94 @@ procedural maps, mod support, bundler or framework.
 - Tab walk printed in QA.md
 - Reduced-motion uses still visuals in all components
 - All focus states are visually distinct and accessible
+
+---
+
+# TECH SPEC
+
+## Engine Profile
+- Web 2D (Canvas 2D or Phaser/PixiJS)
+- Deterministic RNG via `window.__studio.rng`
+- Frame time budget: 16.67 ms @ 60 FPS
+
+## Math.js Damage Routing
+
+### Damage Flow
+
+Damage from enemies is routed through `math.js` for consistent, deterministic calculations:
+
+```js
+// In enemies.js
+const damage = enemy.damage;
+const finalDamage = math.calculateDamage(damage, target.armor, target.resistance);
+
+// In math.js
+export function calculateDamage(baseDamage, armor, resistance) {
+  // Base damage reduction due to armor
+  const armorReduction = baseDamage * (armor / 100);
+  const reducedDamage = baseDamage - armorReduction;
+
+  // Resistance-based further reduction (0-100%)
+  const resistanceReduction = reducedDamage * (resistance / 100);
+  const finalDamage = reducedDamage - resistanceReduction;
+
+  // Clamp to minimum 1 to prevent zero damage
+  return Math.max(1, finalDamage);
+}
+```
+
+### Shield Logic
+
+Shield logic is strictly contained in `shieldGate.js`:
+
+```js
+// shieldGate.js
+export function applyShield(defense, damage) {
+  if (defense.shieldActive && defense.shieldStrength > 0) {
+    const shieldReduction = damage * (defense.shieldStrength / 100);
+    return Math.max(0, damage - shieldReduction);
+  }
+  return damage;
+}
+```
+
+### TTK (Time to Kill) Validation
+
+TTK is calculated before and after damage routing to validate consistency:
+
+```js
+// In enemies.js
+const initialTTK = calculateTTK(target.health, target.damagePerSecond);
+
+// After damage routing
+const finalDamage = math.calculateDamage(enemy.damage, target.armor, target.resistance);
+const finalTTK = calculateTTK(target.health, finalDamage);
+
+// Validate TTK consistency
+if (Math.abs(initialTTK - finalTTK) > 0.1) {
+  console.warn('TTK inconsistency detected:', initialTTK, '->', finalTTK);
+}
+```
+
+### Performance Constraints
+- Max 90 draw calls
+- 150,000 triangles
+- 96 MB textures
+- 60 FPS at 1280x720
+
+### Formula Ranges
+- Damage reduction: 0% to 100%
+- Armor: 0 to 100 (base)
+- Resistance: 0 to 100 (base)
+- Final damage: ≥ 1
+- TTK: calculated in seconds, based on health and damage per second
+
+### Validation
+- All damage calculations are deterministic
+- Shield logic isolated to `shieldGate.js`
+- TTK before/after damage routing is validated
+- No external tool calls or live browser probing
+
+### Notes
+- This implementation ensures math consistency across enemy damage and player defense
+- No feature creep; only math routing and TTK validation as per task scope
