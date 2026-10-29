@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321k";
-import { standardMaterial } from "./materials.js?v=202610321k";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321k";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321k";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321n";
+import { standardMaterial } from "./materials.js?v=202610321n";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321n";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321n";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610321k";
-import { TUNING } from "./tuning.js?v=202610321k";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321k";
-import { createCardTray } from "./cardsui.js?v=202610321k";
-import { createSummary } from "./summaryui.js?v=202610321k";
-import { createBarks } from "./barks.js?v=202610321k";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321k";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321k";
-import { bossHp } from "./balance.js?v=202610321k";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321k";
-import { pilot } from "./autopilot.js?v=202610321k";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321k";
-import { createStartMenu } from "./startmenu.js?v=202610321k";
-import { createGamepad } from "./gamepad.js?v=202610321k";
-import { createTalentWindow } from "./talentui.js?v=202610321k";
-import { aggregate, toRunMods } from "./talents.js?v=202610321k";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321k";
+} from "./theme.js?v=202610321n";
+import { TUNING } from "./tuning.js?v=202610321n";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321n";
+import { createCardTray } from "./cardsui.js?v=202610321n";
+import { createSummary } from "./summaryui.js?v=202610321n";
+import { createBarks } from "./barks.js?v=202610321n";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321n";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321n";
+import { bossHp } from "./balance.js?v=202610321n";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321n";
+import { pilot } from "./autopilot.js?v=202610321n";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321n";
+import { createStartMenu } from "./startmenu.js?v=202610321n";
+import { createGamepad } from "./gamepad.js?v=202610321n";
+import { createTalentWindow } from "./talentui.js?v=202610321n";
+import { aggregate, toRunMods } from "./talents.js?v=202610321n";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321n";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610321k";
-import * as levelModule from "./level.js?v=202610321k";
-import * as menuModule from "./menu.js?v=202610321k";
-import * as audioModule from "./audio.js?v=202610321k";
-import * as fxModule from "./fx.js?v=202610321k";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610321k";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321k";
+} from "./models.js?v=202610321n";
+import * as levelModule from "./level.js?v=202610321n";
+import * as menuModule from "./menu.js?v=202610321n";
+import * as audioModule from "./audio.js?v=202610321n";
+import * as fxModule from "./fx.js?v=202610321n";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610321n";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321n";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610321k";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321k";
+import { createCasings } from "./casings.js?v=202610321n";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321n";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -694,6 +694,44 @@ function buildGroundDetail() {
       groundDetailGroup.add(scar);
     }
   }
+
+  // Cargo stencils painted on the floor beside the containers: the flat ground read as untextured.
+  const texts = ["LYGO CARGO", "EX-07", "HANDLE WITH CARE", "DEPOT 03"];
+  const cache = new Map();
+  const stencilTexture = (label) => {
+    if (cache.has(label)) return cache.get(label);
+    const c = document.createElement("canvas");
+    c.width = 256; c.height = 128;
+    const g = c.getContext("2d");
+    g.clearRect(0, 0, 256, 128);
+    g.strokeStyle = "rgba(255,179,71,0.85)";
+    g.lineWidth = 5;
+    g.strokeRect(6, 6, 244, 116);
+    g.fillStyle = "rgba(255,214,120,0.92)";
+    g.font = "800 30px ui-monospace, Consolas, monospace";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.fillText(label, 128, 64);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    cache.set(label, tex);
+    return tex;
+  };
+  const props = (activeMap && activeMap.props) || [];
+  props.forEach((prop, i) => {
+    if (prop.kind !== "container" && prop.kind !== "barrier" && prop.kind !== "milk-truck") return;
+    const len = Math.hypot(prop.x, prop.z) || 1;
+    const outX = prop.x / len;
+    const outZ = prop.z / len;
+    const decal = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 1.0),
+      new THREE.MeshBasicMaterial({ map: stencilTexture(texts[i % texts.length]), transparent: true,
+        opacity: 0.5, depthWrite: false }));
+    decal.rotation.x = -Math.PI / 2;
+    decal.rotation.z = Math.atan2(outX, outZ) + Math.PI / 2;
+    decal.position.set(prop.x + outX * 2.2, 0.013, prop.z + outZ * 2.2);
+    groundDetailGroup.add(decal);
+  });
 }
 
 // Enemy feet rings: a red ground ring makes hostiles readable at range without touching their rigs.
@@ -711,6 +749,42 @@ const enemyRings = [];
     enemyRings.push(ring);
   }
 }
+// Foot dust: pooled soft discs that rise and fade behind a running operator.
+const dustPool = [];
+{
+  const dustGeo = new THREE.CircleGeometry(0.26, 10);
+  for (let i = 0; i < 18; i += 1) {
+    const mesh = new THREE.Mesh(dustGeo, new THREE.MeshBasicMaterial({
+      color: 0x9c8a6c, transparent: true, opacity: 0, depthWrite: false,
+    }));
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.visible = false;
+    scene.add(mesh);
+    dustPool.push({ mesh, life: 0 });
+  }
+}
+let dustCursor = 0;
+let dustTimer = 0;
+function spawnDust(x, z) {
+  const slot = dustPool[dustCursor % dustPool.length];
+  dustCursor += 1;
+  slot.life = 0.5;
+  slot.mesh.visible = true;
+  slot.mesh.position.set(x + (state.rng() - 0.5) * 0.25, 0.05, z + (state.rng() - 0.5) * 0.25);
+  slot.mesh.scale.setScalar(0.7 + state.rng() * 0.6);
+  slot.mesh.material.opacity = 0.32;
+}
+function updateDust(dt) {
+  for (const d of dustPool) {
+    if (d.life <= 0) continue;
+    d.life -= dt;
+    if (d.life <= 0) { d.mesh.visible = false; continue; }
+    d.mesh.position.y += dt * 0.35;
+    d.mesh.scale.multiplyScalar(1 + dt * 1.6);
+    d.mesh.material.opacity = Math.max(0, d.life * 0.6);
+  }
+}
+
 function updateEnemyRings() {
   const list = enemyManager.getEnemies();
   for (let i = 0; i < enemyRings.length; i += 1) {
@@ -2626,6 +2700,11 @@ function update(dt, ctx) {
       if (mag > 0.02) {
         const step = mag * dt;
         state.pos.x += vel.x * dt;
+    dustTimer -= dt;
+    if (dustTimer <= 0 && Math.hypot(vel.x, vel.z) > 1.0 && state.phase === "playing") {
+      dustTimer = 0.14;
+      spawnDust(state.pos.x, state.pos.z);
+    }
         state.pos.z += vel.z * dt;
         state.odometer = (state.odometer || 0) + step;
         if (state.bossWarning > 0) {
@@ -2936,6 +3015,7 @@ function update(dt, ctx) {
 
     updateEnemyShots(dt);
     updateEnemyRings();
+    updateDust(dt);
     updateGrenades(dt);
     casings.update(dt);
 

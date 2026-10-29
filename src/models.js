@@ -107,9 +107,12 @@ const gltfPromises = new Map();
 
 // ?rig=photo swaps the operator's skinned mesh for the photo-character rig exported by the
 // photo_pipeline (same Mixamo skeleton and Idle/Run/Walk actions).
+// The photo character is the default operator now; ?rig=classic keeps the placeholder for A/B.
 const USE_PHOTO_RIG = (() => {
-  try { return new URLSearchParams(globalThis.location?.search || "").get("rig") === "photo"; }
-  catch (_) { return false; }
+  try {
+    const rig = new URLSearchParams(globalThis.location?.search || "").get("rig");
+    return rig !== "classic";
+  } catch (_) { return true; }
 })();
 const OPERATOR_RIG_ASSET = USE_PHOTO_RIG ? "soldier-rig-photo" : "soldier-rig";
 
