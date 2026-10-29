@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321c";
-import { standardMaterial } from "./materials.js?v=202610321c";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321c";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321c";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321f";
+import { standardMaterial } from "./materials.js?v=202610321f";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321f";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321f";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610321c";
-import { TUNING } from "./tuning.js?v=202610321c";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321c";
-import { createCardTray } from "./cardsui.js?v=202610321c";
-import { createSummary } from "./summaryui.js?v=202610321c";
-import { createBarks } from "./barks.js?v=202610321c";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321c";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321c";
-import { bossHp } from "./balance.js?v=202610321c";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321c";
-import { pilot } from "./autopilot.js?v=202610321c";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321c";
-import { createStartMenu } from "./startmenu.js?v=202610321c";
-import { createGamepad } from "./gamepad.js?v=202610321c";
-import { createTalentWindow } from "./talentui.js?v=202610321c";
-import { aggregate, toRunMods } from "./talents.js?v=202610321c";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321c";
+} from "./theme.js?v=202610321f";
+import { TUNING } from "./tuning.js?v=202610321f";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321f";
+import { createCardTray } from "./cardsui.js?v=202610321f";
+import { createSummary } from "./summaryui.js?v=202610321f";
+import { createBarks } from "./barks.js?v=202610321f";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321f";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321f";
+import { bossHp } from "./balance.js?v=202610321f";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321f";
+import { pilot } from "./autopilot.js?v=202610321f";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321f";
+import { createStartMenu } from "./startmenu.js?v=202610321f";
+import { createGamepad } from "./gamepad.js?v=202610321f";
+import { createTalentWindow } from "./talentui.js?v=202610321f";
+import { aggregate, toRunMods } from "./talents.js?v=202610321f";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321f";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610321c";
-import * as levelModule from "./level.js?v=202610321c";
-import * as menuModule from "./menu.js?v=202610321c";
-import * as audioModule from "./audio.js?v=202610321c";
-import * as fxModule from "./fx.js?v=202610321c";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610321c";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321c";
+} from "./models.js?v=202610321f";
+import * as levelModule from "./level.js?v=202610321f";
+import * as menuModule from "./menu.js?v=202610321f";
+import * as audioModule from "./audio.js?v=202610321f";
+import * as fxModule from "./fx.js?v=202610321f";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610321f";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321f";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610321c";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321c";
+import { createCasings } from "./casings.js?v=202610321f";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321f";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -178,11 +178,21 @@ for (let i = 0; i < TREE_COUNT; i++) {
   scene.add(tree);
   trees.push(tree);
 }
+// Shrubs are low-poly clumps, not single leaf cards: a flat card read as a black shard at ground level.
 for (let i = 0; i < BUSH_COUNT; i++) {
   const a = worldRng() * TAU, r = 12 + worldRng() * 28;
-  const bush = makeBush({ radius: 0.65 + worldRng() * 0.9, seed: 90 + i, leaf: sharedBushMat, texSize: TEX_SIZE });
-  bush.position.set(Math.cos(a) * r, bush.position.y, Math.sin(a) * r);
-  scene.add(bush);
+  const clump = new THREE.Group();
+  const parts = 2 + Math.floor(worldRng() * 3);
+  for (let k = 0; k < parts; k += 1) {
+    const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(0.45 + worldRng() * 0.45, 0), sharedBushMat);
+    blob.position.set((worldRng() - 0.5) * 0.9, 0.28 + worldRng() * 0.25, (worldRng() - 0.5) * 0.9);
+    blob.scale.set(1, 0.62 + worldRng() * 0.2, 1);
+    blob.castShadow = true;
+    clump.add(blob);
+  }
+  clump.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
+  clump.rotation.y = worldRng() * TAU;
+  scene.add(clump);
 }
 for (let i = 0; i < LOG_COUNT; i++) {
   const a = worldRng() * TAU, r = 12 + worldRng() * 20;
@@ -640,6 +650,70 @@ scene.add(soldier);
 const arenaPropsGroup = new THREE.Group();
 arenaPropsGroup.userData.tag = "arena-props";
 scene.add(arenaPropsGroup);
+
+// Ground detail: wet patches and tyre scars. No colliders - this is paint on the floor, and the
+// flat arena was the biggest "cheap" read in the visual pass.
+const groundDetailGroup = new THREE.Group();
+groundDetailGroup.userData.tag = "ground-detail";
+scene.add(groundDetailGroup);
+// unlit and faint: a dark standard puddle read as a hole in the floor
+const groundPuddleMat = new THREE.MeshBasicMaterial({
+  color: 0x2a3d4f, transparent: true, opacity: 0.22, depthWrite: false,
+});
+const groundTyreMat = new THREE.MeshBasicMaterial({ color: 0x070c12, transparent: true, opacity: 0.55, depthWrite: false });
+function buildGroundDetail() {
+  while (groundDetailGroup.children.length) groundDetailGroup.remove(groundDetailGroup.children[0]);
+  for (let i = 0; i < 12; i += 1) {
+    const a = worldRng() * TAU;
+    const r = 7 + worldRng() * 27;
+    const puddle = new THREE.Mesh(new THREE.CircleGeometry(0.35 + worldRng() * 0.6, 18), groundPuddleMat);
+    puddle.rotation.x = -Math.PI / 2;
+    puddle.rotation.z = worldRng() * Math.PI;
+    puddle.scale.x = 1.4 + worldRng() * 0.9;
+    puddle.position.set(Math.cos(a) * r, 0.015, Math.sin(a) * r);
+    groundDetailGroup.add(puddle);
+  }
+  for (let i = 0; i < 7; i += 1) {
+    const a = worldRng() * TAU;
+    const r = 10 + worldRng() * 18;
+    const cx = Math.cos(a) * r;
+    const cz = Math.sin(a) * r;
+    const len = 3 + worldRng() * 5;
+    const ang = worldRng() * Math.PI;
+    for (const side of [-0.42, 0.42]) {
+      const scar = new THREE.Mesh(new THREE.PlaneGeometry(0.24, len), groundTyreMat);
+      scar.rotation.x = -Math.PI / 2;
+      scar.rotation.z = ang;
+      scar.position.set(cx + Math.cos(ang + Math.PI / 2) * side, 0.012, cz + Math.sin(ang + Math.PI / 2) * side);
+      groundDetailGroup.add(scar);
+    }
+  }
+}
+
+// Enemy feet rings: a red ground ring makes hostiles readable at range without touching their rigs.
+const enemyRings = [];
+{
+  const ringGeo = new THREE.RingGeometry(0.52, 0.68, 28);
+  for (let i = 0; i < 24; i += 1) {
+    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({
+      color: 0xf2545b, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+    }));
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.03;
+    ring.visible = false;
+    scene.add(ring);
+    enemyRings.push(ring);
+  }
+}
+function updateEnemyRings() {
+  const list = enemyManager.getEnemies();
+  for (let i = 0; i < enemyRings.length; i += 1) {
+    const e = list[i];
+    if (!e || !e.position || e.hp <= 0) { enemyRings[i].visible = false; continue; }
+    enemyRings[i].visible = e.position.y < 2.2;
+    enemyRings[i].position.set(e.position.x, 0.03, e.position.z);
+  }
+}
 warmGlbAssets();
 
 const enemyGeo = new THREE.BoxGeometry(1.05, 1.05, 1.05);
@@ -713,6 +787,7 @@ function applyArenaLighting(key) {
   arenaKey = lightKey;
   activeMap = map || keepMap;
   populateArenaProps(map ? map.id : keepMap ? keepMap.id : lightKey, arenaPropsGroup, TEX_SIZE);
+  buildGroundDetail();
   renderer.toneMappingExposure = cfg.exposure;
   scene.background.set(hexInt(cfg.background));
   scene.fog.color.set(hexInt(cfg.fog.color));
@@ -2850,6 +2925,7 @@ function update(dt, ctx) {
     }
 
     updateEnemyShots(dt);
+    updateEnemyRings();
     updateGrenades(dt);
     casings.update(dt);
 

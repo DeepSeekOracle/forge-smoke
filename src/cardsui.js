@@ -165,6 +165,9 @@ const CSS = `
   background:linear-gradient(180deg,transparent,rgba(4,6,9,.55) 42%,rgba(4,6,9,.86));
   font:13px/1.4 ui-sans-serif,system-ui,sans-serif;color:#E8F1F8}
 #fs-cards.open{display:flex}
+#fs-cards-scrim{position:fixed;inset:0;z-index:43;display:none;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 68%,rgba(2,5,9,.18) 0%,rgba(2,5,9,.62) 62%,rgba(2,5,9,.82) 100%)}
+#fs-cards-scrim.open{display:block}
 #fs-cards .hdr{position:absolute;left:0;right:0;top:calc(100% - 100%);text-align:center;font:800 11px ui-monospace,Consolas,monospace;
   letter-spacing:.3em;color:#FFB347;pointer-events:none}
 #fs-cards .card{pointer-events:auto;position:relative;width:212px;min-height:286px;border-radius:8px;cursor:pointer;
@@ -293,10 +296,18 @@ export function createCardTray(opts = {}) {
       el.addEventListener("click", () => onPick(i));
       root.appendChild(el);
     });
+    let scrim = document.getElementById("fs-cards-scrim");
+    if (!scrim) { scrim = document.createElement("div"); scrim.id = "fs-cards-scrim"; document.body.appendChild(scrim); }
+    scrim.classList.add("open");
     root.classList.add("open");
   }
 
-  function hide() { root.classList.remove("open"); root.innerHTML = ""; }
+  function hide() {
+    root.classList.remove("open");
+    root.innerHTML = "";
+    const scrim = document.getElementById("fs-cards-scrim");
+    if (scrim) scrim.classList.remove("open");
+  }
 
   return { show: render, hide, root, get open() { return root.classList.contains("open"); } };
 }
