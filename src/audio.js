@@ -4,6 +4,7 @@
  * @module audio
  */
 
+
 function createSynthSfx(ctx, masterGain, sfxGain, key, options = {}) {
   if (!ctx || ctx.state === "suspended") {
     try { ctx.resume(); } catch (_) {}
@@ -213,7 +214,10 @@ export async function initAudio() {
 
 export function playSfx(audio, key, options = {}) {
   if (audio && typeof audio.playSfx === "function") {
-    return audio.playSfx(key, options);
+    // Apply +/-6% pitch variation for weapon reports
+    const pitchVariation = 1 + (Math.random() - 0.5) * 0.12; // 0.94 to 1.06
+    const opts = { ...options, pitch: (options.pitch || 1) * pitchVariation };
+    return audio.playSfx(key, opts);
   }
   return { playing: false, stop() {}, setVolume() {}, setPitch() {} };
 }
@@ -223,3 +227,4 @@ export function playMusic(audio, key, options = {}) {
     return audio.playMusic(key, options);
   }
 }
+
