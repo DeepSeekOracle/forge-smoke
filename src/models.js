@@ -241,16 +241,19 @@ function cacheHumanoidArmBones(rig) {
  */
 function applyTwoHandedRiflePose(bones, aimYaw = 0, reloadTilt = 0, recoil = 0) {
   if (!bones || !bones.rArm || !bones.rFore || !bones.lArm || !bones.lFore) return;
-  const clampedYaw = Math.max(-0.55, Math.min(0.55, aimYaw));
-  const kick = Math.max(0, Math.min(0.35, recoil));
+  const yawIn = Number.isFinite(aimYaw) ? aimYaw : 0;
+  const tiltIn = Number.isFinite(reloadTilt) ? reloadTilt : 0;
+  const clampedYaw = Math.max(-0.55, Math.min(0.55, yawIn));
+  const clampedTilt = Math.max(-1.4, Math.min(1.4, tiltIn));
+  const kick = Math.max(0, Math.min(0.35, Number.isFinite(recoil) ? recoil : 0));
   if (bones.spine2) {
     bones.spine2.rotation.y += clampedYaw * 0.45;
     bones.spine2.rotation.x = -kick * 0.55;   // shoulders rock back on the shot
   }
   // Right hand grips pistol grip at [-0.14, 1.45, 0.25]; Left hand cradles barrel at [0.00, 1.48, 0.36]
-  bones.rArm.rotation.set(0.63 + reloadTilt * 0.5 - kick * 1.1, 0.17 - clampedYaw * 0.35, 1.35);
+  bones.rArm.rotation.set(0.63 + clampedTilt * 0.5 - kick * 1.1, 0.17 - clampedYaw * 0.35, 1.35);
   bones.rFore.rotation.set(1.01 - kick * 0.8, -0.95, 0);
-  bones.lArm.rotation.set(-0.79 - reloadTilt * 0.6 + kick * 0.7, -0.92 - clampedYaw * 0.35, 1.31);
+  bones.lArm.rotation.set(-0.79 - clampedTilt * 0.6 + kick * 0.7, -0.92 - clampedYaw * 0.35, 1.31);
   bones.lFore.rotation.set(-0.48, -1.76, -0.32);
 }
 
@@ -432,9 +435,11 @@ export function updateOperatorAnimation(soldier, gunPivot, dt, isMoving = false,
     gunPivot.position.set(-0.08, 1.46, 0.16);
     if (activeWeapon && activeWeapon.isReloading) {
       const phase = activeWeapon.getReloadPhase();
-      const targetAngle = phase ? (phase.angle * Math.PI) / 180 : -0.38;
+      const rawAngle = phase && Number.isFinite(phase.angle) ? (phase.angle * Math.PI) / 180 : -0.38;
+      const targetAngle = Number.isFinite(rawAngle) ? rawAngle : 0;
+      if (!Number.isFinite(gunPivot.rotation.x)) gunPivot.rotation.x = 0;
       gunPivot.rotation.x += (targetAngle - gunPivot.rotation.x) * Math.min(1, dt * 14);
-      reloadTilt = gunPivot.rotation.x;
+      reloadTilt = Number.isFinite(gunPivot.rotation.x) ? gunPivot.rotation.x : 0;
     } else {
       gunPivot.rotation.x += (0 - gunPivot.rotation.x) * Math.min(1, dt * 12);
     }
