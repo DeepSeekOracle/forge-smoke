@@ -13,7 +13,7 @@ import {
   POINT_LIGHT_SCALE,
   hexInt,
 } from "./theme.js?v=20261030m";
-import { TUNING } from "./tuning.js?v=202610310a";
+import { TUNING } from "./tuning.js?v=202610310c";
 import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030p";
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
@@ -1647,14 +1647,17 @@ function shoot(target) {
   }
   let damageDealt = 0;
   if (fireData.pierceCount > 0) {
-    // Pierce: hit target and up to pierceCount enemies behind
+    // Pierce: the target itself, then up to pierceCount enemies behind it. The old filter required
+    // proj > 0 measured from the TARGET, so the target's own projection was 0 and got excluded —
+    // a pierce weapon only ever damaged enemies lined up behind the thing it was aiming at.
     const dir = new THREE.Vector3().subVectors(target.mesh.position, vMuzzle).normalize();
-    const enemiesInLine = enemyManager.getEnemies().filter(e => {
+    const enemiesInLine = enemyManager.getEnemies().filter((e) => {
+      if (e === target) return true;
       const toEnemy = new THREE.Vector3().subVectors(e.mesh.position, target.mesh.position);
       const proj = toEnemy.dot(dir);
       const perp = toEnemy.clone().sub(dir.clone().multiplyScalar(proj)).length();
-      return proj > 0 && perp < 1.0;
-    }).slice(0, fireData.pierceCount);
+      return proj > 0.35 && perp < 1.1;
+    }).slice(0, fireData.pierceCount + 1);
 
     for (const enemy of enemiesInLine) {
       const result = enemyManager.damageEnemy(enemy, effectiveDamage, isGrenade, 0, shieldPierce);
@@ -1717,6 +1720,15 @@ function shoot(target) {
   }
 
   scoreSystem.recordDamage(damageDealt);
+  state.lastShot = {
+    style: weaponManager.active && weaponManager.active.styleKey,
+    fireDamage: fireData.damage,
+    effectiveDamage,
+    dealt: damageDealt,
+    target: target && target.type,
+    pierceCount: fireData.pierceCount || 0,
+    pellets: fireData.pellets || 1,
+  };
   if (damageDealt > 0) {
     state.hitMarker = 0.12;
     state.hitMarkerKill = Boolean(state.killFlash);
@@ -2357,7 +2369,13 @@ function update(dt, ctx) {
     // anti-air: helicopters sit high, so acquire them from further out and pitch the gun at them
     const anyAir = state.phase === "playing" &&
       enemyManager.enemies.some((e) => e.mesh && e.mesh.position.y > 2.2);
-    const target = state.phase === "playing" ? nearest(anyAir ? 36 : 24) : null;
+    let target = state.phase === "playing" ? nearest(anyAir ? 36 : 24) : null;
+    // A live boss outranks the adds — always. Gating this on distance made the gun drop the boss
+    // whenever it drifted past the gate and go back to chewing riflemen, so a run could never clear.
+    if (state.phase === "playing" && state.bossEnemy && state.bossEnemy.hp > 0
+      && enemyManager.enemies.includes(state.bossEnemy)) {
+      target = state.bossEnemy;
+    }
     if (target) {
       const dy = target.mesh.position.y - 1.15;
       const dxz = Math.hypot(target.mesh.position.x - state.pos.x, target.mesh.position.z - state.pos.z) || 1;
@@ -2387,7 +2405,7 @@ function update(dt, ctx) {
     // ── BOSS WAVE ────────────────────────────────────────────────────────────
     // TUNE-02: boss threshold was 75 s / 18 kills, which every run reached (100 %). At 105 s / 70
     // kills it lands in roughly half of runs, which is the target, and it is still a mid-run event.
-    if (!state.bossSpawned && (beatDirector.runTime > 105 || state.kills >= 110)) {
+    if (!state.bossSpawned && (beatDirector.runTime > 75 || state.kills >= 75)) {
       state.bossSpawned = true;
       const kind = state.arenaBossKind || (state.kills % 2 === 0 ? "mech" : "gunship");
       const boss = enemyManager.spawn(kind, state.pos, beatDirector.runTime / 60);
@@ -2398,7 +2416,7 @@ function update(dt, ctx) {
           const gcfg = TUNING.boss.gunship;
           boss.hp = Math.round((gcfg.hp || 1100) * (1 + 0.12 * Math.max(0, bossLevel - 1)));
         } else {
-          boss.hp = bossHp(boss.hp, bossLevel);
+          boss.hp = Math.round(bossHp(boss.config?.hp || boss.hp, bossLevel) * (TUNING.boss.hpScale ?? 0.4));
         }
         boss.maxHp = boss.hp;
         boss.isBoss = true;
@@ -2438,7 +2456,7 @@ function update(dt, ctx) {
         globalThis.__studio?.hud?.flash("#F2545B", 0.12);
         if (state.bossWarning === 0) {
           // salvo lands: heavy damage in a close band, lighter further out
-          const dmg = dist < 8 ? 34 : dist < 14 ? 18 : 6;
+          const dmg = dist < 8 ? 26 : dist < 14 ? 14 : 6;
           hurt(dmg);
           audioController?.playSfx("kill", { volume: 0.55, pitch: 0.7 });
         }

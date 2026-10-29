@@ -258,6 +258,9 @@ export const TUNING = {
 
   // Boss (separate from the 7-enemy roster)
   boss: {
+    // TUNE-02: ground bosses are scaled from the bossHp() curve; that curve is tuned for a 34-damage
+    // rifle and left them unkillable inside a 100 s run, so the spawned boss takes this multiplier.
+    hpScale: 0.2,
     gunship: {
       // TUNE-04: the aerial boss is tuned for an 8-15 s TTK with an anti-air weapon, not the
       // +2600 flat HP that the ground boss uses. Flak: 22 x 2.6 = 57 per hit / 0.55 s = 104 DPS.

@@ -34,6 +34,21 @@ for (let i = 0; i < 6 && s.phase === "playing" && !(s.kills > 0); i += 1) {
 }
 if (s.phase !== "playing") await fail("not playing after launch");
 if (!(s.kills > 0)) await fail("no kills in the first 20 s of autonomous play");
+
+// Q swap: the secondary must actually deal damage (pierce used to exclude its own target)
+{
+  const d0 = await page.evaluate(() => window.__forgeSmokeTest.getState().scoreSystem.damageDealt);
+  await page.keyboard.press("q");
+  await page.waitForTimeout(4000);
+  const r = await page.evaluate(() => ({
+    dmg: window.__forgeSmokeTest.getState().scoreSystem.damageDealt,
+    style: window.__forgeSmokeTest.getCruise().style,
+    shot: window.__forgeSmokeTest.getState().lastShot || null,
+  }));
+  if (!(r.dmg > d0)) await fail(`secondary weapon ${r.style} dealt no damage after Q (${d0} -> ${r.dmg})`);
+  await page.keyboard.press("q");
+  await page.waitForTimeout(500);
+}
 await page.evaluate(async () => {
   const cs = window.__forgeSmokeTest.getCards();
   cs.queuedCards.push([{ type: "weapon", name: "WEAPON: BEAM", style: "beam" }]);
@@ -51,19 +66,31 @@ if (!(feel.total > 0)) await fail("no shell casings ejected from real shots");
 if (!(feel.kickShots > 0)) await fail("no camera kick recorded from real shots");
 
 // DBG-06: a real XP level-up (not a hand-pushed queue) must open the tray by itself
-await page.evaluate(() => document.querySelector("#fs-cards .card")?.click());
+await page.evaluate(() => {
+  // drain whatever the run already queued, or addXp is blocked by maxQueuedCards
+  const cs = window.__forgeSmokeTest.getCards();
+  cs.queuedCards.length = 0;
+  document.querySelector("#fs-cards .card")?.click();
+});
 await page.waitForTimeout(500);
-const lvBefore = await page.evaluate(() => window.__forgeSmokeTest.getCards().level);
+const before = await page.evaluate(() => {
+  const cs = window.__forgeSmokeTest.getCards();
+  return { lv: cs.level, xp: Math.round(cs.xp), next: Math.round(cs.nextLevelXp), q: cs.queuedCards.length, max: cs.maxQueued };
+});
 await page.evaluate(() => {
   const cs = window.__forgeSmokeTest.getCards();
+  cs.queuedCards.length = 0;
   cs.addXp(cs.nextLevelXp + 1);
 });
 await page.waitForTimeout(900);
-const lvAfter = await page.evaluate(() => window.__forgeSmokeTest.getCards().level);
-if (!(lvAfter > lvBefore)) await fail(`XP did not level the card system (${lvBefore} -> ${lvAfter})`);
+const after = await page.evaluate(() => {
+  const cs = window.__forgeSmokeTest.getCards();
+  return { lv: cs.level, xp: Math.round(cs.xp), next: Math.round(cs.nextLevelXp), q: cs.queuedCards.length };
+});
+if (!(after.lv > before.lv)) await fail(`XP did not level the card system (${JSON.stringify(before)} -> ${JSON.stringify(after)})`);
 if (!(await page.evaluate(() => !!document.querySelector("#fs-cards.open")))) await fail("real level-up did not open the card tray");
 
 if (errors.length) await fail("page errors: " + errors.slice(0, 3).join(" | "));
 console.log("REGRESS OK  phase=" + s.phase + " kills=" + s.kills + " tray=open errors=0"
-  + " casings=" + feel.total + " kick=" + feel.kickShots + " level=" + lvAfter);
+  + " casings=" + feel.total + " kick=" + feel.kickShots + " level=" + after.lv);
 await browser.close();
