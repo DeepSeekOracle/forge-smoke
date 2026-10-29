@@ -18,7 +18,7 @@ import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610320a";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610320b";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610310a";
 import { bossHp } from "./balance.js?v=20261030p";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
@@ -50,6 +50,7 @@ import * as menuModule from "./menu.js?v=20261030m";
 import * as audioModule from "./audio.js?v=20261030n";
 import * as fxModule from "./fx.js?v=20261030m";
 import { MAPS, mapById, selectMap } from "./maps.js?v=20261030n";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610320d";
 import { createCasings } from "./casings.js?v=20261030n";
 import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=20261030n";
 
@@ -499,6 +500,129 @@ function clearEnemyShots() {
   state.incomingShot = null;
 }
 
+// ── ground pickups (health regen, speed, power) ─────────────────────────────────────────────────
+// Auto-apply on touch, stack, respawn 60 s after being taken. Health sites are 68 m apart so a
+// base-speed operator cannot chain them within the 10 s regen window; a speed buff closes that.
+const pickupGroup = new THREE.Group();
+scene.add(pickupGroup);
+const pickupItems = [];
+const pickupCoreGeo = new THREE.IcosahedronGeometry(0.26, 0);
+const pickupRingGeo = new THREE.RingGeometry(0.52, 0.64, 24);
+
+function blockedAt(x, z) {
+  const probe = { x, z };
+  resolveObstacleCollision(probe, 0.9, arenaColliders);
+  return Math.hypot(probe.x - x, probe.z - z) > 0.01;
+}
+
+function buildPickup(site, rng) {
+  const def = PICKUP_DEFS[site.type];
+  // unlit core: a health pickup must read green at a glance, not pick up the arena's amber light
+  const core = new THREE.Mesh(pickupCoreGeo, new THREE.MeshBasicMaterial({ color: def.color }));
+  const ring = new THREE.Mesh(pickupRingGeo, new THREE.MeshBasicMaterial({
+    color: def.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false,
+  }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = -0.7;
+  const grp = new THREE.Group();
+  grp.add(core, ring);
+  grp.position.set(site.x, 0.85, site.z);
+  pickupGroup.add(grp);
+  return { type: site.type, x: site.x, z: site.z, mesh: grp, core, ring, alive: true, respawnAt: 0, phase: rng() * 6.28 };
+}
+
+function resetPickups() {
+  while (pickupGroup.children.length) pickupGroup.remove(pickupGroup.children[0]);
+  pickupItems.length = 0;
+  const sites = planPickupSites({ rng: state.rng, blocked: blockedAt });
+  for (const site of sites) pickupItems.push(buildPickup(site, state.rng));
+  state.pickups = pickupItems;
+  state.regenTicks = [];
+  state.speedStacks = [];
+  state.powerStacks = [];
+  state.speedMult = 1;
+  state.powerMult = 1;
+  state.pickupGoal = null;
+}
+
+function respawnPickup(item) {
+  const rng = state.rng;
+  let spot = null;
+  for (let attempt = 0; attempt < 30 && !spot; attempt += 1) {
+    let x = null;
+    let z = null;
+    if (item.type === "health") {
+      // opposite the other health site, jittered: keeps the 64-80 m gap intact
+      const other = pickupItems.find((p) => p !== item && p.type === "health");
+      if (other) {
+        const a = Math.atan2(other.z, other.x) + Math.PI + (rng() - 0.5) * 0.16;
+        x = Math.cos(a) * HEALTH_SPACING.radius;
+        z = Math.sin(a) * HEALTH_SPACING.radius;
+      }
+    }
+    if (x === null) {
+      const a = rng() * Math.PI * 2;
+      const r = 18 + rng() * 22;
+      x = Math.cos(a) * r;
+      z = Math.sin(a) * r;
+    }
+    if (blockedAt(x, z)) continue;
+    const crowded = pickupItems.some((p) => p !== item && p.alive && Math.hypot(p.x - x, p.z - z) < 16);
+    if (crowded) continue;
+    spot = { x, z };
+  }
+  if (!spot) spot = { x: 0, z: 0 };
+  item.x = spot.x;
+  item.z = spot.z;
+  item.mesh.position.set(spot.x, 0.85, spot.z);
+  item.alive = true;
+  item.mesh.visible = true;
+  item.respawnAt = 0;
+}
+
+function collectPickup(item) {
+  const def = PICKUP_DEFS[item.type];
+  if (item.type === "health") {
+    state.regenTicks.push({ rate: (state.maxHealth * def.regen) / def.seconds, remaining: def.seconds });
+  } else if (item.type === "speed") {
+    state.speedStacks.push({ remaining: def.seconds });
+  } else {
+    state.powerStacks.push({ remaining: def.seconds });
+  }
+  state.pickupsTaken = (state.pickupsTaken || 0) + 1;
+  item.alive = false;
+  item.mesh.visible = false;
+  item.respawnAt = beatDirector.runTime + 60;
+  audioController?.playSfx("pickup", { volume: 0.5 });
+  globalThis.__studio?.hud?.flash(item.type === "health" ? "#7CE6A8" : "#6FE3FF", 0.12);
+}
+
+function updatePickups(dt) {
+  const t = beatDirector.runTime;
+  for (const item of pickupItems) {
+    if (!item.alive) {
+      if (t >= item.respawnAt) respawnPickup(item);
+      continue;
+    }
+    item.mesh.rotation.y += dt * 1.5;
+    item.mesh.position.y = 0.85 + Math.sin(t * 2.2 + item.phase) * 0.1;
+    if (Math.hypot(item.x - state.pos.x, item.z - state.pos.z) < 1.15) collectPickup(item);
+  }
+  for (const tick of state.regenTicks) {
+    tick.remaining -= dt;
+    state.health = Math.min(state.maxHealth, state.health + tick.rate * dt);
+  }
+  state.regenTicks = state.regenTicks.filter((tick) => tick.remaining > 0);
+  for (const s of state.speedStacks) s.remaining -= dt;
+  for (const s of state.powerStacks) s.remaining -= dt;
+  state.speedStacks = state.speedStacks.filter((s) => s.remaining > 0);
+  state.powerStacks = state.powerStacks.filter((s) => s.remaining > 0);
+  state.speedMult = speedMultiplier(state.speedStacks.length);
+  state.powerMult = powerMultiplier(state.powerStacks.length);
+  state.pickupGoal = choosePickup(pickupItems, state.health / Math.max(1, state.maxHealth), { x: state.pos.x, z: state.pos.z });
+}
+
+
 
 scene.add(soldier);
 
@@ -759,6 +883,24 @@ if (testMode) {
       };
     },
     getEnemyTypes: () => Object.keys(ENEMY_TYPES),
+    setPlayerPos: (x, z) => { state.pos.x = Number(x) || 0; state.pos.z = Number(z) || 0; return { x: state.pos.x, z: state.pos.z }; },
+    getPickups: () => ({
+      count: pickupItems.length,
+      alive: pickupItems.filter((p) => p.alive).map((p) => ({ type: p.type, x: +p.x.toFixed(1), z: +p.z.toFixed(1) })),
+      taken: state.pickupsTaken || 0,
+      regen: state.regenTicks.length,
+      speedStacks: state.speedStacks.length,
+      powerStacks: state.powerStacks.length,
+      speedMult: +(state.speedMult || 1).toFixed(2),
+      powerMult: +(state.powerMult || 1).toFixed(2),
+      goal: state.pickupGoal ? { type: state.pickupGoal.type, x: +state.pickupGoal.x.toFixed(1), z: +state.pickupGoal.z.toFixed(1) } : null,
+    }),
+    getRamp: () => ({
+      bodies: enemyManager.spawnBodies || 0,
+      shooters: enemyManager.spawnShooters || 0,
+      share: enemyManager.spawnBodies ? +((enemyManager.spawnShooters || 0) / enemyManager.spawnBodies).toFixed(2) : 0,
+      t: +beatDirector.runTime.toFixed(1),
+    }),
     getCombat: () => ({
       fired: state.enemyShotsFired || 0,
       hit: state.enemyShotsHit || 0,
@@ -1044,8 +1186,8 @@ function syncHud() {
       if (changed) hudPhase = state.phase;
       return;
     }
-    if (hudHealth !== state.health) {
-      hudHealth = state.health;
+    if (hudHealth !== Math.round(state.health)) {
+      hudHealth = Math.round(state.health);
       // ── operator status card (top-left) ─────────────────────────────────────
       P("vitals", { x: 0.015, y: 0.026, w: 0.292, h: 0.134, radius: 0.009, fill: "rgba(6,10,16,0.86)", stroke: "rgba(126,150,176,0.20)", width: 0.0012 });
       P("vitals-accent", { x: 0.015, y: 0.026, w: 0.292, h: 0.0038, radius: 0.002, fill: color, stroke: "rgba(0,0,0,0)", width: 0 });
@@ -1208,6 +1350,44 @@ function syncHud() {
           stroke: "rgba(0,0,0,0)", width: 0,
         });
       }
+      // pickups on the radar: green health, amber power, cyan speed
+      for (let i = 0; i < 8; i += 1) {
+        const id = "radar-pick-" + i;
+        const item = pickupItems[i];
+        if (!item || !item.alive) { h.remove(id); continue; }
+        const dx = item.x - state.pos.x;
+        const dz = item.z - state.pos.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 26) { h.remove(id); continue; }
+        const rel = Math.atan2(dx, dz) - state.yaw;
+        const rr = Math.min(1, dist / 26) * 0.074;
+        P(id, {
+          x: cx + Math.sin(rel) * rr - 0.003,
+          y: cy - Math.cos(rel) * rr - 0.003,
+          w: 0.006, h: 0.006, radius: 0.003,
+          fill: item.type === "health" ? "#7ce6a8" : item.type === "speed" ? "#6fe3ff" : "#ffb347",
+          stroke: "rgba(0,0,0,0)", width: 0,
+        });
+      }
+    }
+
+    // ── active buffs (under the operator card) ───────────────────────────────
+    {
+      const parts = [];
+      if (state.regenTicks.length) {
+        const left = Math.ceil(Math.max(...state.regenTicks.map((t) => t.remaining)));
+        parts.push("REGEN " + left + "s x" + state.regenTicks.length);
+      }
+      if (state.speedStacks.length) {
+        const left = Math.ceil(Math.max(...state.speedStacks.map((s) => s.remaining)));
+        parts.push("SPEED +" + Math.round((state.speedMult - 1) * 100) + "% " + left + "s");
+      }
+      if (state.powerStacks.length) {
+        const left = Math.ceil(Math.max(...state.powerStacks.map((s) => s.remaining)));
+        parts.push("POWER +" + Math.round((state.powerMult - 1) * 100) + "% " + left + "s");
+      }
+      if (parts.length) T("buffs", parts.join("   ·   "), { x: 0.026, y: 0.168, size: TYPE_SCALE.micro, color: "#bcd2e6", weight: 700 });
+      else h.remove("buffs");
     }
 
     // ── kill feed (top-right) ────────────────────────────────────────────────
@@ -1454,6 +1634,8 @@ function startRun(arenaId = "arena1") {
     pilotStrafe: 1,
     pilotWantsMove: false,
     enemyShotsFired: 0,
+    spawnBodies: 0,
+    spawnShooters: 0,
     enemyShotsHit: 0,
     incomingShot: null,
     odometer: 0,
@@ -1534,6 +1716,7 @@ function startRun(arenaId = "arena1") {
   
   applyArenaLighting(chosenMap.id);
   setLightsEnabled(true);
+  resetPickups();
   placeCamera();
   hudPhase = null;
   syncHud();
@@ -1618,6 +1801,13 @@ function spawnEnemy() {
   const types = beat.enemyTypes || ["rifleman"];
   const type = types[Math.floor(state.rng() * types.length)];
   const enemy = enemyManager.spawn(type, state.pos, beatDirector.runTime / 60);
+  // Shooter ramp: early spawns are mostly melee-only bodies, and the share that can actually fire
+  // climbs across the whole round (12 % at t=0, ~85 % by ~110 s).
+  if (enemy) {
+    enemy.canShoot = state.rng() < Math.min(0.85, 0.12 + beatDirector.runTime / 150);
+    state.spawnBodies = (state.spawnBodies || 0) + 1;
+    if (enemy.canShoot) state.spawnShooters = (state.spawnShooters || 0) + 1;
+  }
   // DUAL RAMP: base level rises with the cyborg's profile, then climbs inside the arena
   if (enemy && typeof enemy.hp === "number") {
     const baseLevel = (state.cyborgProfile?.level || 1);
@@ -1795,7 +1985,7 @@ function shoot(target) {
   const cfgPierce = Number(weaponManager.active?.config?.shieldPierce) || 0;
   const shieldPierce = isGrenade ? 1 : Math.max(explosive ? 0.55 : 0, cfgPierce);
   const talentDmg = state.talentMods?.damageMult || 1;
-  let effectiveDamage = Math.round(fireData.damage * litBonusMult * (explosive ? 1.15 : 1) * talentDmg);
+  let effectiveDamage = Math.round(fireData.damage * litBonusMult * (explosive ? 1.15 : 1) * talentDmg * (state.powerMult || 1));
   // WPN-01: anti-air rounds hurt what is overhead and barely scratch what is on the floor.
   // (Ordered after effectiveDamage is initialised — this used to read it a line too early.)
   const airMult = Number(weaponManager.active?.config?.airDamageMult) || 0;
@@ -2267,6 +2457,8 @@ function update(dt, ctx) {
       if (state.paintedTimer <= 0) state.painted = false;
     }
 
+    updatePickups(dt);
+
     // HUD transients: hit marker and kill feed
     if (state.hitMarker > 0) state.hitMarker = Math.max(0, state.hitMarker - dt);
     if (state.killFeed && state.killFeed.length) {
@@ -2314,7 +2506,7 @@ function update(dt, ctx) {
         ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult * TUNING.player.spinupSpeedMult
         : state.aimMode
           ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult
-          : TUNING.player.baseSpeed) * (state.autopilot ? (state.pilotThrottle ?? 1) : 1);
+          : TUNING.player.baseSpeed) * (state.autopilot ? (state.pilotThrottle ?? 1) : 1) * (state.speedMult || 1);
       const len = Math.hypot(mx, mz);
       const wantX = len > 1e-6 ? (mx / len) * speed : 0;
       const wantZ = len > 1e-6 ? (mz / len) * speed : 0;
@@ -2499,7 +2691,7 @@ function update(dt, ctx) {
       if (action.type === "melee") {
         hurt(action.damage || cfg.meleeDamage || 9);
       } else if (action.type === "rangedShot") {
-        if (los && d < 18) spawnEnemyShot(enemy, action.damage || 6, 12, 0xff7a4a);
+        if (los && d < 18) spawnEnemyShot(enemy, action.damage || 9, 12, 0xff7a4a);
       } else if (action.type === "dive") {
         if (d < 3.2) hurt(cfg.diveDamage || 18);
       } else if (action.type === "shell") {
@@ -2507,7 +2699,7 @@ function update(dt, ctx) {
       } else if (action.type === "stomp") {
         if (d < (cfg.stompRadius || 3)) hurt(cfg.stompDamage || 50);
       } else if (action.type === "minigun") {
-        if (los && d < 18) spawnEnemyShot(enemy, cfg.minigunDamage || 8, 19, 0xffb347);
+        if (los && d < 18) spawnEnemyShot(enemy, cfg.minigunDamage || 12, 19, 0xffb347);
       } else if (action.type === "charge") {
         if (d < 2.2) hurt(cfg.chargeDamage || 40);
       } else if (action.type === "paint") {
@@ -2611,7 +2803,7 @@ function update(dt, ctx) {
         globalThis.__studio?.hud?.flash("#F2545B", 0.12);
         if (state.bossWarning === 0) {
           // salvo lands: heavy damage in a close band, lighter further out
-          const dmg = dist < 8 ? 26 : dist < 14 ? 14 : 6;
+          const dmg = dist < 8 ? 30 : dist < 14 ? 16 : 6;
           hurt(dmg);
           audioController?.playSfx("kill", { volume: 0.55, pitch: 0.7 });
         }

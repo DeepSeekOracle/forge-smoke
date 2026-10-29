@@ -5,6 +5,7 @@ import { xpThreshold, bossHp } from "../src/balance.js";
 import { STYLE_FEEL, feelFor, tracerTaper } from "../src/stylefeel.js";
 import { MAPS, validateMap, selectMap } from "../src/maps.js";
 import { STYLE_VFX } from "../src/weapons.js";
+import { planPickupSites, validateSites, speedMultiplier, powerMultiplier, choosePickup, HEALTH_SPACING, PICKUP_DEFS } from "../src/pickups.js";
 import { readFileSync, statSync, existsSync } from "node:fs";
 
 let checks = 0;
@@ -77,6 +78,27 @@ ok(foundry.hazardRing > foundry.centerClear, "FOUNDRY hazard ring must sit outsi
 ok(selectMap({ seed: 7, run: 3 }).id === selectMap({ seed: 7, run: 3 }).id, "selectMap is not deterministic");
 ok(new Set([0, 1, 2].map((r) => selectMap({ seed: 4, run: r }).id)).size === 3, "map rotation does not cover all three");
 ok(selectMap({ forced: "foundry" }).id === "foundry", "forced map is ignored");
+
+// Pickups — health spacing is 68 m: unreachable in 10 s at base speed, reachable with one boost
+ok(HEALTH_SPACING.baseSeconds > 10, "health gap is reachable at base speed in 10 s");
+ok(HEALTH_SPACING.boostedSeconds < 10, "health gap is not reachable even with a speed buff");
+ok(PICKUP_DEFS.health.regen === 0.5 && PICKUP_DEFS.health.seconds === 10, "health regen is not 50% over 10 s");
+ok(speedMultiplier(1) === 1.25 && speedMultiplier(2) === 1.5, "speed buffs do not stack");
+ok(powerMultiplier(1) === 1.25 && powerMultiplier(2) === 1.5, "power buffs do not stack");
+{
+  let s = 12345;
+  const rng = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  const sites = planPickupSites({ rng });
+  const v = validateSites(sites);
+  ok(v.ok, "generated pickup layout: " + v.problems.join("; "));
+  ok(sites.filter((x) => x.type === "health").length === 2, "expected 2 health sites");
+  ok(sites.filter((x) => x.type === "power").length === 3, "expected 3 power sites");
+  ok(sites.filter((x) => x.type === "speed").length === 3, "expected 3 speed sites");
+  const hurtGoal = choosePickup(sites, 0.4, { x: 0, z: 0 });
+  ok(hurtGoal && hurtGoal.type === "health", "hurt pilot does not prioritise health");
+  const healthyGoal = choosePickup(sites, 0.95, { x: 0, z: 0 });
+  ok(healthyGoal && healthyGoal.type === "power", "healthy pilot does not prioritise power");
+}
 
 // MGR-06 — every style has its own numbers (no more nine styles sharing spray stats)
 const styleKeys = Object.keys(TUNING.weapons);

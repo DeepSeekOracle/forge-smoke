@@ -130,6 +130,18 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
   const target = pickTarget(state, enemyManager);
 
   if (!target || !target.mesh) {
+    const goal = state.pickupGoal;
+    if (goal) {
+      const gx = goal.x - state.pos.x;
+      const gz = goal.z - state.pos.z;
+      const gl = Math.hypot(gx, gz) || 1;
+      out.mx = gx / gl;
+      out.mz = gz / gl;
+      out.mode = "fetch-" + goal.type;
+      out.throttle = 0.95;
+      out.wantsMove = true;
+      return out;
+    }
     // nothing to fight: wander back toward the middle at a walk, not a sprint
     const r = Math.hypot(state.pos.x, state.pos.z) || 1;
     out.mx = -state.pos.x / r;
@@ -182,6 +194,17 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
     dirZ = state.incomingShot.z;
     mode = "dodge-shot";
     throttle = 1;
+    state.pilotBeatMode = null;
+  } else if (state.pickupGoal) {
+    // META PRIORITY: health if hurt, then power, then speed (choosePickup already ordered them)
+    const g = state.pickupGoal;
+    const gx = g.x - state.pos.x;
+    const gz = g.z - state.pos.z;
+    const gl = Math.hypot(gx, gz) || 1;
+    dirX = gx / gl;
+    dirZ = gz / gl;
+    mode = "fetch-" + g.type;
+    throttle = 0.95;
     state.pilotBeatMode = null;
   } else if (lowIntegrityFor(state, profile)) {
     dirX = -nx;

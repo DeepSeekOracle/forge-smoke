@@ -16,6 +16,7 @@ ignored (`TUNE_NOCARDS=1`); "with cards" = the tray is always taken.
 | 6 | clear = boss killed; ground boss `hpScale 0.2`; boss 75 s / 75 kills; salvo 7 s, 26/14/6 | 10 | **105.1 s** | **4** | 90 % | **30 %** |
 | 7 | same build, **no upgrades** | 5 | 76.1 s | 0 | 100 % | — |
 | 8 | enemy fire is now visible, travelling and dodgeable (12-19 m/s bolts, pilot sidestep) | 10 | 173.2 s | 5 | 100 % | 40 % |
+| 9 | ground pickups (health regen/speed/power, 60 s respawn) + shooter ramp 12->85 % + harder bolts | 10 | 169.7 s | 5 | 100 % | 17 % |
 
 ## Against the targets
 

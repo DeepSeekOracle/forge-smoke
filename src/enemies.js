@@ -110,7 +110,7 @@ export class Enemy {
       const perpZ = dirX * strafeSign;
       this.velocity.x = (dirX * 0.35 + perpX * 0.75) * this.speed;
       this.velocity.z = (dirZ * 0.35 + perpZ * 0.75) * this.speed;
-      if (this.specialCooldown <= 0) {
+      if (this.specialCooldown <= 0 && this.canShoot !== false) {
         this.specialCooldown = 1.15 + (this.phase % 0.4);
         return {
           type: "rangedShot",
@@ -209,6 +209,7 @@ export class Enemy {
       this.velocity.z = dirX * strafe * this.speed;
       if (this.specialCooldown <= 0) {
         this.specialCooldown = 2.4;
+        if (this.canShoot === false) return null;
         this.painted = true;
         this.paintTimer = 2.4;
         return {
@@ -260,7 +261,7 @@ export class Enemy {
     } else {
       this.velocity.x = 0;
       this.velocity.z = 0;
-      if (this.specialCooldown <= 0) {
+      if (this.specialCooldown <= 0 && this.canShoot !== false) {
         this.specialCooldown = this.config.shellCooldown || 4.0;
         return {
           type: "shell",
@@ -289,7 +290,7 @@ export class Enemy {
     } else {
       this.velocity.x = 0;
       this.velocity.z = 0;
-      if (this.specialCooldown <= 0) {
+      if (this.specialCooldown <= 0 && this.canShoot !== false) {
         this.specialCooldown = this.config.minigunCycle || 0.1;
         return { type: "minigun", damage: this.config.minigunDamage, dirX, dirZ };
       }
@@ -390,6 +391,12 @@ export class EnemyManager {
     };
     resolveObstacleCollision(position, 0.85, arenaColliders);
     const enemy = new Enemy(type, position, this.rng, timeMinutes);
+    // Shooter ramp: 12 % of bodies can fire at t=0, climbing to 85 % by ~110 s. The rest still
+    // advance and melee; gating happens in the type updates via enemy.canShoot.
+    const minutes = Number(timeMinutes) || 0;
+    enemy.canShoot = this.rng() < Math.min(0.85, 0.12 + minutes * (60 / 150));
+    this.spawnBodies = (this.spawnBodies || 0) + 1;
+    if (enemy.canShoot) this.spawnShooters = (this.spawnShooters || 0) + 1;
     enemy.slot = this.slotSeq || 0;
     this.slotSeq = ((this.slotSeq || 0) + 1) % 8;
     this.enemies.push(enemy);
