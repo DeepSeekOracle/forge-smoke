@@ -6,9 +6,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
-import { standardMaterial, bakeTexture } from "./materials.js?v=202610321x";
-import { PALETTE, hexInt } from "./theme.js?v=202610321x";
-import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610321x";
+import { standardMaterial, bakeTexture } from "./materials.js?v=202610322a";
+import { PALETTE, hexInt } from "./theme.js?v=202610322a";
+import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610322a";
 
 export const PLAYER_SKINS = [
   {
@@ -267,8 +267,8 @@ function applyTwoHandedRiflePose(bones, aimYaw = 0, reloadTilt = 0, recoil = 0) 
   // Right hand grips pistol grip at [-0.14, 1.45, 0.25]; Left hand cradles barrel at [0.00, 1.48, 0.36]
   bones.rArm.rotation.set(0.63 + clampedTilt * 0.5 - kick * 1.1, 0.17 - clampedYaw * 0.35, 1.35);
   bones.rFore.rotation.set(1.01 - kick * 0.8, -0.95, 0);
-  bones.lArm.rotation.set(-0.79 - clampedTilt * 0.6 + kick * 0.7, -0.92 - clampedYaw * 0.35, 1.31);
-  bones.lFore.rotation.set(-0.48, -1.76, -0.32);
+  bones.lArm.rotation.set(-0.842 - clampedTilt * 0.6 + kick * 0.7, -0.822 - clampedYaw * 0.35, 1.333);
+  bones.lFore.rotation.set(-0.921, -0.618, -0.755);
 }
 
 function applyOperatorSkinToRig(rigRoot, skin, clothMat, armorMat, visorMat) {
@@ -433,6 +433,16 @@ export function buildOperatorRig(soldier, gunPivot, texSize = 256, skinIndex = 0
  * Step the Operator's skeletal AnimationMixer (`Idle` <-> `Run`), pose both arms to hold
  * the weapon at shoulder height, and tilt the rifle during reload phases.
  */
+const _gunV1 = new THREE.Vector3();
+const _gunV2 = new THREE.Vector3();
+const _gunDir = new THREE.Vector3();
+const _gunUp = new THREE.Vector3();
+const _gunX = new THREE.Vector3();
+const _gunY = new THREE.Vector3();
+const _gunM = new THREE.Matrix4();
+const _gunQ = new THREE.Quaternion();
+const _gunGrip = new THREE.Vector3();
+
 export function updateOperatorAnimation(soldier, gunPivot, dt, isMoving = false, activeWeapon = null) {
   if (!soldier) return;
   const mixer = soldier.userData.mixer;
@@ -450,7 +460,7 @@ export function updateOperatorAnimation(soldier, gunPivot, dt, isMoving = false,
   }
   let reloadTilt = 0;
   if (gunPivot) {
-    gunPivot.position.set(-0.2, 1.42, 0.3);
+    gunPivot.position.set(-0.08, 1.46, 0.16);
     if (activeWeapon && activeWeapon.isReloading) {
       const phase = activeWeapon.getReloadPhase();
       const rawAngle = phase && Number.isFinite(phase.angle) ? (phase.angle * Math.PI) / 180 : -0.38;
