@@ -1,0 +1,35 @@
+FORGE SMOKE — Tab order at 1440x900 (title screen)
+1. <a>  "ALL GAMES"
+2. <a>  "LISTEN"
+3. <a>  "HOME"
+4. <button> radioPlay "Play"
+5. <button> radioNext "NEXT"
+6. <button> radioMute "Mute"
+7. <input> radioVol "Radio volume"
+8. <a>  "SUPPORT"
+9. <button>  "ENTER THE BAY
+MANAGE · LOADO"
+10. <button>  "HOW TO PLAY
+THE LOOP · CARDS"
+11. <button>  "OPTIONS
+AUDIO · CONTROLS · V"
+12. <iframe> aswift_1 "Advertisement"
+
+Observed focus walk (12 presses):
+1. <a>  "ALL GAMES"  outline=auto 1px rgb(16, 16, 16) shadow=none
+2. <a>  "LISTEN"  outline=auto 1px rgb(16, 16, 16) shadow=none
+3. <a>  "HOME"  outline=auto 1px rgb(16, 16, 16) shadow=none
+4. <button> radioPlay "Play"  outline=auto 1px rgb(16, 16, 16) shadow=none
+5. <button> radioNext "NEXT"  outline=auto 1px rgb(16, 16, 16) shadow=none
+6. <button> radioMute "Mute"  outline=auto 1px rgb(16, 16, 16) shadow=none
+7. <input> radioVol "Radio volume"  outline=auto 1px rgb(16, 16, 16) shadow=none
+8. <a>  "SUPPORT"  outline=auto 1px rgb(16, 16, 16) shadow=rgba(255, 179, 71, 0.8) 0px 0px 18px -8p
+9. <button>  "ENTER THE BAY
+MANAGE · LOADO"  outline=solid 2px rgb(111, 227, 255) shadow=rgba(255, 179, 71, 0.65) 0px 0px 34px -1
+10. <button>  "HOW TO PLAY
+THE LOOP · CARDS"  outline=solid 2px rgb(111, 227, 255) shadow=none
+11. <button>  "OPTIONS
+AUDIO · CONTROLS · V"  outline=solid 2px rgb(111, 227, 255) shadow=none
+12. <iframe> aswift_1 "Advertisement"  outline=none 3px rgb(232, 241, 248) shadow=none
+
+Visible focus ring on at least one stop: true

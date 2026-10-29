@@ -16,6 +16,7 @@ def run(label, cmd, **kw):
         sys.exit(r.returncode)
 
 run("SYNTAX", [sys.executable, str(ROOT / "tools" / "verify_syntax.py")])
+run("ASSETS", [sys.executable, str(ROOT / "tools" / "asset_check.py")])
 run("UNIT", ["node", str(ROOT / "tools" / "unit.mjs")])
 if not port_open():
     print("REGRESS SKIPPED (desk 8796 not listening)")

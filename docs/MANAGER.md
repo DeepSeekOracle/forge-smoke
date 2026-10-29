@@ -1,5 +1,12 @@
 # FORGE SMOKE — CYBORG MANAGER (v2 direction)
 
+> **2026-10-29 correction — read with `.forge/STATE.md`.** Three items below predate the current build:
+> (a) the pilot no longer strafes continuously; it uses tactical beats (HOLD / REPOSITION / bounding
+> ADVANCE) plus dodges for travelling enemy bolts; (b) "arena clear" now means **the boss is dead**, not
+> surviving an overtime line — the boss spawns at 75 s / 75 kills; (c) the arena also carries stackable
+> ground pickups (health regen 50 % over 10 s, speed +25 %, power +25 %), and only 12 % of early spawns
+> can shoot, ramping to 85 % late.
+
 **Status: v2.0 milestone 1 built and verified in the preview, not yet pushed live.**
 
 ## The concept

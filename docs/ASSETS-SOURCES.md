@@ -30,3 +30,12 @@ Qwen-Image 2.1 was attempted first via 	ools/generate_image.ps1 at 768x512, but 
 diffusion model fails to allocate its backend buffer (ggml_backend_cpu_buffer_type_alloc_buffer:
 failed to allocate 4003 MB), so the pipeline is procedural until a larger card or smaller quant is
 available.
+
+## Enemy portraits + weapon silhouettes (brief 01) — generated locally
+
+	ools/make_brief_assets.py renders five 256x256 enemy portraits (ssets/portraits/enemies/) and
+fifteen 512x256 weapon silhouettes (ssets/icons/styles/) with Pillow, from one palette (gunmetal,
+amber, cyan, hostile red), no baked text, alpha only where the brief asks. Original work, project-owned.
+	ools/asset_check.py fails the gate if any of them drift from the stated size.
+
+Qwen-Image remains unusable for these on the 8 GB card (same allocation failure as the card plates).
