@@ -105,11 +105,20 @@ const gltfLoader = new GLTFLoader();
 const gltfCache = new Map();
 const gltfPromises = new Map();
 
+// ?rig=photo swaps the operator's skinned mesh for the photo-character rig exported by the
+// photo_pipeline (same Mixamo skeleton and Idle/Run/Walk actions).
+const USE_PHOTO_RIG = (() => {
+  try { return new URLSearchParams(globalThis.location?.search || "").get("rig") === "photo"; }
+  catch (_) { return false; }
+})();
+const OPERATOR_RIG_ASSET = USE_PHOTO_RIG ? "soldier-rig-photo" : "soldier-rig";
+
 const ALL_GLB_NAMES = [
   "soldier-rig",
   "cesium-man",
   "robot-rig",
   "xbot-rig",
+  "soldier-rig-photo",
   "damaged-helmet",
   "brain-stem",
   "gunship",
@@ -351,32 +360,36 @@ export function buildOperatorRig(soldier, gunPivot, texSize = 256, skinIndex = 0
     return { clothMat, armorMat, visorMat, skin };
   }
 
-  withGltf("soldier-rig", (gltf) => {
+  withGltf(OPERATOR_RIG_ASSET, (gltf) => {
     if (soldier.userData.glbRig) {
-      applyOperatorSkinToRig(
-        soldier.userData.glbRig,
-        soldier.userData.skin || skin,
-        soldier.userData.clothMat || clothMat,
-        soldier.userData.armorMat || armorMat,
-        soldier.userData.visorMat || visorMat,
-      );
+      if (!USE_PHOTO_RIG) {
+        applyOperatorSkinToRig(
+          soldier.userData.glbRig,
+          soldier.userData.skin || skin,
+          soldier.userData.clothMat || clothMat,
+          soldier.userData.armorMat || armorMat,
+          soldier.userData.visorMat || visorMat,
+        );
+      }
       return;
     }
     const rig = skeletonClone(gltf.scene);
     rig.name = "OperatorVanguardRig";
     rig.userData.tag = "operator-rig";
-    rig.userData.asset = "soldier-rig";
+    rig.userData.asset = OPERATOR_RIG_ASSET;
     rig.scale.setScalar(1.32);
     rig.position.set(0, 0, 0);
     rig.rotation.set(0, Math.PI, 0);
 
-    applyOperatorSkinToRig(
-      rig,
-      soldier.userData.skin || skin,
-      soldier.userData.clothMat || clothMat,
-      soldier.userData.armorMat || armorMat,
-      soldier.userData.visorMat || visorMat,
-    );
+    if (!USE_PHOTO_RIG) {
+      applyOperatorSkinToRig(
+        rig,
+        soldier.userData.skin || skin,
+        soldier.userData.clothMat || clothMat,
+        soldier.userData.armorMat || armorMat,
+        soldier.userData.visorMat || visorMat,
+      );
+    }
 
     if (soldier.userData.fallbackGroup) {
       soldier.remove(soldier.userData.fallbackGroup);

@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321j";
-import { standardMaterial } from "./materials.js?v=202610321j";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321j";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321j";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321k";
+import { standardMaterial } from "./materials.js?v=202610321k";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321k";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321k";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610321j";
-import { TUNING } from "./tuning.js?v=202610321j";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321j";
-import { createCardTray } from "./cardsui.js?v=202610321j";
-import { createSummary } from "./summaryui.js?v=202610321j";
-import { createBarks } from "./barks.js?v=202610321j";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321j";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321j";
-import { bossHp } from "./balance.js?v=202610321j";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321j";
-import { pilot } from "./autopilot.js?v=202610321j";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321j";
-import { createStartMenu } from "./startmenu.js?v=202610321j";
-import { createGamepad } from "./gamepad.js?v=202610321j";
-import { createTalentWindow } from "./talentui.js?v=202610321j";
-import { aggregate, toRunMods } from "./talents.js?v=202610321j";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321j";
+} from "./theme.js?v=202610321k";
+import { TUNING } from "./tuning.js?v=202610321k";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321k";
+import { createCardTray } from "./cardsui.js?v=202610321k";
+import { createSummary } from "./summaryui.js?v=202610321k";
+import { createBarks } from "./barks.js?v=202610321k";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321k";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321k";
+import { bossHp } from "./balance.js?v=202610321k";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321k";
+import { pilot } from "./autopilot.js?v=202610321k";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321k";
+import { createStartMenu } from "./startmenu.js?v=202610321k";
+import { createGamepad } from "./gamepad.js?v=202610321k";
+import { createTalentWindow } from "./talentui.js?v=202610321k";
+import { aggregate, toRunMods } from "./talents.js?v=202610321k";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321k";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610321j";
-import * as levelModule from "./level.js?v=202610321j";
-import * as menuModule from "./menu.js?v=202610321j";
-import * as audioModule from "./audio.js?v=202610321j";
-import * as fxModule from "./fx.js?v=202610321j";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610321j";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321j";
+} from "./models.js?v=202610321k";
+import * as levelModule from "./level.js?v=202610321k";
+import * as menuModule from "./menu.js?v=202610321k";
+import * as audioModule from "./audio.js?v=202610321k";
+import * as fxModule from "./fx.js?v=202610321k";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610321k";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321k";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610321j";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321j";
+import { createCasings } from "./casings.js?v=202610321k";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321k";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
