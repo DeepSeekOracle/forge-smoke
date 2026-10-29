@@ -1383,7 +1383,7 @@
       "phase": "production",
       "title": "Fixed HUD slots in src/main.js syncHud",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
         "health/mag/objective/boss bar use named y slots in one constants block",
@@ -1397,9 +1397,16 @@
       "files": [
         "src/main.js"
       ],
-      "evidence": [],
-      "artifacts": [],
-      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "evidence": [
+        "HUD_SLOTS block declares weaponActive/title/bossLabel/bossBar/objective/statusBanner (sha256:b1e6708e0246d2de)",
+        "boss-label and boss-bar take y from HUD_SLOTS; no literal 0.11/0.132 remain in those calls",
+        "objective readout restored with its own hudObjective cache and removed when not playing",
+        "gate green: SYNTAX OK + REGRESS OK (playing, 7 kills, tray opens, 0 errors)"
+      ],
+      "artifacts": [
+        "src/main.js"
+      ],
+      "reopened_reason": "",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
@@ -1525,7 +1532,7 @@
       "phase": "production",
       "title": "Boss HP curve in balance.js, used by main.js",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/03-engine-math.md",
       "acceptance": [
         "balance.js exports bossHp(baseHp, level)",
@@ -1543,7 +1550,9 @@
         "src/main.js",
         "docs/TTK.md"
       ],
-      "evidence": [],
+      "evidence": [
+        "build 4a627104b180 (opencode/beam-free): {\"tool\": \"read\", \"path\": \"GAME.md\"}\n{\"tool\": \"read\", \"path\": \"PLAN.md\"}\n{\"tool\": \"read\", \"path\": \"TASKS.json\"}\n{\"tool\": \"read\", \"path\": \"GDD.md\"}\n{\"tool\": \"read\", \"path\": \"ART_BIBLE.md\"}\n{\"tool\": \"read\", \"path\": \"ASSET_PLAN.md\"}\n{\"tool\": \"read\", \"path\": \"TECH_SPEC.md\"}\n{\"tool\": \"read\", \"path\": \"QA.md\"}\n{\"tool\": \"read\", \"path\": \"DECISIONS.md\"}\n{\"tool\": \"read\", \"path\": \".forge/briefs/03-engine-math.md\"}"
+      ],
       "artifacts": [],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"

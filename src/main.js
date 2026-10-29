@@ -60,6 +60,17 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const TEX_SIZE = lowEnd ? 128 : 512;
 const RAIN_COUNT = lowEnd ? 60 : 420;
+
+/** HUD vertical slots (fraction of viewport height): one block lays out every overlay. */
+const HUD_SLOTS = {
+  weaponActive: 0.045,
+  title: 0.072,
+  bossLabel: 0.110,
+  bossBar: 0.132,
+  objective: 0.168,
+  statusBanner: 0.196,
+};
+
 const TREE_COUNT = lowEnd ? 6 : 16;
 const BUSH_COUNT = lowEnd ? 6 : 20;
 const LOG_COUNT = lowEnd ? 1 : 4;
@@ -664,7 +675,7 @@ const managerUI = createManager({
 });
 
 const vMuzzle = new THREE.Vector3(), vTarget = new THREE.Vector3(), vDesired = new THREE.Vector3();
-let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat = null, hudScore = null, hudAirdrop = null, hudCards = null, hudBoss = null, hudDarkness = null;
+let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat = null, hudScore = null, hudAirdrop = null, hudCards = null, hudBoss = null, hudDarkness = null, hudObjective = null;
 
 function syncHud() {
   // The DOM manager is the loadout screen now: clear the canvas HUD so its text does not bleed
@@ -803,13 +814,31 @@ function syncHud() {
       if (hudBoss !== bossKey) {
         hudBoss = bossKey;
         const bossLabel = boss.type === "gunship" ? "BOSS // ASSAULT GUNSHIP" : "ELITE // SIEGE MECH";
-        T("boss-label", `${bossLabel}  (${Math.max(0, Math.round(boss.hp))} HP)`, { x: 0.5, y: 0.11, size: TYPE_SCALE.micro, color: PALETTE.deadPrompt, weight: 700, align: "center" });
-        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.39, y: 0.132, w: 0.22, h: 0.014, color: PALETTE.healthCrit, back: PALETTE.strokes.barBack });
+        T("boss-label", `${bossLabel}  (${Math.max(0, Math.round(boss.hp))} HP)`, { x: 0.5, y: HUD_SLOTS.bossLabel, size: TYPE_SCALE.micro, color: PALETTE.deadPrompt, weight: 700, align: "center" });
+        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.39, y: HUD_SLOTS.bossBar, w: 0.22, h: 0.014, color: PALETTE.healthCrit, back: PALETTE.strokes.barBack });
       }
     } else if (hudBoss !== null) {
       hudBoss = null;
       h.remove("boss-label");
       h.remove("boss-bar");
+    }
+
+    // Objective readout: what the autonomous pilot is doing (zones come from autopilot.js)
+    const objZones = state.objZones || [];
+    const objOn = state.phase === "playing" && objZones.length > 0 && state.pilotMode !== "boss";
+    if (objOn) {
+      const zi = (state.objIndex || 0) % objZones.length;
+      const pct = Math.min(100, Math.round(((state.objProgress || 0) / 3) * 100));
+      const line = state.pilotMode === "securing"
+        ? `OBJECTIVE // SECURING ZONE ${zi + 1}/${objZones.length} - ${pct}%`
+        : `OBJECTIVE // ADVANCING TO ZONE ${zi + 1}/${objZones.length}`;
+      if (hudObjective !== line) {
+        hudObjective = line;
+        T("obj-hud", line, { x: 0.5, y: HUD_SLOTS.objective, size: TYPE_SCALE.micro, color: PALETTE.ui, weight: 700 });
+      }
+    } else if (hudObjective !== null) {
+      hudObjective = null;
+      h.remove("obj-hud");
     }
 
     // "THE DARKNESS COMES" status banner when ambient light dims
