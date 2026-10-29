@@ -23,6 +23,9 @@ for (let i = 0; i < 3; i += 1) {
 }
 
 const placed = await page.evaluate(() => {
+  // clear the arena and freeze spawns so the placed ring is the only thing alive
+  window.__forgeSmokeTest.clearEnemies();
+  window.__forgeSmokeTest.setSpawns(false);
   const st = window.__forgeSmokeTest.getState();
   const yaw = st.yaw || 0;
   const px = st.pos.x;

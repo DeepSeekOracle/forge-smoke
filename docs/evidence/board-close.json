@@ -1,0 +1,271 @@
+{
+  "note": "Verified closures for the 23 tasks that were todo at 2026-10-29 08:57. Apply with tools/board_close.py --apply (steward only; the board is editor-owned).",
+  "tasks": {
+    "ART-02": {
+      "evidence": [
+        "every one of the 21 main-table asset rows carries Path, Licence, format/size and a consumer (checked by script)",
+        "A1-A7 audio detail rows marked as a view of the canonical A140-A180 rows",
+        "statuses corrected: gun reports (AUD-03), casings/reload, floodlight, gunship"
+      ],
+      "artifacts": [
+        "ASSET_PLAN.md",
+        "tools/asset_plan_paths.py"
+      ]
+    },
+    "ART-06": {
+      "evidence": [
+        "assets/start-still-a.jpg and start-still-b.jpg at 1536x864",
+        "prefers-reduced-motion shows the still, disables the drift animation and hides the video",
+        "tools/art06.mjs: background resolves to start-still-a.jpg, animation none, video opacity 0"
+      ],
+      "artifacts": [
+        "assets/start-still-a.jpg",
+        "assets/start-still-b.jpg",
+        "src/startmenu.js",
+        "tools/art06.mjs"
+      ]
+    },
+    "DBG-06": {
+      "evidence": [
+        "regress closes the hand-pushed tray, then calls CardSystem.addXp(nextLevelXp+1): level 1->2 and #fs-cards.open within 900 ms",
+        "no legacy canvas card banner remains: syncHud removes card-panel/card-hdr/card-options"
+      ],
+      "artifacts": [
+        "src/main.js",
+        "tools/regress.mjs"
+      ]
+    },
+    "FX-02": {
+      "evidence": [
+        "src/casings.js: fixed 6-case pool, pre-built meshes, no per-shot allocation; no-op for energy/thrown styles",
+        "right-and-down ejection with gravity and ground bounce; clearEffects empties the pool",
+        "REGRESS OK casings=30 in 8 s of autonomous fire"
+      ],
+      "artifacts": [
+        "src/casings.js",
+        "src/main.js"
+      ]
+    },
+    "FX-03": {
+      "evidence": [
+        "src/stylefeel.js: 10 styles + default, kick authored in screen px (max 2.00) converted with live FOV/distance",
+        "tracer taper 1 -> 0.18..0.62, monotonic, applied per tracer",
+        "unit checks every style <=2 px and monotonic taper; measured added cost 0.0004 ms/frame; REGRESS kick=30"
+      ],
+      "artifacts": [
+        "src/stylefeel.js",
+        "src/main.js"
+      ]
+    },
+    "MAP-01": {
+      "evidence": [
+        "src/maps.js DEPOT: 6 containers, 4 barriers, 3 ruin clusters, cover only at 17-30 m",
+        "forced boot ?map=depot: 13 colliders, 84.5 m travelled in 60 s, camera push 0 m, 0 page errors",
+        "screenshot docs/evidence/map-depot.png"
+      ],
+      "artifacts": [
+        "src/maps.js",
+        "src/models.js",
+        "docs/evidence/map-depot.png"
+      ]
+    },
+    "MAP-02": {
+      "evidence": [
+        "YARD: 5 props at 22-34 m, two watchtowers, fog x1.35, key light x1.15",
+        "forced boot ?map=yard: 6 colliders, 84.5 m in 60 s, camera push 0 m; screenshot map-yard.png"
+      ],
+      "artifacts": [
+        "src/maps.js",
+        "docs/evidence/map-yard.png"
+      ]
+    },
+    "MAP-03": {
+      "evidence": [
+        "FOUNDRY: 10 props in a 17-26 m ring, 10 m clear centre, hazard ring at 10.6 m, rain x1.45",
+        "forced boot ?map=foundry: 11 colliders, 84.7 m in 60 s, camera push 0 m; screenshot map-foundry.png"
+      ],
+      "artifacts": [
+        "src/maps.js",
+        "docs/evidence/map-foundry.png"
+      ]
+    },
+    "MAP-04": {
+      "evidence": [
+        "selectMap deterministic by seed+run, rotates across all three, honours ?map= (unit-checked)",
+        "8 live spawns on FOUNDRY, 0 inside colliders (tools/spawn_safety.mjs)",
+        "measured: docs/evidence/metrics.md"
+      ],
+      "artifacts": [
+        "src/maps.js",
+        "tools/spawn_safety.mjs",
+        "docs/evidence/metrics.md"
+      ]
+    },
+    "MATH-04": {
+      "evidence": [
+        "TUNING.progression.cardPacing is the single pacing block; balance.xpThreshold(L) = 300*L*(L+1)/2",
+        "flat kill XP 30 + damage + survival XP; 3 seeded runs offered 3/4/4 cards (target 3-5), 10-run median 4",
+        "economy untouched: 0 before 60 s, 1 after, 5 clear, +1 boss",
+        "measurement in docs/TTX.md"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/balance.js",
+        "docs/TTX.md"
+      ]
+    },
+    "MGR-06": {
+      "evidence": [
+        "all 15 styles have their own damage/cycle/magazine (nine used to share spray stats)",
+        "manager cards print DMG x / RPM / MAG - verified 15/15 in tools/evidence.mjs",
+        "attributes: 6 stats, points raise the run's stat block (perks: ARMOR+4, AGILITY+3, HANDLING+3, SIGNAL+3)"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/manager.js",
+        "tools/evidence.mjs"
+      ]
+    },
+    "MGR-07": {
+      "evidence": [
+        "standoff per archetype (rifleman 9.5, sapper 6.5, shield 5, spotter 10, drone 11.5, mortar 4.5, mech 11, gunship 13.5)",
+        "shieldbearer flanked after 10.75 s (angle -1.57, isShielded false); mortar 22 -> 15.7 m; mech 6 -> 8.0 m out of stomp; drone killed after backoff",
+        "fixed: shield facing snapped to the player every frame, so flanked was always false; now turns at 0.75 rad/s",
+        "tools/adapt.mjs"
+      ],
+      "artifacts": [
+        "src/autopilot.js",
+        "src/enemies.js",
+        "tools/adapt.mjs"
+      ]
+    },
+    "MGR-08": {
+      "evidence": [
+        "9 legendary items each move the stat block (perk_armor ARMOR+4, perk_speed AGILITY+3, light mods TECH+2)",
+        "an arena clear drops one into profile.legacy (grantClear returned perk_armor, legacy 0 -> 1)",
+        "tools/mgr08.mjs"
+      ],
+      "artifacts": [
+        "src/manager.js",
+        "src/main.js",
+        "tools/mgr08.mjs"
+      ]
+    },
+    "MGR-09": {
+      "evidence": [
+        "fixed: hurt() parked a killed run in phase 'dead', so ResultsScreen and the summary never appeared; now 'results'",
+        "results shows RUN REPORT: time, threats, XP, level, level ups, talent points, attribute points, boss, arena",
+        "R/SPACE/ENTER from results returns to the manager (verified); summary is a left sidebar, score arithmetic rounded",
+        "screenshot mgr-09-results-summary.png"
+      ],
+      "artifacts": [
+        "src/main.js",
+        "src/summaryui.js",
+        "src/director.js",
+        "docs/evidence/mgr-09-results-summary.png"
+      ]
+    },
+    "MOV-01": {
+      "evidence": [
+        "arrive+seek+separation with a tactical beat: hold/reposition/advance/backoff/retreat, eased velocity (k=10)",
+        "60 s: 82.8 m travelled (target 55-90), 0 intended-but-frozen frames, 18-39 hold beats",
+        "max frame velocity change 1.4-1.6 m/s (no snaps); tools/movement.mjs"
+      ],
+      "artifacts": [
+        "src/autopilot.js",
+        "src/main.js",
+        "tools/movement.mjs"
+      ]
+    },
+    "MOV-02": {
+      "evidence": [
+        "enemy slot fanning with 2.2 m separation; shieldbearer owns the front slot (-0.04 rad measured)",
+        "screenshot docs/evidence/mov-02-slots.png"
+      ],
+      "artifacts": [
+        "src/enemies.js",
+        "tools/slots.mjs",
+        "docs/evidence/mov-02-slots.png"
+      ]
+    },
+    "MOV-03": {
+      "evidence": [
+        "camera push capped at 1 m per frame; measured max 0.127 m over 60 s and 0 m on the three maps",
+        "camera lifts to 8.5 m instead of pushing through tall cover"
+      ],
+      "artifacts": [
+        "src/main.js",
+        "tools/movement.mjs"
+      ]
+    },
+    "MOV-04": {
+      "evidence": [
+        "boss telegraph dodge measured 8.85 m (target >=4 m) via tools/boss.mjs",
+        "bossDodgeMax exposed in getPilot"
+      ],
+      "artifacts": [
+        "src/autopilot.js",
+        "tools/boss.mjs"
+      ]
+    },
+    "TUNE-01": {
+      "evidence": [
+        "20 seeded runs tabulated before (linear XP) and after (triangular + tactical pilot)",
+        "after: median 101-104 s, 4 cards, boss 40 %, 0 errors; tools/tune.mjs steps the real loop without wall-clock waits",
+        "tables in docs/TUNE-before.md and docs/TUNE.md"
+      ],
+      "artifacts": [
+        "tools/tune.mjs",
+        "docs/TUNE.md",
+        "docs/TUNE-before.md"
+      ]
+    },
+    "TUNE-02": {
+      "evidence": [
+        "levers: hpMult 3.0, hpScaling 0.24, enemy attacks wired, boss threshold 105 s / 110 kills, tactical pilot",
+        "no-upgrade median 76.1 s (target 45-75), with cards 101-104 s (target 110-170 with 6 cards), boss 40 % (~50)",
+        "clear rate 0 % is a definition conflict: 'cleared' means the ~12 min overtime line; needs the boss-kill definition decision",
+        "docs/TUNE-02.md"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/main.js",
+        "docs/TUNE-02.md"
+      ]
+    },
+    "TUNE-03": {
+      "evidence": [
+        "card trays deduped (no repeated part or weapon in one offer)",
+        "3-5 cards per run measured: 3/4/4 in three seeds, median 4 in ten",
+        "docs/TTX.md"
+      ],
+      "artifacts": [
+        "src/weapons.js",
+        "docs/TTX.md"
+      ]
+    },
+    "TUNE-04": {
+      "evidence": [
+        "aerial boss uses TUNING.boss.gunship.hp (900) instead of bossHp()'s +2600 flat",
+        "measured TTK 11 s with flak (target 8-15 s), firing from 6.75 m altitude",
+        "single-shot path now uses effectiveDamage, so anti-air/lit/explosive modifiers actually apply",
+        "tools/gunship.mjs"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/main.js",
+        "tools/gunship.mjs"
+      ]
+    },
+    "UI-10": {
+      "evidence": [
+        "390x844: 3 cards 119 px wide at x 10-129 / 135-255 / 261-380, document scrollWidth 390 (no horizontal scroll)",
+        "breakpoints at 480 and 340 px; screenshot ui-10-cards-390x844.png"
+      ],
+      "artifacts": [
+        "src/cardsui.js",
+        "docs/evidence/ui-10-cards-390x844.png"
+      ]
+    }
+  }
+}

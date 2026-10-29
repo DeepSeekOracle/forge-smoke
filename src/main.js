@@ -643,7 +643,7 @@ if (testMode) {
       return { type: e.type, slot: e.slot, hp: Math.round(e.hp) };
     },
     // MOV-04: skip to the boss threshold so the telegraph dodge can be measured without an 80 s run
-    forceBoss: () => { state.kills = Math.max(state.kills || 0, 18); return state.kills; },
+    forceBoss: () => { state.kills = Math.max(state.kills || 0, 110); return state.kills; },
     // MGR-06/08 evidence: what each equipped item does to the run's stat block, and the clear drop
     getStatsFor: (equipped) => statsForLevel((state.cyborgProfile && state.cyborgProfile.level) || 1, equipped || {}),
     grantClear: () => bankRun(true),
