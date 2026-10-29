@@ -72,6 +72,37 @@ const HUD_SLOTS = {
   statusBanner: 0.196,
 };
 
+/** Ground markers for the autopilot's capture zones: current zone amber, held zones dim. */
+const zoneMarkers = [];
+function updateZoneMarkers() {
+  const zones = state.objZones || [];
+  const on = state.phase === "playing" && zones.length > 0;
+  for (const m of zoneMarkers) m.visible = false;
+  if (!on) return;
+  while (zoneMarkers.length < zones.length) {
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(1.55, 1.85, 40),
+      new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false })
+    );
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.03;
+    ring.renderOrder = 2;
+    scene.add(ring);
+    zoneMarkers.push(ring);
+  }
+  for (let i = 0; i < zones.length; i += 1) {
+    const ring = zoneMarkers[i];
+    const z = zones[i];
+    ring.visible = true;
+    ring.position.x = z.x;
+    ring.position.z = z.z;
+    const current = i === (state.objIndex || 0) % zones.length;
+    ring.material.color.setHex(current ? 0xffb347 : 0x5a6b7c);
+    ring.material.opacity = current ? (state.pilotMode === "securing" ? 0.85 : 0.55) : 0.2;
+  }
+}
+
+
 const TREE_COUNT = lowEnd ? 6 : 16;
 const BUSH_COUNT = lowEnd ? 6 : 20;
 const LOG_COUNT = lowEnd ? 1 : 4;
@@ -841,6 +872,8 @@ function syncHud() {
       hudObjective = null;
       h.remove("obj-hud");
     }
+
+    updateZoneMarkers();
 
     // "THE DARKNESS COMES" status banner when ambient light dims
     const darkPct = Math.round((state.darknessFactor || 0) * 100);

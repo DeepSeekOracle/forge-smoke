@@ -1357,7 +1357,7 @@
       "phase": "production",
       "title": "Ground zone markers in src/main.js using assets/zones/",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/09-audio-ui.md",
       "acceptance": [
         "a ring mesh is placed at each objZones centre",
@@ -1373,9 +1373,16 @@
         "src/main.js",
         "assets/zones"
       ],
-      "evidence": [],
-      "artifacts": [],
-      "reopened_reason": "placeholder island file that no game module imports; work not wired in",
+      "evidence": [
+        "main.js: updateZoneMarkers() builds a ring mesh per objZone and colours current amber / held dim (sha256:0d45e2a96a5780e3)",
+        "ring opacity pulses 0.55 -> 0.85 while the pilot is securing (state.pilotMode === 'securing')",
+        "called every HUD pass during play; markers hidden outside a run",
+        "gate green: SYNTAX OK + REGRESS OK; screenshot saved"
+      ],
+      "artifacts": [
+        "src/main.js"
+      ],
+      "reopened_reason": "",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
     {
