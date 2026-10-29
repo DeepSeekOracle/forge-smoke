@@ -5,6 +5,7 @@ import { xpThreshold, bossHp } from "../src/balance.js";
 import { STYLE_FEEL, feelFor, tracerTaper } from "../src/stylefeel.js";
 import { MAPS, validateMap, selectMap } from "../src/maps.js";
 import { STYLE_VFX } from "../src/weapons.js";
+import { MATH, armourSoak, spread, falloff, xpForRun } from "../src/math.js";
 import { planPickupSites, validateSites, speedMultiplier, powerMultiplier, choosePickup, HEALTH_SPACING, PICKUP_DEFS } from "../src/pickups.js";
 import { readFileSync, statSync, existsSync } from "node:fs";
 
@@ -98,6 +99,19 @@ ok(powerMultiplier(1) === 1.25 && powerMultiplier(2) === 1.5, "power buffs do no
   ok(hurtGoal && hurtGoal.type === "health", "hurt pilot does not prioritise health");
   const healthyGoal = choosePickup(sites, 0.95, { x: 0, z: 0 });
   ok(healthyGoal && healthyGoal.type === "power", "healthy pilot does not prioritise power");
+}
+
+// 03-engine-math — the documented surface behaves as stated
+ok(Object.isFrozen(MATH), "MATH constants are mutable");
+ok(Math.abs(armourSoak(100, 20) - 100 * (1 - 20 / 280)) < 1e-9, "armourSoak(100,20) is not the fraction model");
+ok(armourSoak(100, 0) === 100, "zero armour should take full damage");
+ok(falloff(0) === 1 && Math.abs(falloff(30) - 0.35) < 1e-9, "falloff does not hit 1 -> 0.35 at range");
+ok(falloff(6) > falloff(20), "falloff is not monotonic");
+ok(xpForRun({ seconds: 60, kills: 10 }) === 250, "xpForRun base formula drifted");
+ok(xpForRun({ seconds: 60, kills: 10, cleared: true, level: 1 }) > xpForRun({ seconds: 60, kills: 10 }), "clear bonus missing");
+for (let i = 0; i < 200; i += 1) {
+  const s = spread(0.2, 1, () => Math.random());
+  ok(Math.abs(s) <= 0.3 + 1e-9, "spread exceeds the clamp");
 }
 
 // MGR-06 — every style has its own numbers (no more nine styles sharing spray stats)
