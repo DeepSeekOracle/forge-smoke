@@ -10,6 +10,7 @@ const BASE = process.env.FORGE_URL || "http://127.0.0.1:8796/preview/forge-smoke
 const RUNS = Math.max(1, Number(process.argv[2]) || 20);
 const CAP = Math.max(30, Number(process.argv[3]) || 180);
 const BATCH = Math.max(1, Number(process.env.TUNE_BATCH) || 12); // simulated seconds per step() call
+const PICK_CARDS = process.env.TUNE_NOCARDS !== "1";
 mkdirSync("docs/evidence", { recursive: true });
 
 const browser = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
@@ -32,15 +33,16 @@ for (let seed = 1; seed <= RUNS; seed += 1) {
   let t = 0;
   let last = null;
   while (t < CAP) {
-    const res = await page.evaluate((batch) => {
+    const res = await page.evaluate(({ batch, pick }) => {
       window.__studio.step(batch * 1000);
       const st = window.__forgeSmokeTest.getState();
-      // take a card whenever the tray is up, like a player would
-      if (document.querySelector("#fs-cards.open")) document.querySelector("#fs-cards .card")?.click();
+      // take a card whenever the tray is up, like a player would (unless measuring no-upgrade play)
+      if (pick && document.querySelector("#fs-cards.open")) document.querySelector("#fs-cards .card")?.click();
       const cs = window.__forgeSmokeTest.getCards();
+      const p = window.__forgeSmokeTest.getPilot();
       return {
         phase: st.phase,
-        runTime: +window.__forgeSmokeTest.getPilot().runTime.toFixed(1),
+        runTime: +p.runTime.toFixed(1),
         kills: st.kills,
         level: cs.level,
         xp: Math.round(cs.xp),
@@ -50,8 +52,10 @@ for (let seed = 1; seed <= RUNS; seed += 1) {
         cleared: Boolean(st.arenaCleared),
         health: Math.round(st.health),
         map: window.__forgeSmokeTest.getLighting().map,
+        accel: p.maxFrameAccel,
+        holds: p.holdBeats,
       };
-    }, BATCH);
+    }, { batch: BATCH, pick: PICK_CARDS });
     t += BATCH;
     last = res;
     if (res.phase !== "playing") break;
@@ -68,11 +72,14 @@ for (let seed = 1; seed <= RUNS; seed += 1) {
     cards: cardsOffered,
     boss: last.bossSpawned ? "yes" : "no",
     cleared: last.cleared ? "yes" : "no",
+    health: last.health,
+    accel: last.accel,
+    holds: last.holds,
     outcome: last.phase === "playing" ? "alive@cap" : last.health <= 0 ? "dead" : last.phase,
     errors: errors.length,
   };
   rows.push(row);
-  console.log(`${seed}\t${row.map}\t${row.kills}\t${row.seconds}\tL${row.level}\t${row.xp}/${row.next}xp\t${row.cards} cards\t${row.boss}\t${row.cleared}\t${row.outcome}`);
+  console.log(`${seed}\t${row.map}\t${row.kills}\t${row.seconds}\tL${row.level}\t${row.xp}/${row.next}xp h${row.health} a${row.accel} k${row.holds}\t${row.cards} cards\t${row.boss}\t${row.cleared}\t${row.outcome}`);
   await page.close();
 }
 

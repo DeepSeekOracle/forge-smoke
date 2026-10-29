@@ -42,7 +42,8 @@ export function timeToKill(weapon, hp, armour = 0) {
 
 /** Enemy HP at time t (minutes): HP_E0 * (1 + 0.18 * t). No cap. */
 export function enemyHpAt(baseHp, tMinutes) {
-  return baseHp * (1 + TUNING.difficulty.hpScaling * tMinutes);
+  const mult = TUNING.difficulty.hpMult ?? 1;
+  return baseHp * mult * (1 + TUNING.difficulty.hpScaling * tMinutes);
 }
 
 /** Enemy speed at time t (minutes): v_E0 * min(1.45, 1 + 0.05 * t). */

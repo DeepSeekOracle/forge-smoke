@@ -1,0 +1,6 @@
+1	yard	54	74.5	L2	1879/900xp h0 a1.436 k25	1 cards	yes	no	dead
+2	foundry	55	76.1	L2	1915/900xp h0 a1.518 k18	1 cards	yes	no	dead
+3	depot	54	78.1	L2	1891/900xp h0 a1.532 k21	1 cards	yes	no	dead
+4	yard	52	72.7	L2	1813/900xp h0 a1.48 k19	1 cards	yes	no	dead
+5	foundry	72	103.4	L2	2523/900xp h0 a1.443 k25	1 cards	yes	no	dead
+TUNE SUMMARY {"runs":5,"medianSeconds":76.1,"medianCards":1,"bossReachedPct":100,"clearedPct":0,"errors":0}

@@ -2,25 +2,15 @@
 
 | run | seed | map | kills | time | level | cards | boss? | cleared? | outcome |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | 1 | yard | 337 | 180.8s | 5 | 4 | yes | no | alive@cap |
-| 2 | 2 | foundry | 314 | 180.9s | 5 | 4 | yes | no | alive@cap |
-| 3 | 3 | depot | 281 | 181.4s | 4 | 3 | yes | no | alive@cap |
-| 4 | 4 | yard | 313 | 180.8s | 5 | 4 | yes | no | alive@cap |
-| 5 | 5 | foundry | 262 | 180.9s | 4 | 3 | yes | no | alive@cap |
-| 6 | 6 | depot | 324 | 181.3s | 5 | 4 | yes | no | alive@cap |
-| 7 | 7 | yard | 304 | 180.9s | 4 | 3 | yes | no | alive@cap |
-| 8 | 8 | foundry | 288 | 180.9s | 4 | 3 | yes | no | alive@cap |
-| 9 | 9 | depot | 305 | 181.4s | 5 | 4 | yes | no | alive@cap |
-| 10 | 10 | yard | 301 | 181s | 4 | 3 | yes | no | alive@cap |
-| 11 | 11 | foundry | 282 | 180.8s | 4 | 3 | yes | no | alive@cap |
-| 12 | 12 | depot | 307 | 181.3s | 5 | 4 | yes | no | alive@cap |
-| 13 | 13 | yard | 303 | 181s | 5 | 4 | yes | no | alive@cap |
-| 14 | 14 | foundry | 296 | 180.9s | 5 | 4 | yes | no | alive@cap |
-| 15 | 15 | depot | 316 | 181.3s | 5 | 4 | yes | no | alive@cap |
-| 16 | 16 | yard | 309 | 181s | 5 | 4 | yes | no | alive@cap |
-| 17 | 17 | foundry | 266 | 180.9s | 4 | 3 | yes | no | alive@cap |
-| 18 | 18 | depot | 296 | 181.3s | 5 | 4 | yes | no | alive@cap |
-| 19 | 19 | yard | 280 | 180.9s | 4 | 3 | yes | no | alive@cap |
-| 20 | 20 | foundry | 274 | 180.9s | 4 | 3 | yes | no | alive@cap |
+| 1 | 1 | yard | 76 | 86.7s | 4 | 3 | no | no | dead |
+| 2 | 2 | foundry | 118 | 121.3s | 5 | 4 | yes | no | dead |
+| 3 | 3 | depot | 95 | 101.2s | 5 | 4 | no | no | dead |
+| 4 | 4 | yard | 134 | 132.9s | 6 | 5 | yes | no | dead |
+| 5 | 5 | foundry | 75 | 89.7s | 4 | 3 | no | no | dead |
+| 6 | 6 | depot | 92 | 95.8s | 5 | 4 | no | no | dead |
+| 7 | 7 | yard | 99 | 105.8s | 5 | 4 | yes | no | dead |
+| 8 | 8 | foundry | 95 | 98.9s | 5 | 4 | no | no | dead |
+| 9 | 9 | depot | 104 | 109.8s | 5 | 4 | yes | no | dead |
+| 10 | 10 | yard | 93 | 99.6s | 5 | 4 | no | no | dead |
 
-**Summary:** {"runs":20,"medianSeconds":180.9,"medianCards":4,"bossReachedPct":100,"clearedPct":0,"errors":0}
+**Summary:** {"runs":10,"medianSeconds":101.2,"medianCards":4,"bossReachedPct":40,"clearedPct":0,"errors":0}

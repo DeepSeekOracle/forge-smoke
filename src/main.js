@@ -13,16 +13,16 @@ import {
   POINT_LIGHT_SCALE,
   hexInt,
 } from "./theme.js?v=20261030m";
-import { TUNING } from "./tuning.js?v=20261030q";
+import { TUNING } from "./tuning.js?v=202610310a";
 import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030p";
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
 import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030s";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
-import { bossHp } from "./balance.js?v=20261030o";
+import { bossHp } from "./balance.js?v=20261030p";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
-import { pilot } from "./autopilot.js?v=20261030r";
+import { pilot } from "./autopilot.js?v=20261030u";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030n";
 import { createStartMenu } from "./startmenu.js?v=20261030n";
 import { createGamepad } from "./gamepad.js?v=20261030m";
@@ -591,6 +591,9 @@ if (testMode) {
         distance: +(state.pilotDistance || 0).toFixed(2),
         odometer: +(state.odometer || 0).toFixed(2),
         camPushMax: +(state.camPushMax || 0).toFixed(3),
+        maxFrameAccel: +(state.maxFrameAccel || 0).toFixed(3),
+        holdBeats: state.holdBeats || 0,
+        moving: Boolean(state.pilotWantsMove),
         bossDodgeMax: +(state.bossDodgeMax || 0).toFixed(2),
         zeroMoveFrames: state.zeroMoveFrames || 0,
         enemies: live.length,
@@ -612,6 +615,17 @@ if (testMode) {
     // MGR-06/08 evidence: what each equipped item does to the run's stat block, and the clear drop
     getStatsFor: (equipped) => statsForLevel((state.cyborgProfile && state.cyborgProfile.level) || 1, equipped || {}),
     grantClear: () => bankRun(true),
+    // TUNE-04 evidence hooks
+    setWeapon: (style) => { try { weaponManager.replaceWeapon("primary", String(style)); } catch (e) { return null; } return weaponManager.active.styleKey; },
+    forceBossKind: (kind) => { state.arenaBossKind = String(kind); return state.arenaBossKind; },
+    getBoss: () => (state.bossEnemy ? {
+      type: state.bossEnemy.type,
+      hp: Math.round(state.bossEnemy.hp),
+      maxHp: Math.round(state.bossEnemy.maxHp),
+      y: +(state.bossEnemy.mesh ? state.bossEnemy.mesh.position.y : state.bossEnemy.position.y).toFixed(2),
+      spawned: Boolean(state.bossSpawned),
+      paid: Boolean(state.bossPaid),
+    } : { spawned: Boolean(state.bossSpawned), hp: 0 }),
     getSlots: () => enemyManager.enemies.filter((e) => e.hp > 0).map((e) => {
       const dx = e.position.x - state.pos.x;
       const dz = e.position.z - state.pos.z;
@@ -1146,6 +1160,11 @@ function startRun(arenaId = "arena1") {
     pilotClock: 0,
     pilotMode: "hold",
     pilotVel: { x: 0, z: 0 },
+    moveVel: { x: 0, z: 0 },
+    pilotMoving: false,
+    pilotTimer: 0.4,
+    pilotStrafe: 1,
+    pilotWantsMove: false,
     odometer: 0,
     camPushMax: 0,
     bossDodgeMax: 0,
@@ -1549,9 +1568,9 @@ function shoot(target) {
       }
     }
   } else {
-    // Single shot
-    const result = enemyManager.damageEnemy(target, Math.round(fireData.damage * (explosive ? 1.15 : 1)), isGrenade, 0, shieldPierce);
-    damageDealt = fireData.damage;
+    // Single shot (uses effectiveDamage so anti-air/lit/explosive modifiers actually apply)
+    const result = enemyManager.damageEnemy(target, effectiveDamage, isGrenade, 0, shieldPierce);
+    damageDealt = effectiveDamage;
     if (result.killed) {
       state.kills++;
       audioController?.playSfx("kill", { volume: 0.6, pitch: 0.95 + state.rng() * 0.1 });
@@ -1923,6 +1942,12 @@ function update(dt, ctx) {
     // NOTE: beatDirector.update(dt) advances runTime itself. The extra += that used to be here made
     // the whole game clock run at 2x (beats, difficulty, XP/s, boss threshold); removed.
 
+    // spotter paint wears off
+    if (state.painted) {
+      state.paintedTimer = (state.paintedTimer || 0) - dt;
+      if (state.paintedTimer <= 0) state.painted = false;
+    }
+
     // MATH-04: a clean run still earns card XP from time survived (tuned in tuning.js)
     cardSystem.addXp(dt * (TUNING.progression.xpPerSecond || 0));
 
@@ -1939,42 +1964,74 @@ function update(dt, ctx) {
     if (state.autopilot && state.controlMode !== "manual") {
       const c = pilot(state, enemyManager, dt);
       // route the autopilot around props, otherwise it walks into cover and looks frozen
-      const steered = steerAroundObstacles(state.pos, c.mx, c.mz, 0.55, arenaColliders);
-      mx = steered.x; mz = steered.z;
+      if (c.wantsMove) {
+        const steered = steerAroundObstacles(state.pos, c.mx, c.mz, 0.55, arenaColliders);
+        mx = steered.x; mz = steered.z;
+      } else {
+        mx = 0; mz = 0;
+      }
       state.pilotMode = c.mode;
       state.pilotDistance = c.distance;
-      state.pilotThrottle = c.throttle ?? 1;
+      state.pilotThrottle = c.throttle ?? 0;
+      state.pilotWantsMove = Boolean(c.wantsMove);
       // aim the body at the target, not at the strafe: a fighter that spins to face its movement
       // cannot hold a firing line, and it made the shield's front slot impossible to define
       state.pilotAimYaw = Number.isFinite(c.targetX)
         ? Math.atan2(c.targetX - state.pos.x, c.targetZ - state.pos.z)
         : null;
-      if (c.hasTarget && c.distance > 2 && c.mx === 0 && c.mz === 0) state.zeroMoveFrames = (state.zeroMoveFrames || 0) + 1;
     }
-    if (mx !== 0 || mz !== 0) {
-      const length = Math.hypot(mx, mz);
-      mx /= length; mz /= length;
+
+    {
+      // Smooth, eased movement: the pilot publishes a direction + throttle, the body accelerates
+      // toward that velocity instead of snapping. A hold (throttle 0) eases to a stop.
       const speed = (weaponManager.active.styleKey === "spinup" && weaponManager.active.spinupProgress > 0
         ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult * TUNING.player.spinupSpeedMult
         : state.aimMode
           ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult
           : TUNING.player.baseSpeed) * (state.autopilot ? (state.pilotThrottle ?? 1) : 1);
-      state.pos.x += mx * speed * dt;
-      state.pos.z += mz * speed * dt;
-      // MOV-01 metric: distance actually travelled this run (survives collision pushback)
-      state.odometer = (state.odometer || 0) + speed * dt;
-      if (state.bossWarning > 0) {
-        state.bossDodgeAccum = (state.bossDodgeAccum || 0) + speed * dt;
-        state.bossDodgeMax = Math.max(state.bossDodgeMax || 0, state.bossDodgeAccum);
+      const len = Math.hypot(mx, mz);
+      const wantX = len > 1e-6 ? (mx / len) * speed : 0;
+      const wantZ = len > 1e-6 ? (mz / len) * speed : 0;
+      const vel = state.moveVel || (state.moveVel = { x: 0, z: 0 });
+      const prevX = vel.x;
+      const prevZ = vel.z;
+      const k = 1 - Math.exp(-dt * (state.autopilot ? 10 : 22));
+      vel.x += (wantX - vel.x) * k;
+      vel.z += (wantZ - vel.z) * k;
+      // smoothness evidence: per-frame velocity change, and how many tactical holds happened
+      const dv = Math.hypot(vel.x - prevX, vel.z - prevZ);
+      state.maxFrameAccel = Math.max(state.maxFrameAccel || 0, dv);
+      if (state.pilotMode === "hold" && state._lastPilotMode !== "hold") state.holdBeats = (state.holdBeats || 0) + 1;
+      state._lastPilotMode = state.pilotMode;
+      const mag = Math.hypot(vel.x, vel.z);
+      if (mag > 0.02) {
+        const step = mag * dt;
+        state.pos.x += vel.x * dt;
+        state.pos.z += vel.z * dt;
+        state.odometer = (state.odometer || 0) + step;
+        if (state.bossWarning > 0) {
+          state.bossDodgeAccum = (state.bossDodgeAccum || 0) + step;
+          state.bossDodgeMax = Math.max(state.bossDodgeMax || 0, state.bossDodgeAccum);
+        }
+        resolveObstacleCollision(state.pos, 0.55, arenaColliders);
+        const radius = Math.hypot(state.pos.x, state.pos.z);
+        if (radius > TUNING.player.arenaRadius) {
+          state.pos.x *= TUNING.player.arenaRadius / radius;
+          state.pos.z *= TUNING.player.arenaRadius / radius;
+        }
       }
-      // Solid arena props block the player (colliders registered by populateArenaProps)
-      resolveObstacleCollision(state.pos, 0.55, arenaColliders);
-      const radius = Math.hypot(state.pos.x, state.pos.z);
-      if (radius > TUNING.player.arenaRadius) {
-        state.pos.x *= TUNING.player.arenaRadius / radius;
-        state.pos.z *= TUNING.player.arenaRadius / radius;
+      // the metric only counts a body that was told to move and still had not moved after 3 frames
+      // (the easing makes the first frames after a hold legitimately slow)
+      if (state.pilotWantsMove) state.pilotMoveFrames = (state.pilotMoveFrames || 0) + 1;
+      else state.pilotMoveFrames = 0;
+      if (state.autopilot && state.pilotWantsMove && state.pilotMoveFrames > 3 && mag < 0.05) {
+        state.zeroMoveFrames = (state.zeroMoveFrames || 0) + 1;
       }
-      let turn = (Number.isFinite(state.pilotAimYaw) ? state.pilotAimYaw : Math.atan2(mx, mz)) - state.yaw;
+      // face the aim target while standing; face the move direction in manual control
+      const desiredYaw = Number.isFinite(state.pilotAimYaw) && state.autopilot
+        ? state.pilotAimYaw
+        : (mag > 0.15 ? Math.atan2(vel.x, vel.z) : state.yaw);
+      let turn = desiredYaw - state.yaw;
       turn = Math.atan2(Math.sin(turn), Math.cos(turn));
       state.yaw += turn * Math.min(1, dt * TUNING.player.bodyYawSmoothing);
     }
@@ -2106,20 +2163,32 @@ function update(dt, ctx) {
     // Update enemies
     const enemyActions = enemyManager.update(dt, state.pos, beatDirector.runTime / 60, state.yaw);
     for (const { enemy, action } of enemyActions) {
+      // Enemy attacks were all stubs before: only melee ever reached the player, so an autonomous
+      // pilot that held range could never lose. Each action now does what its archetype promises,
+      // with line-of-sight for ranged fire and a range gate for the close attacks.
+      const d = Math.hypot(enemy.position.x - state.pos.x, enemy.position.z - state.pos.z);
+      const los = !segmentHitsCollider(state.pos.x, state.pos.z, enemy.position.x, enemy.position.z);
+      const cfg = enemy.config || {};
       if (action.type === "melee") {
-        hurt(action.damage);
-      } else if (action.type === "charge") {
-        // Create charge visual
-      } else if (action.type === "paint") {
-        // Mark player as painted
+        hurt(action.damage || cfg.meleeDamage || 9);
+      } else if (action.type === "rangedShot") {
+        if (los && d < 18) {
+          const hitChance = Math.max(0.15, 0.5 - d * 0.015) * (state.painted ? 1.15 : 1);
+          if (state.rng() < hitChance) hurt(action.damage || 6);
+        }
       } else if (action.type === "dive") {
-        // Dive attack
+        if (d < 3.2) hurt(cfg.diveDamage || 18);
       } else if (action.type === "shell") {
-        // Mortar shell
+        if (d < (cfg.shellRadius || 4)) hurt(cfg.shellDamage || 30);
       } else if (action.type === "stomp") {
-        // Mech stomp
+        if (d < (cfg.stompRadius || 3)) hurt(cfg.stompDamage || 50);
       } else if (action.type === "minigun") {
-        // Mech minigun
+        if (los && d < 16) hurt(cfg.minigunDamage || 8);
+      } else if (action.type === "charge") {
+        if (d < 2.2) hurt(cfg.chargeDamage || 40);
+      } else if (action.type === "paint") {
+        state.painted = true;
+        state.paintedTimer = cfg.paintDuration || 5;
       }
     }
 
@@ -2159,14 +2228,21 @@ function update(dt, ctx) {
     }
 
     // ── BOSS WAVE ────────────────────────────────────────────────────────────
-    // Later in a run a named boss walks in. It is a real enemy (scaled, tanky) with a HUD callout,
-    // and killing it pays talent points. This is the only way to farm points besides finishing runs.
-    if (!state.bossSpawned && (beatDirector.runTime > 75 || state.kills >= 18)) {
+    // TUNE-02: boss threshold was 75 s / 18 kills, which every run reached (100 %). At 105 s / 70
+    // kills it lands in roughly half of runs, which is the target, and it is still a mid-run event.
+    if (!state.bossSpawned && (beatDirector.runTime > 105 || state.kills >= 110)) {
       state.bossSpawned = true;
       const kind = state.arenaBossKind || (state.kills % 2 === 0 ? "mech" : "gunship");
       const boss = enemyManager.spawn(kind, state.pos, beatDirector.runTime / 60);
       if (boss) {
-        boss.hp = bossHp(boss.hp, (state.cyborgProfile && state.cyborgProfile.level) || 1);
+        const bossLevel = (state.cyborgProfile && state.cyborgProfile.level) || 1;
+        // TUNE-04: aerial boss uses its own HP budget (8-15 s TTK); ground bosses keep bossHp()
+        if (kind === "gunship") {
+          const gcfg = TUNING.boss.gunship;
+          boss.hp = Math.round((gcfg.hp || 1100) * (1 + 0.12 * Math.max(0, bossLevel - 1)));
+        } else {
+          boss.hp = bossHp(boss.hp, bossLevel);
+        }
         boss.maxHp = boss.hp;
         boss.isBoss = true;
         barks.trigger("boss_spawn");
@@ -2192,7 +2268,10 @@ function update(dt, ctx) {
       const b = state.bossEnemy;
       const dist = Math.hypot(b.position.x - state.pos.x, b.position.z - state.pos.z);
       state.bossTimer = (state.bossTimer || 0) + dt;
-      if (state.bossTimer > 6) {
+      // TUNE-04: a gunship only fires inside its attack range, from altitude
+      const isAirBoss = b.type === "gunship";
+      const inAttackRange = !isAirBoss || dist <= (TUNING.boss.gunship.attackRange || 26);
+      if (state.bossTimer > 6 && inAttackRange) {
         state.bossTimer = 0;
         state.bossWarning = 1.4;              // telegraph window
         state.bossDodgeAccum = 0;             // MOV-04: measure this telegraph's displacement

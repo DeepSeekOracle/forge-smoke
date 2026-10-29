@@ -23,7 +23,7 @@ const CARD_POOL = [
 const CARD_PACING = {
   levelXpBase: 300,
   levelXpShape: "triangular",
-  xpPerKill: 10,
+  xpPerKill: 30,
   xpPerDamage: 1 / 25,
   xpPerSecond: 2,
   maxQueuedCards: 1,
@@ -259,7 +259,11 @@ export const TUNING = {
   // Boss (separate from the 7-enemy roster)
   boss: {
     gunship: {
-      hp: 2600,
+      // TUNE-04: the aerial boss is tuned for an 8-15 s TTK with an anti-air weapon, not the
+      // +2600 flat HP that the ground boss uses. Flak: 22 x 2.6 = 57 per hit / 0.55 s = 104 DPS.
+      hp: 900,
+      attackRange: 26,
+      altitude: 6.4,
       strafeSpeed: 4.0,
       cannonDamage: 40,
       cannonCycle: 0.8,
@@ -391,7 +395,10 @@ export const TUNING = {
 
   // Difficulty scaling
   difficulty: {
-    hpScaling: 0.18,
+    // TUNE-02: base HP is authored for one-shot kills on paper; the arena needs bodies that live
+    // long enough to use their cooldowns, so the curve multiplies the whole roster.
+    hpMult: 3.0,
+    hpScaling: 0.24,
     speedScaling: 0.05,
     speedCap: 1.45,
     spawnBudgetBase: 8,
@@ -493,7 +500,7 @@ Object.assign(TUNING.weapons, {
   },
   flak: {
     ...TUNING.weapons.burst,
-    style: "flak", family: "aa", damage: 22, cycle: 0.55, magazine: 6, reload: 2.4,
+    style: "flak", family: "aa", damage: 22, cycle: 0.55, magazine: 10, reload: 1.8,
     range: 34, spread: 2.2, bloomPerShot: 0.2, maxBloom: 4,
     tracerColor: 0xffb347, tracerLife: 0.09, muzzleFlashSize: 0.34, muzzleFlashLife: 0.07,
     airDamageMult: 2.6, groundDamageMult: 0.45,
