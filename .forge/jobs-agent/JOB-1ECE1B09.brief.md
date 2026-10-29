@@ -1,0 +1,65 @@
+FORGE WORKER JOB JOB-1ECE1B09
+Skill: forge-worker
+Project: forge-smoke
+Project path: C:\Users\justi\AI Games\forge-smoke
+Task id: MOV-02
+Priority: high | Risk: high
+Title: MOV-02 - Enemy slot flanking + separation
+Depends on: MOV-01
+
+READ FIRST in the project: AGENTS.md, then .forge/STATE.md (known-broken list), then .forge/VERIFY.md (the only accepted evidence format). Follow AGENTS.md exactly: work only in this folder, never touch D:/excavationpro-ca, never change the save schema destructively, bump every module ?v= together with index.html, add no runtime network calls, use only CC0/CC-BY/MIT art and record the licence in docs/ASSETS-SOURCES.md.
+
+**Goal:** movement and pathing that reads as deliberate on both sides. This is the most-complained-about
+system; treat "it looked frantic" as a bug report.
+
+## Current state
+
+- Autopilot: zone objectives (4 zones, 3 s hold) in `src/autopilot.js`, `steerAroundObstacles` to avoid
+  cover, boss envelope 13.5 m, telegraph dodge.
+- Enemies: direct seek + `resolveObstacleCollision` + a 1 s stuck-breaker nudge.
+- Camera: orbit follow, collider probe push-out.
+
+## Work
+
+1. **Steering (player)** — replace the weave hack with a proper arrive+seek blend:
+   `desired = seek(target) + separation(enemies) * w_s + avoid(cover) * w_a`,
+   clamp speed, and smooth acceleration (critically damped, `k = 6`). No frame with zero movement while
+   a target is > 2 m away.
+2. **Separation** — units within 2.5 m of each other push apart. Prevents the "pile of enemies" look.
+3. **Enemy flanking** — enemies take a slot angle around the player (`i * 2π/n`) instead of stacking on a
+   line; shieldbearers move to the front slot, riflemen to flanks, sappers to the rear.
+4. **Cover usage** — enemies may stop behind a collider within weapon range; add a `peek` state.
+5. **Camera** — spring-arm with damping; never clip inside a collider (assert max displacement).
+6. **Dodge** — boss telegraph sets `state.bossWarning`; the pilot must move ≥ 4 m during the warning
+   window. Measure it.
+
+## Metrics to report
+
+| Metric | Before | Target |
+|---|---|---|
+| Player distance travelled in 60 s (idle autopilot) | measure | 55–90 m |
+| Distinct positions per 10 s (not orbiting one point) | measure | ≥ 6 |
+| Enemy mean pairwise spacing | measure | ≥ 2.2 m |
+| Frames with player velocity 0 while target exists | measure | 0 |
+| Camera max displacement from collider push | measure | ≤ 1.0 m |
+
+## Acceptance
+
+1. A 120 s autonomous run with the metrics above printed.
+2. No page errors; boss fight still reachable (`kills=19`).
+3. Screenshot showing enemies spread around the player rather than stacked.
+
+FILES EXPECTED TO CHANGE:
+  - src/enemies.js
+
+ACCEPTANCE - paste the command output for each line:
+  - mean spacing ≥2.2 m
+  - shield takes the front slot
+
+REPORT SHAPE (required):
+TASK MOV-02 - Enemy slot flanking + separation
+Changed: <files>
+Evidence: <command> -> <output>
+Screenshot: <path or n/a>
+Not verified: <list>
+Broke / left open: <list>
