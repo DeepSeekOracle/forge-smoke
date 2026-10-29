@@ -6,9 +6,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
-import { standardMaterial, bakeTexture } from "./materials.js?v=202610322e";
-import { PALETTE, hexInt } from "./theme.js?v=202610322e";
-import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610322e";
+import { standardMaterial, bakeTexture } from "./materials.js?v=202610322i";
+import { PALETTE, hexInt } from "./theme.js?v=202610322i";
+import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610322i";
 
 export const PLAYER_SKINS = [
   {

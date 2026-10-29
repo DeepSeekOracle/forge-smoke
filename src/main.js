@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610322e";
-import { standardMaterial } from "./materials.js?v=202610322e";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610322e";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610322e";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610322i";
+import { standardMaterial } from "./materials.js?v=202610322i";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610322i";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610322i";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,24 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610322e";
-import { TUNING } from "./tuning.js?v=202610322e";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610322e";
-import { createCardTray } from "./cardsui.js?v=202610322e";
-import { createSummary } from "./summaryui.js?v=202610322e";
-import { createBarks } from "./barks.js?v=202610322e";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610322e";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610322e";
-import { bossHp } from "./balance.js?v=202610322e";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610322e";
-import { pilot } from "./autopilot.js?v=202610322e";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610322e";
-import { createStartMenu } from "./startmenu.js?v=202610322e";
-import { createGamepad } from "./gamepad.js?v=202610322e";
-import { createTalentWindow } from "./talentui.js?v=202610322e";
-import { aggregate, toRunMods } from "./talents.js?v=202610322e";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610322e";
+} from "./theme.js?v=202610322i";
+import { TUNING } from "./tuning.js?v=202610322i";
+import { spawnDamageNumber, updateDamageNumbers, clearDamageNumbers } from "./damageNumbers.js?v=202610322i";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610322i";
+import { createCardTray } from "./cardsui.js?v=202610322i";
+import { createSummary } from "./summaryui.js?v=202610322i";
+import { createBarks } from "./barks.js?v=202610322i";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610322i";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610322i";
+import { bossHp } from "./balance.js?v=202610322i";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610322i";
+import { pilot } from "./autopilot.js?v=202610322i";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610322i";
+import { createStartMenu } from "./startmenu.js?v=202610322i";
+import { createGamepad } from "./gamepad.js?v=202610322i";
+import { createTalentWindow } from "./talentui.js?v=202610322i";
+import { aggregate, toRunMods } from "./talents.js?v=202610322i";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610322i";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +45,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610322e";
-import * as levelModule from "./level.js?v=202610322e";
-import * as menuModule from "./menu.js?v=202610322e";
-import * as audioModule from "./audio.js?v=202610322e";
-import * as fxModule from "./fx.js?v=202610322e";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610322e";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610322e";
+} from "./models.js?v=202610322i";
+import * as levelModule from "./level.js?v=202610322i";
+import * as menuModule from "./menu.js?v=202610322i";
+import * as audioModule from "./audio.js?v=202610322i";
+import * as fxModule from "./fx.js?v=202610322i";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610322i";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610322i";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610322e";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610322e";
+import { createCasings } from "./casings.js?v=202610322i";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610322i";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -222,6 +223,7 @@ const weaponIconAtlas = generateWeaponIconAtlas();
 weaponIconAtlas.userData.tag = "weapon-icon-atlas";
 
 const proceduralArtSprites = typeof bakeProceduralArtSprites === "function" ? bakeProceduralArtSprites() : {};
+let lastDmgFrame = 0;
 const fxController = typeof fxModule?.createFx === "function" ? fxModule.createFx(renderer.domElement) : null;
 const casings = createCasings(scene);
 const menuController = typeof menuModule?.createMenu === "function" ? menuModule.createMenu(renderer.domElement, {}) : null;
@@ -1860,7 +1862,8 @@ function startRun(arenaId = "arena1") {
   if (state.talentMods) {
     const tm = state.talentMods;
     state.maxHealth = Math.round(state.maxHealth * (tm.hpMult || 1));
-    state.health = state.maxHealth;
+    clearDamageNumbers();
+  state.health = state.maxHealth;
     state.statSpeedMult = (state.statSpeedMult || 1) * (tm.speedMult || 1);
     state.talentCrit = tm.critAdd || 0;
   }
@@ -2210,6 +2213,7 @@ function shoot(target) {
       : (effectiveDamage >= 40 ? "impact_heavy" : "impact_light"), { volume: blocked ? 0.5 : 0.3 });
   }
       damageDealt += effectiveDamage;
+      if (!state.attractSim) spawnDamageNumber(enemy.position.x, 1.75 + (enemy.mesh?.scale?.y || 1) * 0.3, enemy.position.z, effectiveDamage, { crit: effectiveDamage >= 40, kill: result.killed });
       if (result.killed) {
         state.kills++;
         noteKill(enemy.type);
@@ -2239,6 +2243,7 @@ function shoot(target) {
         const dmg = Math.round(fireData.damage * falloff);
         const result = enemyManager.damageEnemy(best, dmg, isGrenade, 0, shieldPierce);
         damageDealt += dmg;
+        if (!state.attractSim) spawnDamageNumber(best.position.x, 1.75, best.position.z, dmg, { kill: result.killed });
         if (result.killed) {
           state.kills++;
           noteKill(best.type);
@@ -2251,6 +2256,7 @@ function shoot(target) {
     // Single shot (uses effectiveDamage so anti-air/lit/explosive modifiers actually apply)
     const result = enemyManager.damageEnemy(target, effectiveDamage, isGrenade, 0, shieldPierce);
     damageDealt = effectiveDamage;
+    if (!state.attractSim) spawnDamageNumber(target.position.x, 1.8, target.position.z, effectiveDamage, { crit: effectiveDamage >= 40, kill: result.killed });
     if (result.killed) {
       state.kills++;
       noteKill(target.type);
@@ -2354,6 +2360,7 @@ function hurt(amount) {
   if (amount >= 22) barks.trigger("close_call");   // a big single hit is a close call
   if (state.phase !== "playing") return;
   state.health = Math.max(0, state.health - amount);
+  if (!state.attractSim) spawnDamageNumber(soldier.position.x + 0.6, 2.55, soldier.position.z, amount, { player: true });
   audioController?.playSfx("hurt", { volume: 0.45, pitch: 1.0 });
   globalThis.__studio?.hud?.flash("#e5313b", 0.22);
   if (state.health <= 0) {
@@ -3265,6 +3272,10 @@ const studioApi = installStudio({
   }),
   cameras: { default: placeCamera },
   render() {
+    const now = (globalThis.performance?.now?.() || 0) / 1000;
+    const dmgDt = lastDmgFrame ? Math.min(0.05, Math.max(0.001, now - lastDmgFrame)) : 0.016;
+    lastDmgFrame = now;
+    updateDamageNumbers(camera, dmgDt);
     renderer.render(scene, camera);
   },
 });
