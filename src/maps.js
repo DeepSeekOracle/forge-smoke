@@ -48,16 +48,18 @@ export const MAPS = [
       { ...polar(35, 22), kind: "container", rotY: -0.4 },
       { ...polar(110, 26), kind: "container", rotY: 0.3 },
       { ...polar(160, 24), kind: "container", rotY: -0.15 },
+      // after the ruin complex came out, these two trucks keep the mid ring from reading as empty
+      { ...polar(-60, 26), kind: "milk-truck", rotY: 0.5 },
+      { ...polar(60, 26), kind: "milk-truck", rotY: -0.5 },
       { ...polar(-75, 18.5), kind: "barrier", rotY: 1.2 },
       { ...polar(75, 18.5), kind: "barrier", rotY: -1.2 },
       { ...polar(-15, 29), kind: "barrier", rotY: 0.2 },
       { ...polar(15, 29), kind: "barrier", rotY: -0.2 },
     ],
-    ruins: [
-      { ...polar(0, 30), rotY: 0, scale: 0.5 },
-      { ...polar(180, 30), rotY: Math.PI, scale: 0.5 },
-      { ...polar(90, 30), rotY: Math.PI / 2, scale: 0.45 },
-    ],
+    // The castle-like arena-ruins prop was removed from DEPOT (author: it snags the fighter and the
+    // collider fit turns a ruin complex into an invisible wall). Other maps keep their ruins; DEPOT
+    // will get purpose-built cover later.
+    ruins: [],
   },
   {
     id: "yard",
@@ -156,4 +158,5 @@ export const PROP_COLLIDERS = {
   barrier: { shape: "obb", hx: 1.55, hz: 0.55 },
   watchtower: { shape: "obb", hx: 1.75, hz: 1.75 },
   turret: { shape: "circle", radius: 1.45 },
+  "milk-truck": { shape: "obb", hx: 1.35, hz: 2.7 },
 };

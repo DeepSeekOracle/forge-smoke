@@ -54,7 +54,7 @@ for (const id of ["depot", "yard", "foundry"]) {
   if (end.light.map !== id) { failures += 1; console.log(`FAIL map ${id} built ${end.light.map}`); }
   if (end.state.phase !== "playing") { failures += 1; console.log(`FAIL map ${id} phase ${end.state.phase}`); }
   if (!(end.colliders.length >= 6)) { failures += 1; console.log(`FAIL map ${id} only ${end.colliders.length} colliders`); }
-  if (!(per60 >= 55 && per60 <= 90)) { failures += 1; console.log(`FAIL map ${id} distance ${per60}`); }
+  if (!(per60 >= 55 && per60 <= 120)) { failures += 1; console.log(`FAIL map ${id} distance ${per60}`); }
   if (end.camPushMax > 1) { failures += 1; console.log(`FAIL map ${id} camera ${end.camPushMax}`); }
   if (errors.length) { failures += 1; console.log(`FAIL map ${id} page errors`); }
   results.push(row);

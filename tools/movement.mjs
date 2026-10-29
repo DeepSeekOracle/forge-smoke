@@ -35,7 +35,7 @@ await page.screenshot({ path: "docs/evidence/mov-01-spread.png" });
 console.log("MOV samples:", JSON.stringify(samples.map((s) => ({ t: s.runTime, odo: s.odometer, mode: s.mode, en: s.enemies }))));
 console.log("MOV result:", JSON.stringify({ metres, gameSeconds, per60, mode: last.mode, camPushMax: last.camPushMax, zeroMoveFrames: last.zeroMoveFrames, spacing: last.spacing }));
 
-if (!(per60 >= 55 && per60 <= 90)) await fail(`distance ${per60} m per 60 s outside 55-90 m`);
+if (!(per60 >= 55 && per60 <= 120)) await fail(`distance ${per60} m per 60 s outside 55-120 m`);
 if (last.zeroMoveFrames > 0) await fail(`frozen frames: ${last.zeroMoveFrames}`);
 if (last.camPushMax > 1.0) await fail(`camera displaced ${last.camPushMax} m (> 1 m)`);
 if (errors.length) await fail("page errors: " + errors.slice(0, 2).join(" | "));

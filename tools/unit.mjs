@@ -67,7 +67,10 @@ for (const m of MAPS) {
 const depot = MAPS.find((m) => m.id === "depot");
 ok(depot.props.filter((p) => p.kind === "container").length === 6, "DEPOT needs 6 containers");
 ok(depot.props.filter((p) => p.kind === "barrier").length === 4, "DEPOT needs 4 barriers");
-ok(depot.ruins.length === 3, "DEPOT needs 3 ruin clusters");
+// author removed the castle-like ruin complex on DEPOT: it snagged the fighter and read as an
+// invisible wall. The map now carries two trucks instead (see maps.js).
+ok(depot.ruins.length === 0, "DEPOT should carry no ruin clusters");
+ok(depot.props.filter((p) => p.kind === "milk-truck").length === 2, "DEPOT should carry 2 trucks after the ruins came out");
 const yard = MAPS.find((m) => m.id === "yard");
 ok(yard.props.length === 5, `YARD needs 5 props, has ${yard.props.length}`);
 ok(yard.fogScale > 1, "YARD should have thicker fog");

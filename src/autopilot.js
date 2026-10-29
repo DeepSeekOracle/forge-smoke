@@ -29,8 +29,8 @@ export const PILOT_PROFILE = {
   dashSeconds: 0.62,
   dashThrottle: 0.62,
   repositionDeg: 52,
-  advanceThrottle: 0.5,
-  backoffThrottle: 0.45,
+  advanceThrottle: 0.44,
+  backoffThrottle: 0.4,
   retreatThrottle: 0.8,
   dodgeThrottle: 1.0,
   patrolThrottle: 0.32,
@@ -193,9 +193,13 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
     dirX = state.incomingShot.x;
     dirZ = state.incomingShot.z;
     mode = "dodge-shot";
-    throttle = 1;
+    throttle = 0.85;
     state.pilotBeatMode = null;
-  } else if (state.pickupGoal) {
+  } else if (state.pickupGoal && (state.pickupCooldown || 0) <= 0
+    && (state.pickupGoal.type === "health" || !target)) {
+    // Pickups are a detour, not a treadmill: health wins whenever integrity is low, power/speed only
+    // when there is no live target to fight. Without this the pilot ran 230 m per minute and never
+    // held an angle — the tactical beats never got a chance to play.
     // META PRIORITY: health if hurt, then power, then speed (choosePickup already ordered them)
     const g = state.pickupGoal;
     const gx = g.x - state.pos.x;

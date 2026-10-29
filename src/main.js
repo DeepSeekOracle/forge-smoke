@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610320q";
-import { standardMaterial } from "./materials.js?v=202610320q";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610320q";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610320q";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321c";
+import { standardMaterial } from "./materials.js?v=202610321c";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321c";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321c";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610320q";
-import { TUNING } from "./tuning.js?v=202610320q";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610320q";
-import { createCardTray } from "./cardsui.js?v=202610320q";
-import { createSummary } from "./summaryui.js?v=202610320q";
-import { createBarks } from "./barks.js?v=202610320q";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610320q";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610320q";
-import { bossHp } from "./balance.js?v=202610320q";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610320q";
-import { pilot } from "./autopilot.js?v=202610320q";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610320q";
-import { createStartMenu } from "./startmenu.js?v=202610320q";
-import { createGamepad } from "./gamepad.js?v=202610320q";
-import { createTalentWindow } from "./talentui.js?v=202610320q";
-import { aggregate, toRunMods } from "./talents.js?v=202610320q";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610320q";
+} from "./theme.js?v=202610321c";
+import { TUNING } from "./tuning.js?v=202610321c";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321c";
+import { createCardTray } from "./cardsui.js?v=202610321c";
+import { createSummary } from "./summaryui.js?v=202610321c";
+import { createBarks } from "./barks.js?v=202610321c";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321c";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321c";
+import { bossHp } from "./balance.js?v=202610321c";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321c";
+import { pilot } from "./autopilot.js?v=202610321c";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321c";
+import { createStartMenu } from "./startmenu.js?v=202610321c";
+import { createGamepad } from "./gamepad.js?v=202610321c";
+import { createTalentWindow } from "./talentui.js?v=202610321c";
+import { aggregate, toRunMods } from "./talents.js?v=202610321c";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321c";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610320q";
-import * as levelModule from "./level.js?v=202610320q";
-import * as menuModule from "./menu.js?v=202610320q";
-import * as audioModule from "./audio.js?v=202610320q";
-import * as fxModule from "./fx.js?v=202610320q";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610320q";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610320q";
+} from "./models.js?v=202610321c";
+import * as levelModule from "./level.js?v=202610321c";
+import * as menuModule from "./menu.js?v=202610321c";
+import * as audioModule from "./audio.js?v=202610321c";
+import * as fxModule from "./fx.js?v=202610321c";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610321c";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321c";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610320q";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610320q";
+import { createCasings } from "./casings.js?v=202610321c";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321c";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -166,9 +166,12 @@ const trees = [];
 const sharedBarkMat = standardMaterial({ ...MATERIAL_RECIPES.bark, size: TEX_SIZE });
 const sharedLeafMat = standardMaterial({ ...MATERIAL_RECIPES.leaf, size: TEX_SIZE });
 const sharedBushMat = standardMaterial({ ...MATERIAL_RECIPES.bush, size: TEX_SIZE });
+// a faint emissive keeps low bushes readable in the dark instead of reading as black shards
+sharedBushMat.emissive = new THREE.Color(0x101c0c);
+sharedBushMat.emissiveIntensity = 0.55;
 
 for (let i = 0; i < TREE_COUNT; i++) {
-  const a = worldRng() * TAU, r = 10 + worldRng() * 38;
+  const a = worldRng() * TAU, r = 26 + worldRng() * 24; // keep trunks out of the fighting ring: a tree at r=10 put the camera inside a leaf card
   const tree = makeTree({ height: 5.5 + worldRng() * 3.5, spread: 2.7 + worldRng() * 1.5, seed: 20 + i, cards: TREE_CARDS, bark: sharedBarkMat, leaf: sharedLeafMat, texSize: TEX_SIZE });
   tree.position.set(Math.cos(a) * r, 0, Math.sin(a) * r);
   tree.rotation.y = worldRng() * TAU;
@@ -176,13 +179,13 @@ for (let i = 0; i < TREE_COUNT; i++) {
   trees.push(tree);
 }
 for (let i = 0; i < BUSH_COUNT; i++) {
-  const a = worldRng() * TAU, r = 4 + worldRng() * 30;
+  const a = worldRng() * TAU, r = 12 + worldRng() * 28;
   const bush = makeBush({ radius: 0.65 + worldRng() * 0.9, seed: 90 + i, leaf: sharedBushMat, texSize: TEX_SIZE });
   bush.position.set(Math.cos(a) * r, bush.position.y, Math.sin(a) * r);
   scene.add(bush);
 }
 for (let i = 0; i < LOG_COUNT; i++) {
-  const a = worldRng() * TAU, r = 8 + worldRng() * 24;
+  const a = worldRng() * TAU, r = 12 + worldRng() * 20;
   const log = makeLog({ length: 2 + worldRng() * 1.6, radius: 0.18 + worldRng() * 0.1, seed: 140 + i, bark: sharedBarkMat, texSize: TEX_SIZE });
   log.position.x = Math.cos(a) * r;
   log.position.z = Math.sin(a) * r;
@@ -436,7 +439,7 @@ function spawnEnemyShot(enemy, damage, speed = 16, color = 0xff7a4a) {
 /** Advance bolts, apply hits, and publish the nearest incoming threat for the pilot. */
 function updateEnemyShots(dt) {
   let threat = null;
-  let bestT = 1.15;
+  let bestT = 0.8;
   for (const s of enemyShots) {
     if (!s.alive) continue;
     s.life -= dt;
@@ -595,6 +598,8 @@ function collectPickup(item) {
     state.powerStacks.push({ remaining: def.seconds });
   }
   state.pickupsTaken = (state.pickupsTaken || 0) + 1;
+  // Detour, not a treadmill: after taking an item the pilot returns to the fight for a while.
+  state.pickupCooldown = item.type === "health" ? 4 : 9;
   item.alive = false;
   item.mesh.visible = false;
   item.respawnAt = beatDirector.runTime + 60;
@@ -624,7 +629,8 @@ function updatePickups(dt) {
   state.powerStacks = state.powerStacks.filter((s) => s.remaining > 0);
   state.speedMult = speedMultiplier(state.speedStacks.length);
   state.powerMult = powerMultiplier(state.powerStacks.length);
-  state.pickupGoal = choosePickup(pickupItems, state.health / Math.max(1, state.maxHealth), { x: state.pos.x, z: state.pos.z });
+  state.pickupCooldown = Math.max(0, (state.pickupCooldown || 0) - dt);
+  state.pickupGoal = choosePickup(pickupItems, state.health / Math.max(1, state.maxHealth), { x: state.pos.x, z: state.pos.z, needHealthAt: 0.55 });
 }
 
 
@@ -1408,7 +1414,7 @@ function syncHud() {
         const id = `killfeed-${i}`;
         const entry = feed[i];
         if (!entry) { h.remove(id); continue; }
-        T(id, entry.text, { x: 0.585, y: 0.176 + i * 0.020, size: TYPE_SCALE.micro, color: i === 0 ? "#ffe9a8" : "#8ea3b8", weight: 800 });
+        T(id, entry.text, { x: 0.585, y: 0.246 + i * 0.020, size: TYPE_SCALE.micro, color: i === 0 ? "#ffe9a8" : "#8ea3b8", weight: 800 });
       }
     }
 
@@ -1931,7 +1937,8 @@ function shoot(target) {
   const pelletCount = fireData.pellets || 1;
   const darkBoost = Math.max(state.darknessFactor || 0, state.blackoutActive ? 1 : 0);
   const orbScaleBase = (weaponManager.hasLightOrbMod ? 1.75 : 1.0) * (1 + darkBoost * 0.85);
-  const orbLife = Math.max(fireData.tracerLife, 0.16 + darkBoost * 0.12 + (weaponManager.hasLightOrbMod ? 0.08 : 0));
+  // a tracer is a 70 ms flash, not a 160 ms beam; the long glow made every shot read as a laser
+      const orbLife = Math.max(fireData.tracerLife, 0.07 + darkBoost * 0.05 + (weaponManager.hasLightOrbMod ? 0.04 : 0));
 
   for (let p = 0; p < pelletCount; p++) {
     const tracer = tracers.find((t) => t.life <= 0);
@@ -1939,7 +1946,7 @@ function shoot(target) {
       const spreadAngle = (state.rng() - 0.5) * fireData.spread * (Math.PI / 180);
       const dir = new THREE.Vector3().subVectors(vTarget, vMuzzle).normalize();
       dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), spreadAngle);
-      const travelDist = Math.min(26, Math.max(5, vMuzzle.distanceTo(vTarget) + 3.5));
+      const travelDist = Math.min(18, Math.max(4, vMuzzle.distanceTo(vTarget) + 0.6));
       const endPos = vMuzzle.clone().add(dir.clone().multiplyScalar(travelDist));
       tracer.start.copy(vMuzzle);
       tracer.end.copy(endPos);
@@ -1949,7 +1956,7 @@ function shoot(target) {
 
       tracer.mesh.position.copy(vMuzzle).add(endPos).multiplyScalar(0.5);
       tracer.mesh.lookAt(endPos);
-      const tracerWidth = state.attractSim ? 0.42 : (1 + darkBoost * 0.6) * vfx.tracer;
+      const tracerWidth = state.attractSim ? 0.24 : (1 + darkBoost * 0.6) * vfx.tracer * 0.55;
       tracer.mesh.scale.set(tracerWidth, tracerWidth, Math.max(0.4, vMuzzle.distanceTo(endPos)));
       tracer.baseWidth = tracerWidth;
       tracer.feelKey = weaponManager.active?.styleKey;
@@ -1967,7 +1974,7 @@ function shoot(target) {
 
   flash.position.copy(vMuzzle);
   if (flash.material && flash.material.color) flash.material.color.setHex(vfx.color);
-  flash.scale.setScalar((fireData.muzzleFlashSize / 0.24) * vfx.flash);
+  flash.scale.setScalar((fireData.muzzleFlashSize / 0.24) * vfx.flash * 0.6);
   flash.visible = !state.attractSim;   // no blown-out flash ball in the bay demo
   state.flash = fireData.muzzleFlashLife;
 
@@ -2615,11 +2622,12 @@ function update(dt, ctx) {
 
     // Apply smooth ambient dimming + gun floodlight & solar aura amplification during Darkness
     const cfg = ARENA_LIGHTING[arenaKey] || ARENA_LIGHTING.perimeter;
-    const dimMult = 1 - (state.darknessFactor || 0) * 0.88;
+    // darkness tops out at 70 % so the arena stays readable: 88 % turned the map into a black screen
+  const dimMult = 1 - (state.darknessFactor || 0) * 0.7;
     if (!lightsOff) {
       hemi.intensity = cfg.hemisphere.intensity * dimMult;
       sun.intensity = cfg.sun.intensity * dimMult;
-      scene.fog.density = cfg.fog.density * (1 + (state.darknessFactor || 0) * 0.55);
+      scene.fog.density = cfg.fog.density * (1 + (state.darknessFactor || 0) * 0.35);
     }
     // LIGHT MODS ARE CARD-GATED: no beam, no lamp housing, no aura until the player owns the card
     // (or is holding a light gun, whose identity *is* the light). Darkness only amplifies what you own.
