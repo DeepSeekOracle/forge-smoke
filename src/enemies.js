@@ -5,7 +5,7 @@
 
 import * as THREE from "three";
 import { TUNING } from "./tuning.js";
-import { enemyHpAt, enemySpeedAt, damageAfterArmour } from "./balance.js";
+import { enemyHpAt, enemySpeedAt, damageAfterArmour, shieldGate } from "./balance.js";
 import {
   buildEnemyMesh,
   animateEnemyMesh,
@@ -286,14 +286,12 @@ export class Enemy {
 
   /** Take damage. Returns true if killed. */
   takeDamage(amount, isFlank = false, armour = 0, pierce = 0) {
-    let dmg = amount;
-    if (this.type === ENEMY_TYPES.shieldbearer && this.isShielded && !isFlank) {
-      // The wall tracks the player, so there is no "front" to shoot around. Only an explosive
-      // charge punches a fraction through it; a lobbed grenade (isFlank) goes over the top.
-      dmg = pierce > 0 ? damageAfterArmour(amount * pierce, armour) : 0;
-    } else {
-      dmg = damageAfterArmour(amount, armour);
-    }
+    const dmg = shieldGate(amount, {
+      shielded: this.type === ENEMY_TYPES.shieldbearer && this.isShielded,
+      flanked: Boolean(isFlank),
+      pierce,
+      armour,
+    });
     this.hp -= dmg;
     return this.hp <= 0;
   }

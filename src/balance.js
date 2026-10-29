@@ -13,6 +13,24 @@ export function damageAfterArmour(rawDamage, armour) {
   return effective;
 }
 
+/**
+ * Shield gate - the single source of truth for "did that shot get through?".
+ * The shieldbearer's wall tracks the player, so ordinary fire does nothing; explosive rounds punch
+ * `pierce` (0..1) of the damage through; a lobbed grenade (flanked) lands in full.
+ */
+export function shieldGate(damage, { shielded = false, flanked = false, pierce = 0, armour = 0 } = {}) {
+  if (!shielded || flanked) return damageAfterArmour(damage, armour);
+  if (pierce > 0) return damageAfterArmour(damage * pierce, armour);
+  return 0;
+}
+
+/** Shots needed and seconds to kill, using the same armour model as live combat. */
+export function timeToKill(weapon, hp, armour = 0) {
+  const perShot = damageAfterArmour(weapon.damage, armour);
+  if (perShot <= 0) return Infinity;
+  return Math.ceil(hp / perShot) * weapon.cycle;
+}
+
 /** Enemy HP at time t (minutes): HP_E0 * (1 + 0.18 * t). No cap. */
 export function enemyHpAt(baseHp, tMinutes) {
   return baseHp * (1 + TUNING.difficulty.hpScaling * tMinutes);
