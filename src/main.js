@@ -18,11 +18,11 @@ import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030m";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030s";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
 import { bossHp } from "./balance.js?v=20261030n";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
-import { pilot } from "./autopilot.js?v=20261030q";
+import { pilot } from "./autopilot.js?v=20261030r";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030m";
 import { createStartMenu } from "./startmenu.js?v=20261030m";
 import { createGamepad } from "./gamepad.js?v=20261030m";
@@ -589,6 +589,22 @@ if (testMode) {
       };
     },
     getEnemyTypes: () => Object.keys(ENEMY_TYPES),
+    // MOV-02 evidence: drop an archetype at a world point and read the live ring around the player
+    spawnAt: (t, x, z) => {
+      const e = enemyManager.spawn(String(t), { x, z }, 0);
+      if (!e) return null;
+      e.position.x = x;
+      e.position.z = z;
+      if (e.mesh) e.mesh.position.set(x, 0.72, z);
+      return { type: e.type, slot: e.slot, hp: Math.round(e.hp) };
+    },
+    getSlots: () => enemyManager.enemies.filter((e) => e.hp > 0).map((e) => {
+      const dx = e.position.x - state.pos.x;
+      const dz = e.position.z - state.pos.z;
+      let a = Math.atan2(dx, dz) - state.yaw;
+      a = Math.atan2(Math.sin(a), Math.cos(a));
+      return { type: e.type, slot: e.slot, d: +Math.hypot(dx, dz).toFixed(2), angle: +a.toFixed(2) };
+    }),
     // MGR-07: spawn a real archetype and report the stat block the run will fight
     spawnType: (t) => {
       const e = enemyManager.spawn(String(t), state.pos, 0);
@@ -1903,6 +1919,11 @@ function update(dt, ctx) {
       state.pilotMode = c.mode;
       state.pilotDistance = c.distance;
       state.pilotThrottle = c.throttle ?? 1;
+      // aim the body at the target, not at the strafe: a fighter that spins to face its movement
+      // cannot hold a firing line, and it made the shield's front slot impossible to define
+      state.pilotAimYaw = Number.isFinite(c.targetX)
+        ? Math.atan2(c.targetX - state.pos.x, c.targetZ - state.pos.z)
+        : null;
       if (c.hasTarget && c.distance > 2 && c.mx === 0 && c.mz === 0) state.zeroMoveFrames = (state.zeroMoveFrames || 0) + 1;
     }
     if (mx !== 0 || mz !== 0) {
@@ -1928,7 +1949,7 @@ function update(dt, ctx) {
         state.pos.x *= TUNING.player.arenaRadius / radius;
         state.pos.z *= TUNING.player.arenaRadius / radius;
       }
-      let turn = Math.atan2(mx, mz) - state.yaw;
+      let turn = (Number.isFinite(state.pilotAimYaw) ? state.pilotAimYaw : Math.atan2(mx, mz)) - state.yaw;
       turn = Math.atan2(Math.sin(turn), Math.cos(turn));
       state.yaw += turn * Math.min(1, dt * TUNING.player.bodyYawSmoothing);
     }
@@ -2058,7 +2079,7 @@ function update(dt, ctx) {
     }
 
     // Update enemies
-    const enemyActions = enemyManager.update(dt, state.pos, beatDirector.runTime / 60);
+    const enemyActions = enemyManager.update(dt, state.pos, beatDirector.runTime / 60, state.yaw);
     for (const { enemy, action } of enemyActions) {
       if (action.type === "melee") {
         hurt(action.damage);

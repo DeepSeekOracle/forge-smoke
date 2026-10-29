@@ -25,6 +25,18 @@ export const ENEMY_TYPES = {
   gunship: "gunship",
 };
 
+/** MOV-02 slot bias: 0 is the front slot (where the player's gun points), PI is the rear. */
+const SLOT_BIAS = {
+  shieldbearer: 0,
+  rifleman: (Math.PI * 2) / 3,
+  spotter: Math.PI / 2,
+  sapper: Math.PI,
+  mortar: -Math.PI / 2,
+  mech: 0.35,
+  drone: 0,
+  gunship: 0,
+};
+
 export class Enemy {
   constructor(type, position, rng, timeMinutes = 0) {
     this.type = type;
@@ -372,6 +384,8 @@ export class EnemyManager {
     };
     resolveObstacleCollision(position, 0.85, arenaColliders);
     const enemy = new Enemy(type, position, this.rng, timeMinutes);
+    enemy.slot = this.slotSeq || 0;
+    this.slotSeq = ((this.slotSeq || 0) + 1) % 8;
     this.enemies.push(enemy);
     // Create role-specific 3D model & skin so each enemy class reads at 32px+
     const mat = this.materials?.enemyMat;
@@ -397,7 +411,7 @@ export class EnemyManager {
   }
 
   /** Update all enemies. Returns array of actions. */
-  update(dt, playerPos, timeMinutes) {
+  update(dt, playerPos, timeMinutes, playerYaw = 0) {
     this.timeMinutes = timeMinutes;
     this.spawnTimer -= dt;
     const actions = [];
@@ -410,10 +424,71 @@ export class EnemyManager {
       // Update position with obstacle pathfinding / steering + solid collider pushback
       const isAerial = enemy.type === "drone" || enemy.type === "gunship";
       if (!isAerial) {
-        const vx = enemy.velocity.x;
-        const vz = enemy.velocity.z;
-        const spd = Math.hypot(vx, vz);
+        let vx = enemy.velocity.x;
+        let vz = enemy.velocity.z;
+        let spd = Math.hypot(vx, vz);
+        const dToPlayer = Math.hypot(enemy.position.x - playerPos.x, enemy.position.z - playerPos.z) || 1;
+        // a body that has reached its standoff can have zero velocity; the slot ring still needs to
+        // pull it round to its angle, so give the fan a floor speed to work with
+        const inRing = this.enemies.length > 1 && dToPlayer < 5;
+        if (inRing && spd < 0.4) {
+          spd = Math.max(0.8, Number(enemy.speed) || 1.2);
+          vx = 0;
+          vz = 0;
+        }
+        // the shield repositions at a trot: the front slot moves with the player's facing, and a
+        // shield that walks at 1.1 m/s can never catch a turning target
+        if (inRing && enemy.type === "shieldbearer") spd = Math.max(spd, 2.8);
+
+        // MOV-02: slot fanning + separation. The shield takes the front slot, riflemen the flanks,
+        // sappers the rear, so the crowd spreads around the player instead of stacking on one line.
+        if (spd > 0.01) {
+          if (enemy.type === "shieldbearer" && inRing) {
+            // the shield OWNS the front slot: it walks to the point in front of the player's gun
+            const ang = (Number(playerYaw) || 0);
+            const sx = playerPos.x + Math.sin(ang) * 1.9 - enemy.position.x;
+            const sz = playerPos.z + Math.cos(ang) * 1.9 - enemy.position.z;
+            const sl = Math.hypot(sx, sz) || 1;
+            vx = (sx / sl) * spd;
+            vz = (sz / sl) * spd;
+          } else if (inRing) {
+            const bias = SLOT_BIAS[enemy.type] ?? 0;
+            const spread = ((enemy.slot % 3) - 1) * 0.45;
+            const ang = (Number(playerYaw) || 0) + bias + spread;
+            const tX = playerPos.x + Math.sin(ang) * 2.3;
+            const tZ = playerPos.z + Math.cos(ang) * 2.3;
+            const sx = tX - enemy.position.x;
+            const sz = tZ - enemy.position.z;
+            const sl = Math.hypot(sx, sz) || 1;
+            vx = vx * 0.55 + (sx / sl) * spd * 0.45;
+            vz = vz * 0.55 + (sz / sl) * spd * 0.45;
+          }
+          // bodies inside 2.2 m push each other apart
+          let px = 0;
+          let pz = 0;
+          for (const other of this.enemies) {
+            if (other === enemy || other.hp <= 0) continue;
+            const ox = enemy.position.x - other.position.x;
+            const oz = enemy.position.z - other.position.z;
+            const od = Math.hypot(ox, oz);
+            if (od > 0.001 && od < 2.2) {
+              const w = (2.2 - od) / 2.2;
+              px += (ox / od) * w;
+              pz += (oz / od) * w;
+            }
+          }
+          if (px !== 0 || pz !== 0) {
+            const pl = Math.hypot(px, pz) || 1;
+            vx += (px / pl) * spd * 0.7;
+            vz += (pz / pl) * spd * 0.7;
+          }
+          const nl = Math.hypot(vx, vz) || 1;
+          vx = (vx / nl) * spd;
+          vz = (vz / nl) * spd;
+        }
+
         const colRadius = enemy.type === "mech" ? 1.05 : enemy.type === "shieldbearer" ? 0.75 : 0.55;
+        enemy._move = { x: vx, z: vz, spd };
         if (spd > 0.01) {
           const steered = steerAroundObstacles(enemy.position, vx / spd, vz / spd, colRadius, arenaColliders);
           enemy.position.x += steered.x * spd * dt;

@@ -89,6 +89,8 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
     return out;
   }
   out.target = target;
+  out.targetX = target.mesh.position.x;
+  out.targetZ = target.mesh.position.z;
 
   const dx = target.mesh.position.x - state.pos.x;
   const dz = target.mesh.position.z - state.pos.z;
