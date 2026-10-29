@@ -78,6 +78,7 @@ export const SAMPLE_MAP = {
   launch: "./assets/sfx/launch.mp3",
   levelup: "./assets/sfx/levelup.mp3",
   death: "./assets/sfx/death.mp3",
+  ambience: "./assets/sfx/ambience-rain.mp3",
 };
 
 export async function initAudio() {
@@ -87,6 +88,9 @@ export async function initAudio() {
   let sfxGain = null;
   let musicGain = null;
   let musicOsc = null;
+  let ambienceSrc = null;
+  let ambienceGain = null;
+  let ambienceFilter = null;
   let masterVol = 0.8;
   let sfxVol = 1.0;
   let musicVol = 0.6;
@@ -164,6 +168,40 @@ export async function initAudio() {
       // No music bed. A bare 48-64 Hz sine/sawtooth read as an electrical hum, not atmosphere, and
       // it ran under everything. Silence is better than a buzz; the SFX carry the scene.
       musicOsc = null;
+    },
+    /** Rain/wind bed: looped, lowpassed, low gain - atmosphere, not a hum. */
+    async startAmbience(file = "./assets/sfx/ambience-rain.mp3", volume = 0.1) {
+      const c = ensureContext();
+      if (!c) return;
+      if (ambienceSrc) return;
+      try {
+        if (!loadPromise) loadPromise = loadSamples();
+        await loadPromise;
+        let buf = buffers.get("ambience");
+        if (!buf) {
+          const res = await fetch(file);
+          buf = await c.decodeAudioData(await res.arrayBuffer());
+          buffers.set("ambience", buf);
+        }
+        ambienceSrc = c.createBufferSource();
+        ambienceSrc.buffer = buf;
+        ambienceSrc.loop = true;
+        ambienceFilter = c.createBiquadFilter();
+        ambienceFilter.type = "lowpass";
+        ambienceFilter.frequency.value = 1800;
+        ambienceGain = c.createGain();
+        ambienceGain.gain.value = Math.max(0, Math.min(0.3, volume));
+        ambienceSrc.connect(ambienceFilter).connect(ambienceGain).connect(masterGain);
+        ambienceSrc.start();
+      } catch (_) {
+        ambienceSrc = null;
+      }
+    },
+    stopAmbience() {
+      try { if (ambienceSrc) { ambienceSrc.stop(); ambienceSrc.disconnect(); } } catch (_) {}
+      ambienceSrc = null;
+      ambienceGain = null;
+      ambienceFilter = null;
     },
     stopMusic() {
       if (musicOsc) {

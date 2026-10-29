@@ -1025,6 +1025,7 @@ function startRun(arenaId = "arena1") {
     bossEnemy: null,
   });
   audioController?.playSfx("launch", { volume: 0.7 });
+  audioController?.startAmbience?.();
   // manager stat block -> real gameplay multipliers (integrity, speed, reload, damage, crit, tech)
   // special operations tree: fold its modifiers into this run
   state.talentMods = toRunMods(aggregate((state.cyborgProfile && state.cyborgProfile.talents) || []));
@@ -2082,6 +2083,7 @@ function update(dt, ctx) {
     // Check death — this is the run's end, so the profile banks here
     if (state.health <= 0) {
       state.phase = "results";
+  audioController?.stopAmbience?.();
   barks.trigger(state.health <= 0 ? "died" : "clear_dead");
       state.showResults = true;
       audioController?.playSfx("death", { volume: 0.8 });
