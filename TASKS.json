@@ -1551,9 +1551,15 @@
         "docs/TTK.md"
       ],
       "evidence": [
-        "build 4a627104b180 (opencode/beam-free): {\"tool\": \"read\", \"path\": \"GAME.md\"}\n{\"tool\": \"read\", \"path\": \"PLAN.md\"}\n{\"tool\": \"read\", \"path\": \"TASKS.json\"}\n{\"tool\": \"read\", \"path\": \"GDD.md\"}\n{\"tool\": \"read\", \"path\": \"ART_BIBLE.md\"}\n{\"tool\": \"read\", \"path\": \"ASSET_PLAN.md\"}\n{\"tool\": \"read\", \"path\": \"TECH_SPEC.md\"}\n{\"tool\": \"read\", \"path\": \"QA.md\"}\n{\"tool\": \"read\", \"path\": \"DECISIONS.md\"}\n{\"tool\": \"read\", \"path\": \".forge/briefs/03-engine-math.md\"}"
+        "balance.js exports bossHp(baseHp, level) (sha256:d3993d3efce8b5ae)",
+        "main.js calls bossHp(base, cyborgProfile.level) instead of inline *2+2600",
+        "level-1 parity verified: base 2600 -> 7800 (identical to the old formula); base 3900 -> 10400",
+        "gate green: SYNTAX OK + REGRESS OK (playing, kills, tray, 0 errors)"
       ],
-      "artifacts": [],
+      "artifacts": [
+        "src/balance.js",
+        "src/main.js"
+      ],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },

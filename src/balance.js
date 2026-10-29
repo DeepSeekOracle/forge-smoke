@@ -24,6 +24,15 @@ export function shieldGate(damage, { shielded = false, flanked = false, pierce =
   return 0;
 }
 
+/**
+ * Boss HP for a run. Level 1 reproduces the old live formula exactly (base*2 + 2600); each player
+ * level above 1 adds 15% of the base, so a boss stays a boss as the cyborg grows.
+ */
+export function bossHp(baseHp, level = 1) {
+  const steps = Math.max(0, (Number(level) || 1) - 1);
+  return Math.round(baseHp * (2 + 0.15 * steps) + 2600);
+}
+
 /** Shots needed and seconds to kill, using the same armour model as live combat. */
 export function timeToKill(weapon, hp, armour = 0) {
   const perShot = damageAfterArmour(weapon.damage, armour);

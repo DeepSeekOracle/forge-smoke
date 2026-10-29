@@ -20,6 +20,7 @@ import { createSummary } from "./summaryui.js?v=20261030m";
 import { createBarks } from "./barks.js?v=20261030m";
 import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030m";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030m";
+import { bossHp } from "./balance.js?v=20261030n";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
 import { pilot } from "./autopilot.js?v=20261030m";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030m";
@@ -2011,7 +2012,7 @@ function update(dt, ctx) {
       const kind = state.arenaBossKind || (state.kills % 2 === 0 ? "mech" : "gunship");
       const boss = enemyManager.spawn(kind, state.pos, beatDirector.runTime / 60);
       if (boss) {
-        boss.hp = Math.round(boss.hp * 2 + 2600);   // hard, but a built cyborg can finish it
+        boss.hp = bossHp(boss.hp, (state.cyborgProfile && state.cyborgProfile.level) || 1);
         boss.maxHp = boss.hp;
         boss.isBoss = true;
         barks.trigger("boss_spawn");
