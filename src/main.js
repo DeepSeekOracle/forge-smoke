@@ -22,7 +22,7 @@ import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030m";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
 import { bossHp } from "./balance.js?v=20261030n";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
-import { pilot } from "./autopilot.js?v=20261030m";
+import { pilot } from "./autopilot.js?v=20261030q";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030m";
 import { createStartMenu } from "./startmenu.js?v=20261030m";
 import { createGamepad } from "./gamepad.js?v=20261030m";
@@ -70,40 +70,8 @@ const HUD_SLOTS = {
   title: 0.072,
   bossLabel: 0.110,
   bossBar: 0.132,
-  objective: 0.168,
   statusBanner: 0.196,
 };
-
-/** Ground markers for the autopilot's capture zones: current zone amber, held zones dim. */
-const zoneMarkers = [];
-function updateZoneMarkers() {
-  const zones = state.objZones || [];
-  const on = state.phase === "playing" && zones.length > 0;
-  for (const m of zoneMarkers) m.visible = false;
-  if (!on) return;
-  while (zoneMarkers.length < zones.length) {
-    const ring = new THREE.Mesh(
-      new THREE.RingGeometry(1.55, 1.85, 40),
-      new THREE.MeshBasicMaterial({ color: 0xffb347, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false })
-    );
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.y = 0.03;
-    ring.renderOrder = 2;
-    scene.add(ring);
-    zoneMarkers.push(ring);
-  }
-  for (let i = 0; i < zones.length; i += 1) {
-    const ring = zoneMarkers[i];
-    const z = zones[i];
-    ring.visible = true;
-    ring.position.x = z.x;
-    ring.position.z = z.z;
-    const current = i === (state.objIndex || 0) % zones.length;
-    ring.material.color.setHex(current ? 0xffb347 : 0x5a6b7c);
-    ring.material.opacity = current ? (state.pilotMode === "securing" ? 0.85 : 0.55) : 0.2;
-  }
-}
-
 
 const TREE_COUNT = lowEnd ? 6 : 16;
 const BUSH_COUNT = lowEnd ? 6 : 20;
@@ -596,6 +564,30 @@ if (testMode) {
       return (performance.now() - t0) / n;
     },
     getEnemies: () => enemyManager,
+    // MOV-01..04 metrics: distance travelled, camera push, boss dodge, spacing, frozen frames
+    getPilot: () => {
+      const live = enemyManager.enemies.filter((e) => e.hp > 0 && e.mesh);
+      let sum = 0;
+      let pairs = 0;
+      for (let i = 0; i < live.length; i += 1) {
+        for (let j = i + 1; j < live.length; j += 1) {
+          sum += Math.hypot(live[i].mesh.position.x - live[j].mesh.position.x,
+            live[i].mesh.position.z - live[j].mesh.position.z);
+          pairs += 1;
+        }
+      }
+      return {
+        mode: state.pilotMode,
+        runTime: +beatDirector.runTime.toFixed(2),
+        distance: +(state.pilotDistance || 0).toFixed(2),
+        odometer: +(state.odometer || 0).toFixed(2),
+        camPushMax: +(state.camPushMax || 0).toFixed(3),
+        bossDodgeMax: +(state.bossDodgeMax || 0).toFixed(2),
+        zeroMoveFrames: state.zeroMoveFrames || 0,
+        enemies: live.length,
+        spacing: pairs ? +(sum / pairs).toFixed(2) : 0,
+      };
+    },
     getEnemyTypes: () => Object.keys(ENEMY_TYPES),
     // MGR-07: spawn a real archetype and report the stat block the run will fight
     spawnType: (t) => {
@@ -898,25 +890,11 @@ function syncHud() {
       h.remove("boss-bar");
     }
 
-    // Objective readout: what the autonomous pilot is doing (zones come from autopilot.js)
-    const objZones = state.objZones || [];
-    const objOn = state.phase === "playing" && objZones.length > 0 && state.pilotMode !== "boss";
-    if (objOn) {
-      const zi = (state.objIndex || 0) % objZones.length;
-      const pct = Math.min(100, Math.round(((state.objProgress || 0) / 3) * 100));
-      const line = state.pilotMode === "securing"
-        ? `OBJECTIVE // SECURING ZONE ${zi + 1}/${objZones.length} - ${pct}%`
-        : `OBJECTIVE // ADVANCING TO ZONE ${zi + 1}/${objZones.length}`;
-      if (hudObjective !== line) {
-        hudObjective = line;
-        T("obj-hud", line, { x: 0.5, y: HUD_SLOTS.objective, size: TYPE_SCALE.micro, color: PALETTE.ui, weight: 700 });
-      }
-    } else if (hudObjective !== null) {
+    // Objective readout removed with the defend-location system: there are no capture zones.
+    if (hudObjective !== null) {
       hudObjective = null;
       h.remove("obj-hud");
     }
-
-    updateZoneMarkers();
 
     // "THE DARKNESS COMES" status banner when ambient light dims
     const darkPct = Math.round((state.darknessFactor || 0) * 100);
@@ -1126,6 +1104,11 @@ function startRun(arenaId = "arena1") {
     runXp: 0,
     pilotClock: 0,
     pilotMode: "hold",
+    pilotVel: { x: 0, z: 0 },
+    odometer: 0,
+    camPushMax: 0,
+    bossDodgeMax: 0,
+    bossDodgeAccum: 0,
     cardsPlayed: 0,
     bossSpawned: false,
     bossPaid: false,
@@ -1896,7 +1879,8 @@ function update(dt, ctx) {
     }
 
     state.t += dt;
-    beatDirector.runTime += dt;
+    // NOTE: beatDirector.update(dt) advances runTime itself. The extra += that used to be here made
+    // the whole game clock run at 2x (beats, difficulty, XP/s, boss threshold); removed.
 
     // MATH-04: a clean run still earns card XP from time survived (tuned in tuning.js)
     cardSystem.addXp(dt * (TUNING.progression.xpPerSecond || 0));
@@ -1918,17 +1902,25 @@ function update(dt, ctx) {
       mx = steered.x; mz = steered.z;
       state.pilotMode = c.mode;
       state.pilotDistance = c.distance;
+      state.pilotThrottle = c.throttle ?? 1;
+      if (c.hasTarget && c.distance > 2 && c.mx === 0 && c.mz === 0) state.zeroMoveFrames = (state.zeroMoveFrames || 0) + 1;
     }
     if (mx !== 0 || mz !== 0) {
       const length = Math.hypot(mx, mz);
       mx /= length; mz /= length;
-      const speed = weaponManager.active.styleKey === "spinup" && weaponManager.active.spinupProgress > 0
+      const speed = (weaponManager.active.styleKey === "spinup" && weaponManager.active.spinupProgress > 0
         ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult * TUNING.player.spinupSpeedMult
         : state.aimMode
           ? TUNING.player.baseSpeed * TUNING.player.aimModeSpeedMult
-          : TUNING.player.baseSpeed;
+          : TUNING.player.baseSpeed) * (state.autopilot ? (state.pilotThrottle ?? 1) : 1);
       state.pos.x += mx * speed * dt;
       state.pos.z += mz * speed * dt;
+      // MOV-01 metric: distance actually travelled this run (survives collision pushback)
+      state.odometer = (state.odometer || 0) + speed * dt;
+      if (state.bossWarning > 0) {
+        state.bossDodgeAccum = (state.bossDodgeAccum || 0) + speed * dt;
+        state.bossDodgeMax = Math.max(state.bossDodgeMax || 0, state.bossDodgeAccum);
+      }
       // Solid arena props block the player (colliders registered by populateArenaProps)
       resolveObstacleCollision(state.pos, 0.55, arenaColliders);
       const radius = Math.hypot(state.pos.x, state.pos.z);
@@ -2157,6 +2149,7 @@ function update(dt, ctx) {
       if (state.bossTimer > 6) {
         state.bossTimer = 0;
         state.bossWarning = 1.4;              // telegraph window
+        state.bossDodgeAccum = 0;             // MOV-04: measure this telegraph's displacement
       }
       if (state.bossWarning > 0) {
         state.bossWarning = Math.max(0, state.bossWarning - dt);
@@ -2204,10 +2197,18 @@ function update(dt, ctx) {
     camera.position.lerp(vDesired, lerpFactor);
     // keep the camera out of cover: a container swallowing the view reads as a broken game
     const camProbe = { x: camera.position.x, z: camera.position.z };
+    const camX0 = camera.position.x;
+    const camZ0 = camera.position.z;
     if (resolveObstacleCollision(camProbe, 1.6, arenaColliders)) {
-      camera.position.x = camProbe.x;
-      camera.position.z = camProbe.z;
-      camera.position.y = Math.max(camera.position.y, 4.6);
+      // MOV-03: apply at most 1 m of lateral correction (acceptance), and lift the arm over the
+      // cover instead when the probe wants more than that. A big push means "look down over it".
+      const pushed = Math.hypot(camProbe.x - camX0, camProbe.z - camZ0);
+      const applied = Math.min(pushed, 1.0);
+      const s = pushed > 0 ? applied / pushed : 0;
+      camera.position.x = camX0 + (camProbe.x - camX0) * s;
+      camera.position.z = camZ0 + (camProbe.z - camZ0) * s;
+      camera.position.y = Math.max(camera.position.y, pushed > 0.55 ? 8.5 : 4.6);
+      state.camPushMax = Math.max(state.camPushMax || 0, applied);
     }
     camera.lookAt(state.pos.x, 1.25, state.pos.z);
 
