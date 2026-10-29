@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321n";
-import { standardMaterial } from "./materials.js?v=202610321n";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321n";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321n";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610321q";
+import { standardMaterial } from "./materials.js?v=202610321q";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610321q";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610321q";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610321n";
-import { TUNING } from "./tuning.js?v=202610321n";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321n";
-import { createCardTray } from "./cardsui.js?v=202610321n";
-import { createSummary } from "./summaryui.js?v=202610321n";
-import { createBarks } from "./barks.js?v=202610321n";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321n";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321n";
-import { bossHp } from "./balance.js?v=202610321n";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321n";
-import { pilot } from "./autopilot.js?v=202610321n";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321n";
-import { createStartMenu } from "./startmenu.js?v=202610321n";
-import { createGamepad } from "./gamepad.js?v=202610321n";
-import { createTalentWindow } from "./talentui.js?v=202610321n";
-import { aggregate, toRunMods } from "./talents.js?v=202610321n";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321n";
+} from "./theme.js?v=202610321q";
+import { TUNING } from "./tuning.js?v=202610321q";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610321q";
+import { createCardTray } from "./cardsui.js?v=202610321q";
+import { createSummary } from "./summaryui.js?v=202610321q";
+import { createBarks } from "./barks.js?v=202610321q";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610321q";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610321q";
+import { bossHp } from "./balance.js?v=202610321q";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610321q";
+import { pilot } from "./autopilot.js?v=202610321q";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610321q";
+import { createStartMenu } from "./startmenu.js?v=202610321q";
+import { createGamepad } from "./gamepad.js?v=202610321q";
+import { createTalentWindow } from "./talentui.js?v=202610321q";
+import { aggregate, toRunMods } from "./talents.js?v=202610321q";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610321q";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610321n";
-import * as levelModule from "./level.js?v=202610321n";
-import * as menuModule from "./menu.js?v=202610321n";
-import * as audioModule from "./audio.js?v=202610321n";
-import * as fxModule from "./fx.js?v=202610321n";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610321n";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321n";
+} from "./models.js?v=202610321q";
+import * as levelModule from "./level.js?v=202610321q";
+import * as menuModule from "./menu.js?v=202610321q";
+import * as audioModule from "./audio.js?v=202610321q";
+import * as fxModule from "./fx.js?v=202610321q";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610321q";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610321q";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610321n";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321n";
+import { createCasings } from "./casings.js?v=202610321q";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610321q";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -311,7 +311,7 @@ playerRim.position.set(0, 2.35, -1.45);
 soldier.add(playerRim);
 const steel = standardMaterial({ ...MATERIAL_RECIPES.playerSteel, size: TEX_SIZE });
 const gunPivot = new THREE.Group();
-gunPivot.position.set(-0.08, 1.46, 0.16);
+gunPivot.position.set(-0.2, 1.42, 0.3);
 
 // Weapon-Mounted Tactical Flashlight (SpotLight + Target) attached to gunPivot — OFF by default until card/light-gun unlocked
 const gunFlashlight = new THREE.SpotLight(0xffe8a3, 0, 22, 0.46, 0.45, 1.3);
@@ -1577,7 +1577,14 @@ function syncHud() {
 
     // ── hit marker (screen centre) ───────────────────────────────────────────
     if ((state.hitMarker || 0) > 0) {
-      T("hitmarker", "X", { x: 0.5, y: 0.5, size: TYPE_SCALE.title, color: state.hitMarkerKill ? "#ff5a5a" : "#ffe9a8", weight: 900, align: "center" });
+      // four diagonal ticks, not a giant letter X
+      const c = 0.5, i = 0.012, o = 0.026;
+      const color = state.hitMarkerKill ? "#ff5a5a" : "#ffe9a8";
+      const d = "M " + (c - o) + " " + (c - o) + " L " + (c - i) + " " + (c - i)
+        + " M " + (c + i) + " " + (c - i) + " L " + (c + o) + " " + (c - o)
+        + " M " + (c - i) + " " + (c + i) + " L " + (c - o) + " " + (c + o)
+        + " M " + (c + o) + " " + (c + i) + " L " + (c + i) + " " + (c + o);
+      P("hitmarker", { type: "path", x: 0.47, y: 0.47, w: 0.06, h: 0.06, d, viewBox: [0, 0, 1, 1], fill: null, stroke: color, width: 0.0035 });
     } else {
       h.remove("hitmarker");
     }

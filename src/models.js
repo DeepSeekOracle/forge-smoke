@@ -342,7 +342,7 @@ export function buildOperatorRig(soldier, gunPivot, texSize = 256, skinIndex = 0
 
   if (gunPivot) {
     // Positioned at the Vanguard Soldier's shoulder/hands rifle grip (rHand=[-0.14, 1.45, 0.25], lHand=[0.0, 1.48, 0.36])
-    gunPivot.position.set(-0.08, 1.46, 0.16);
+    gunPivot.position.set(-0.2, 1.42, 0.3);
     if (gunPivot.parent !== soldier) {
       soldier.add(gunPivot);
     }
@@ -450,13 +450,16 @@ export function updateOperatorAnimation(soldier, gunPivot, dt, isMoving = false,
   }
   let reloadTilt = 0;
   if (gunPivot) {
-    gunPivot.position.set(-0.08, 1.46, 0.16);
+    gunPivot.position.set(-0.2, 1.42, 0.3);
     if (activeWeapon && activeWeapon.isReloading) {
       const phase = activeWeapon.getReloadPhase();
       const rawAngle = phase && Number.isFinite(phase.angle) ? (phase.angle * Math.PI) / 180 : -0.38;
       const targetAngle = Number.isFinite(rawAngle) ? rawAngle : 0;
       if (!Number.isFinite(gunPivot.rotation.x)) gunPivot.rotation.x = 0;
       gunPivot.rotation.x += (targetAngle - gunPivot.rotation.x) * Math.min(1, dt * 14);
+      // keep the reload tilt sane: larger angles swing the rifle through the torso and it reads as
+      // "the gun disappeared"
+      gunPivot.rotation.x = Math.max(-0.55, Math.min(0.55, gunPivot.rotation.x));
       reloadTilt = Number.isFinite(gunPivot.rotation.x) ? gunPivot.rotation.x : 0;
     } else {
       gunPivot.rotation.x += (0 - gunPivot.rotation.x) * Math.min(1, dt * 12);
