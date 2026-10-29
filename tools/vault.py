@@ -81,7 +81,16 @@ def lock_readonly(root: Path) -> int:
     return n
 
 
-def snapshot(project: Path, label: str | None) -> None:
+def snapshot(project: Path, label: str | None, verify_cmd: str | None = None) -> None:
+    if verify_cmd:
+        print(f"  verifying before snapshot: {verify_cmd}")
+        rc = subprocess.run(verify_cmd, shell=True, cwd=str(project)).returncode
+        if rc != 0:
+            ledger(project, {"action": "snapshot_refused", "verify_cmd": verify_cmd, "exit": rc})
+            print(f"  REFUSED: verification exited {rc}; the working tree is not a confirmed build")
+            print("  fix it (see project-vault skill, recovery runbook) and snapshot again")
+            return
+        print("  verification passed")
     commit = git(project, "rev-parse", "--short", "HEAD") or "nogit"
     dirty = bool(git(project, "status", "--porcelain"))
     dest = project_vault(project) / "RELEASE-READONLY" / commit
@@ -180,6 +189,36 @@ def verify(project: Path) -> None:
                      "added": added, "changed": changed, "deleted": deleted})
 
 
+def doctor(project: Path | None) -> None:
+    """Coverage report: which projects are vaulted, how stale, and how much drift."""
+    print("  MIRROR VAULT DOCTOR")
+    print(f"  root: {VAULT_ROOT}")
+    if not VAULT_ROOT.exists():
+        print("  root does not exist")
+        return
+    for d in sorted(VAULT_ROOT.iterdir()):
+        if not d.is_dir():
+            continue
+        rel_root = d / "RELEASE-READONLY"
+        rels = sorted([r for r in rel_root.iterdir() if r.is_dir()], key=lambda x: x.stat().st_mtime) if rel_root.exists() else []
+        subs = d / "SUBMISSIONS"
+        nsubs = len([x for x in subs.iterdir() if x.is_dir()]) if subs.exists() else 0
+        led = d / "LEDGER.jsonl"
+        nled = len(led.read_text(encoding="utf-8").splitlines()) if led.exists() else 0
+        newest = rels[-1] if rels else None
+        age = ""
+        if newest:
+            days = (dt.datetime.now() - dt.datetime.fromtimestamp(newest.stat().st_mtime)).days
+            age = f"{days}d ago"
+        files = len([f for f in newest.rglob("*") if f.is_file()]) if newest else 0
+        proj = d / "PROJECT_PATH.txt"
+        print(f"  {d.name:<26} releases={len(rels):<2} newest={newest.name if newest else '-':<9} "
+              f"{age:<8} files={files:<5} submissions={nsubs:<3} ledger={nled}")
+    if project is not None:
+        print("  --- drift for " + project.name + " ---")
+        verify(project)
+
+
 def zip_release(project: Path) -> None:
     rel = newest_release(project)
     if not rel:
@@ -197,20 +236,24 @@ def zip_release(project: Path) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="LYGO mirror vault")
-    ap.add_argument("command", choices=["snapshot", "submit", "backup", "verify", "zip", "ledger"])
+    ap.add_argument("command", choices=["snapshot", "submit", "backup", "verify", "zip", "ledger", "doctor"])
     ap.add_argument("project")
     ap.add_argument("--label")
+    ap.add_argument("--verify-cmd")
     ap.add_argument("--task", default="")
     ap.add_argument("--agent", default="")
     ap.add_argument("--paths", nargs="*", default=[])
     a = ap.parse_args()
-    project = Path(a.project).resolve()
-    if not project.exists():
+    project = Path(a.project).resolve() if a.project else None
+    if a.command == "doctor":
+        doctor(project)
+        return 0
+    if project is None or not project.exists():
         print(f"  no such project: {project}")
         return 2
     project_vault(project)
     if a.command == "snapshot":
-        snapshot(project, a.label)
+        snapshot(project, a.label, a.verify_cmd)
     elif a.command in ("submit", "backup"):
         submit(project, a.task, a.agent, a.paths)
     elif a.command == "verify":
