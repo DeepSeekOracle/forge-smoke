@@ -19,3 +19,14 @@ that permits commercial use; attribution is recorded here because it is owed.
 - Kenney.nl and several asset-store pages were tried first and could not be downloaded (hashed paths,
   no direct file URLs), which is why this list is GitHub-sourced.
 - Poly Haven's API is the next stop for CC0 environment textures/HDRI if the maps need them.
+
+## Card plates (brief 01) — generated locally, no download
+
+cardsui.js draws six effect-family plates at runtime on a 768x512 canvas: pierce, chain, spinup,
+ricochet, drone, armour. Original work, project-owned, no text baked in, ~40 KB as JPEG data URLs at
+load (not shipped as files).
+
+Qwen-Image 2.1 was attempted first via 	ools/generate_image.ps1 at 768x512, but on this 8 GB card the
+diffusion model fails to allocate its backend buffer (ggml_backend_cpu_buffer_type_alloc_buffer:
+failed to allocate 4003 MB), so the pipeline is procedural until a larger card or smaller quant is
+available.

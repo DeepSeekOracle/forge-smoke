@@ -529,7 +529,8 @@ export class CardSystem {
       } else if (i === 1 && this.rng() < 0.65) {
         const chosenMod = pickUnique(lightAndReloadPool);
         options.push({ type: "part", name: chosenMod.name, part: chosenMod });
-      } else if (this.rng() < 0.4) {
+      } else if (!this.lastHadWeapon && this.rng() < 0.16) {
+        // weapon cards are the rarest offer (16 %, and never two trays in a row)
         // never offer the same weapon twice in one tray
         const open = styles.filter((s) => !used.has(`wpn_${s}`));
         const st = open.length ? open[Math.floor(this.rng() * open.length)] : styles[Math.floor(this.rng() * styles.length)];
@@ -549,6 +550,7 @@ export class CardSystem {
         }
       }
     }
+    this.lastHadWeapon = options.some((o) => o.type === "weapon");
     this.queuedCards.push(options);
     return options;
   }

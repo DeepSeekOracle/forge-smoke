@@ -2,18 +2,25 @@
 
 Every task is finished by running one of these and pasting the output. No output, no credit.
 
-## 0. Bump versions (do this before any test)
+## 0. Patch safely, then bump every module together
 
-```powershell
-$p = 'C:\Users\justi\AI Games\forge-smoke'
-(Get-Content "$p\src\main.js" -Raw) -replace '\?v=2026\d{4}\w', '?v=20261030n' |
-  Set-Content "$p\src\main.js" -Encoding utf8 -NoNewline
-(Get-Content "$p\index.html" -Raw) -replace 'main\.js\?v=\w+', 'main.js?v=20261030n' |
-  Set-Content "$p\index.html" -Encoding utf8 -NoNewline
-```
+Never hand-edit with a string replace that can silently miss. Use the exact-anchor patcher:
 
-Pick a letter nobody has used (the steward keeps the live one current in `STATE.md`). Both files must
-match. If only one is bumped you will "fix" something that never loads.
+`powershell
+python tools/patch.py src/main.js old.txt new.txt   # fails loudly if the anchor is absent
+python tools/patch.py --self-test
+`
+
+Then bump all module versions in one pass (this rewrites every ?v= in src/**.js and index.html
+and runs the module-strict syntax check):
+
+`powershell
+python tools/bump.py 202610320m
+`
+
+A half-bump mixes old and new modules. main.js logs [forge] BUILD <version> and sets
+window.__forgeBuild; runtime errors (including unhandled promise rejections) render in a red strip at
+the top of the page with that build tag instead of black-screening the game.
 
 ## 1. Boot test (run this after ANY change)
 

@@ -15,6 +15,113 @@ const RARITY = {
   epic: { name: "CLASSIFIED", a: "#7B5BD6", b: "#B79CFF", glow: "rgba(183,156,255,.6)", ink: "#ddd0ff" },
 };
 
+/**
+ * Procedural card plates (brief 01). Qwen generation is blocked on this 8 GB card (the diffusion
+ * model fails to allocate), so the six effect-family plates are drawn locally on a canvas instead:
+ * 768x512, dark military palette, no text baked in.
+ */
+const PLATE_CACHE = new Map();
+function plate(kind) {
+  if (PLATE_CACHE.has(kind)) return PLATE_CACHE.get(kind);
+  const c = document.createElement("canvas");
+  c.width = 768; c.height = 512;
+  const g = c.getContext("2d");
+  const bg = g.createLinearGradient(0, 0, 0, 512);
+  bg.addColorStop(0, "#121b26");
+  bg.addColorStop(0.55, "#0b121a");
+  bg.addColorStop(1, "#060a0f");
+  g.fillStyle = bg;
+  g.fillRect(0, 0, 768, 512);
+  g.strokeStyle = "rgba(159,179,200,0.07)";
+  g.lineWidth = 1;
+  for (let x = 0; x <= 768; x += 48) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 512); g.stroke(); }
+  for (let y = 0; y <= 512; y += 48) { g.beginPath(); g.moveTo(0, y); g.lineTo(768, y); g.stroke(); }
+  let seed = 96;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  g.fillStyle = "rgba(0,0,0,0.25)";
+  for (let i = 0; i < 160; i += 1) {
+    const r = 1 + rnd() * 3;
+    g.beginPath(); g.arc(rnd() * 768, rnd() * 512, r, 0, Math.PI * 2); g.fill();
+  }
+  const amber = "#ffb347", cyan = "#6fe3ff", green = "#a6ff7a", violet = "#b79cff", red = "#f2545b";
+  g.save();
+  g.translate(384, 256);
+  g.shadowBlur = 26;
+  if (kind === "pierce") {
+    g.shadowColor = cyan;
+    g.strokeStyle = cyan;
+    for (let i = -2; i <= 2; i += 1) {
+      g.lineWidth = 7;
+      g.beginPath(); g.moveTo(-260, 120 + i * 40); g.lineTo(240, -120 + i * 40); g.stroke();
+    }
+    g.fillStyle = "rgba(10,16,22,0.9)";
+    g.fillRect(-70, -150, 140, 300);
+    g.strokeStyle = "rgba(255,179,71,0.5)"; g.lineWidth = 2; g.strokeRect(-70, -150, 140, 300);
+  } else if (kind === "chain") {
+    g.shadowColor = violet;
+    g.strokeStyle = violet;
+    g.lineWidth = 6;
+    g.beginPath(); g.moveTo(-240, -40);
+    let x = -240, y = -40;
+    for (let i = 0; i < 9; i += 1) { x += 55; y = -40 + (i % 2 ? -55 : 55); g.lineTo(x, y); }
+    g.stroke();
+    g.fillStyle = amber;
+    g.fillRect(-270, -60, 30, 40); g.fillRect(210, -60, 30, 40);
+  } else if (kind === "spinup") {
+    g.shadowColor = amber;
+    g.strokeStyle = amber;
+    g.lineWidth = 10;
+    for (let i = 0; i < 8; i += 1) {
+      const a = (i / 8) * Math.PI * 2;
+      g.beginPath(); g.moveTo(Math.cos(a) * 40, Math.sin(a) * 40); g.lineTo(Math.cos(a) * 150, Math.sin(a) * 150); g.stroke();
+    }
+    g.fillStyle = "rgba(255,179,71,0.18)";
+    g.beginPath(); g.arc(0, 0, 70, 0, Math.PI * 2); g.fill();
+  } else if (kind === "ricochet") {
+    g.shadowColor = green;
+    g.strokeStyle = green;
+    g.lineWidth = 5;
+    g.beginPath(); g.moveTo(-260, 150); g.lineTo(-40, -40); g.lineTo(190, 120); g.stroke();
+    g.fillStyle = green;
+    for (const p of [[-40, -40], [190, 120], [-150, 60], [80, 40]]) { g.beginPath(); g.arc(p[0], p[1], 5, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = "rgba(10,16,22,0.9)"; g.fillRect(-90, -210, 180, 64);
+  } else if (kind === "drone") {
+    g.shadowColor = cyan;
+    g.fillStyle = "#1a2531"; g.strokeStyle = cyan; g.lineWidth = 4;
+    g.beginPath(); g.ellipse(0, 0, 70, 40, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    for (const s of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      g.beginPath(); g.arc(s[0] * 110, s[1] * 70, 34, 0, Math.PI * 2); g.stroke();
+    }
+    const beam = g.createLinearGradient(0, 40, 0, 230);
+    beam.addColorStop(0, "rgba(111,227,255,0.55)"); beam.addColorStop(1, "rgba(111,227,255,0)");
+    g.fillStyle = beam;
+    g.beginPath(); g.moveTo(-24, 40); g.lineTo(24, 40); g.lineTo(150, 240); g.lineTo(-150, 240); g.closePath(); g.fill();
+  } else {
+    g.shadowColor = amber;
+    g.strokeStyle = amber; g.lineWidth = 4;
+    for (let i = 0; i < 3; i += 1) {
+      const w = 220 - i * 34;
+      g.beginPath();
+      for (let k = 0; k < 6; k += 1) {
+        const a = (k / 6) * Math.PI * 2 + Math.PI / 6;
+        const px = Math.cos(a) * (w * 0.5), py = Math.sin(a) * (w * 0.42);
+        if (k === 0) g.moveTo(px, py); else g.lineTo(px, py);
+      }
+      g.closePath(); g.stroke();
+    }
+    g.fillStyle = "rgba(255,179,71,0.12)"; g.fillRect(-110, -110, 220, 220);
+  }
+  g.restore();
+  g.strokeStyle = "rgba(255,179,71,0.35)";
+  g.lineWidth = 3;
+  g.strokeRect(10, 10, 748, 492);
+  g.fillStyle = "rgba(255,179,71,0.5)";
+  for (const p of [[22, 22], [746, 22], [22, 490], [746, 490]]) { g.fillRect(p[0] - 2, p[1] - 2, 4, 4); }
+  const url = c.toDataURL("image/jpeg", 0.86);
+  PLATE_CACHE.set(kind, url);
+  return url;
+}
+
 const CARD_ART = {
   weapon: "./assets/cards/weapon.jpg",
   explosive: "./assets/cards/explosive.jpg",
@@ -27,7 +134,20 @@ const CARD_ART = {
 function cardArt(card) {
   const e = card.part?.effect || {};
   const id = String(card.part?.id || "");
-  if (card.type === "weapon") return CARD_ART.weapon;
+  const style = String(card.style || "");
+  if (card.type === "weapon") {
+    if (style === "chain" || style === "arc") return plate("chain");
+    if (style === "spinup") return plate("spinup");
+    if (style === "ricochet") return plate("ricochet");
+    if (style === "rail" || style === "rail2" || style === "pierce" || style === "flak") return plate("pierce");
+    return CARD_ART.weapon;
+  }
+  if (/ap_rounds|pierce|rail|penetr/.test(id) || e.pierceCount) return plate("pierce");
+  if (/chain|tesla|arc_|overload/.test(id)) return plate("chain");
+  if (/spinup|minigun|gatling|drum/.test(id)) return plate("spinup");
+  if (/ricochet|bank/.test(id)) return plate("ricochet");
+  if (/drone/.test(id) || e.lightDrone) return plate("drone");
+  if (/plate|ceramic|reactive|armour|armor/.test(id) || e.armor) return plate("armour");
   if (e.explosive || e.blast || e.shieldPierce || /frag|breach|grenade|satchel/.test(id)) return CARD_ART.explosive;
   if (e.lightBeamMult || e.lightOrbMult || e.solarAura || e.lightDrone || e.lightBeacon || /light|flare|lumen|phosphor/.test(id)) return CARD_ART.light;
   if (e.reloadMult || e.magMult || /mag|ammo|supply|quartermaster|rack/.test(id)) return CARD_ART.logistics;
