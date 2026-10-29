@@ -3,6 +3,9 @@
 import { TUNING } from "../src/tuning.js";
 import { xpThreshold, bossHp } from "../src/balance.js";
 import { STYLE_FEEL, feelFor, tracerTaper } from "../src/stylefeel.js";
+import { MAPS, validateMap, selectMap } from "../src/maps.js";
+import { STYLE_VFX } from "../src/weapons.js";
+import { readFileSync, statSync, existsSync } from "node:fs";
 
 let checks = 0;
 function ok(cond, msg) {
@@ -50,4 +53,54 @@ const behaviours = new Set(
 );
 ok(behaviours.size >= 3, `only ${behaviours.size} distinct enemy behaviours`);
 
-console.log(`UNIT OK  ${checks} checks`);
+// MAP-01..04 — three layouts, cover only at 17-34 m, clear centre, the brief's prop counts
+ok(MAPS.length === 3, `expected 3 maps, got ${MAPS.length}`);
+for (const m of MAPS) {
+  const v = validateMap(m);
+  ok(v.ok, `${m.id} placement: ${v.problems.join("; ")}`);
+  ok(v.minRadius >= 16, `${m.id} cover inside 16 m (${v.minRadius})`);
+  ok(v.maxRadius <= 34, `${m.id} cover outside 34 m (${v.maxRadius})`);
+  ok(m.centerClear >= 10, `${m.id} centre pad smaller than 10 m`);
+}
+const depot = MAPS.find((m) => m.id === "depot");
+ok(depot.props.filter((p) => p.kind === "container").length === 6, "DEPOT needs 6 containers");
+ok(depot.props.filter((p) => p.kind === "barrier").length === 4, "DEPOT needs 4 barriers");
+ok(depot.ruins.length === 3, "DEPOT needs 3 ruin clusters");
+const yard = MAPS.find((m) => m.id === "yard");
+ok(yard.props.length === 5, `YARD needs 5 props, has ${yard.props.length}`);
+ok(yard.fogScale > 1, "YARD should have thicker fog");
+const foundry = MAPS.find((m) => m.id === "foundry");
+ok(foundry.props.length === 10, `FOUNDRY needs 10 props, has ${foundry.props.length}`);
+ok(foundry.hazardRing > foundry.centerClear, "FOUNDRY hazard ring must sit outside the centre pad");
+
+// MAP-04 — selection is deterministic by seed, rotates per run, and honours a forced map
+ok(selectMap({ seed: 7, run: 3 }).id === selectMap({ seed: 7, run: 3 }).id, "selectMap is not deterministic");
+ok(new Set([0, 1, 2].map((r) => selectMap({ seed: 4, run: r }).id)).size === 3, "map rotation does not cover all three");
+ok(selectMap({ forced: "foundry" }).id === "foundry", "forced map is ignored");
+
+// MGR-06 — every style has its own numbers (no more nine styles sharing spray stats)
+const styleKeys = Object.keys(TUNING.weapons);
+ok(styleKeys.length >= 15, `only ${styleKeys.length} weapon configs`);
+for (const key of styleKeys) {
+  const w = TUNING.weapons[key];
+  ok(w.damage > 0 && w.cycle > 0 && w.magazine > 0, `${key} has no usable damage/cycle/magazine`);
+}
+
+// AUD-03 — at least six styles carry distinct sample files, every sample is mapped and on disk,
+// and the added audio stays under 4 MB
+const sounds = new Set(Object.values(STYLE_VFX).map((v) => v.sound));
+ok(sounds.size >= 6, `only ${sounds.size} distinct weapon samples`);
+const audioSrc = readFileSync(new URL("../src/audio.js", import.meta.url), "utf8");
+for (const s of sounds) {
+  ok(audioSrc.includes(`${s}:`), `SAMPLE_MAP has no entry for ${s}`);
+}
+const samplePaths = [...audioSrc.matchAll(/"\.\/assets\/sfx\/([^"]+)"/g)].map((m) => m[1]);
+let audioBytes = 0;
+for (const f of samplePaths) {
+  const u = new URL(`../assets/sfx/${f}`, import.meta.url);
+  ok(existsSync(u), `missing audio file ${f}`);
+  audioBytes += statSync(u).size;
+}
+ok(audioBytes < 4 * 1024 * 1024, `sample bank is ${(audioBytes / 1048576).toFixed(2)} MB (cap 4 MB)`);
+
+console.log(`UNIT OK  ${checks} checks  (audio bank ${(audioBytes / 1024).toFixed(0)} KB)`);

@@ -89,16 +89,22 @@ async function boot(page) {
   await page.waitForTimeout(1200);
   const mgr = await page.evaluate(() => {
     const q = (s) => document.querySelectorAll(s).length;
+    const weaponCards = Array.from(document.querySelectorAll("#cyborg-manager [data-weapons] .mg-item"))
+      .map((el) => el.innerText.replace(/\s+/g, " ").trim());
     return {
       attrs: q("#cyborg-manager [data-attrs] button"),
       weapons: q("#cyborg-manager [data-weapons] *"),
+      weaponCards,
       perks: q("#cyborg-manager [data-perks] *"),
       attrPoints: document.querySelector("#cyborg-manager [data-attrpts]")?.textContent?.trim(),
       statsText: (document.querySelector("#cyborg-manager .mg-stats")?.innerText || "").replace(/\s+/g, " ").trim().slice(0, 240),
       name: window.__forgeSmokeTest.getManager?.() ? "manager mounted" : "no manager",
     };
   });
-  console.log("MGR-06 manager:", JSON.stringify(mgr));
+  if (mgr.weaponCards.length < 15) await fail(`only ${mgr.weaponCards.length} weapon cards`);
+  const withNumbers = mgr.weaponCards.filter((t) => /DMG .* RPM .* MAG/.test(t));
+  if (withNumbers.length < 15) await fail(`weapon numbers missing on ${15 - withNumbers.length} cards`);
+  console.log("MGR-06 manager:", JSON.stringify({ ...mgr, weaponCards: mgr.weaponCards.slice(0, 3) }));
 
   const types = await page.evaluate(() => window.__forgeSmokeTest.getEnemyTypes());
   const roster = await page.evaluate((list) => list.map((t) => window.__forgeSmokeTest.spawnType(t)), types);

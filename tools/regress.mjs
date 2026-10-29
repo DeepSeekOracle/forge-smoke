@@ -7,8 +7,14 @@ const URL = process.env.FORGE_URL || "http://127.0.0.1:8796/preview/forge-smoke/
 const browser = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 const errors = [];
+// The preview page embeds the ExcavationPro dock (and its ad iframes). Those cross-origin frame
+// errors are not the game's: count only page errors and first-party console errors.
+const EXTERNAL = /Content Security Policy|google|googlesyndication|doubleclick|frame-ancestors|adsbygoogle/i;
 page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
-page.on("console", (m) => { if (m.type() === "error") errors.push(m.text().slice(0, 160)); });
+page.on("console", (m) => {
+  const text = m.text();
+  if (m.type() === "error" && !EXTERNAL.test(text)) errors.push(text.slice(0, 160));
+});
 
 const fail = async (msg) => { console.log("FAIL " + msg); await browser.close(); process.exit(1); };
 

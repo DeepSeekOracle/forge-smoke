@@ -8,6 +8,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
 import { standardMaterial, bakeTexture } from "./materials.js";
 import { PALETTE, hexInt } from "./theme.js";
+import { mapById, PROP_COLLIDERS } from "./maps.js";
 
 export const PLAYER_SKINS = [
   {
@@ -1155,6 +1156,48 @@ export function populateArenaProps(arenaKey, propGroup, texSize = 256) {
   const addCircleCollider = (x, z, radius, blocksProjectiles = true, tag = "prop") => {
     arenaColliders.push({ shape: "circle", x, z, radius, blocksProjectiles, tag });
   };
+
+  // ── MAP-01/02/03: the three named layouts live in src/maps.js ────────────────────────────────
+  const map = mapById(arenaKey);
+  if (map) {
+    // ruin clusters first (their colliders are fitted from the geometry)
+    (map.ruins || []).forEach((r, i) => {
+      spawnGlbProp(propGroup, "arena-ruins", [{
+        x: r.x, y: -0.2, z: r.z, scale: r.scale || 0.5, rotY: r.rotY || 0,
+        centerAndGround: true, tintHex: 0x4b5663, tag: `${map.id}-ruins-${i}`, fitCollider: true,
+      }]);
+    });
+
+    const byKind = new Map();
+    for (const p of map.props) {
+      if (!byKind.has(p.kind)) byKind.set(p.kind, []);
+      byKind.get(p.kind).push(p);
+    }
+    for (const [kind, list] of byKind) {
+      spawnGlbProp(propGroup, kind, list.map((p) => ({
+        x: p.x, y: 0, z: p.z, scale: p.scale || 1.15, rotY: p.rotY || 0,
+      })));
+      for (const p of list) {
+        const c = PROP_COLLIDERS[kind] || { shape: "obb", hx: 1.2, hz: 1.2 };
+        if (c.shape === "circle") addCircleCollider(p.x, p.z, c.radius, true, kind);
+        else addBoxCollider(p.x, p.z, c.hx, c.hz, p.rotY || 0, true, kind);
+      }
+    }
+
+    // FOUNDRY's hazard ring is paint on the floor, deliberately not a collider
+    if (map.hazardRing) {
+      const ring = makePart(new THREE.RingGeometry(map.hazardRing - 0.25, map.hazardRing, 40), hazardMat,
+        "foundry-hazard-ring", 0, 0.03, 0, -Math.PI / 2, 0, 0);
+      propGroup.add(ring);
+      for (let i = 0; i < 4; i += 1) {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        const strip = makePart(new THREE.BoxGeometry(0.35, 0.04, 2.4), hazardMat, "foundry-hazard-strip",
+          Math.cos(a) * map.hazardRing, 0.03, Math.sin(a) * map.hazardRing, 0, -a, 0);
+        propGroup.add(strip);
+      }
+    }
+    return arenaColliders;
+  }
 
   if (arenaKey === "perimeter") {
     spawnGlbProp(propGroup, "arena-ruins", [

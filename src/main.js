@@ -13,8 +13,8 @@ import {
   POINT_LIGHT_SCALE,
   hexInt,
 } from "./theme.js?v=20261030m";
-import { TUNING } from "./tuning.js?v=20261030n";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030n";
+import { TUNING } from "./tuning.js?v=20261030p";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030o";
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
@@ -23,8 +23,8 @@ import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610
 import { bossHp } from "./balance.js?v=20261030n";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
 import { pilot } from "./autopilot.js?v=20261030r";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030m";
-import { createStartMenu } from "./startmenu.js?v=20261030m";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030n";
+import { createStartMenu } from "./startmenu.js?v=20261030n";
 import { createGamepad } from "./gamepad.js?v=20261030m";
 import { createTalentWindow } from "./talentui.js?v=20261030m";
 import { aggregate, toRunMods } from "./talents.js?v=20261030m";
@@ -44,11 +44,12 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=20261030m";
+} from "./models.js?v=20261030n";
 import * as levelModule from "./level.js?v=20261030m";
 import * as menuModule from "./menu.js?v=20261030m";
-import * as audioModule from "./audio.js?v=20261030m";
+import * as audioModule from "./audio.js?v=20261030n";
 import * as fxModule from "./fx.js?v=20261030m";
+import { MAPS, mapById, selectMap } from "./maps.js?v=20261030n";
 import { createCasings } from "./casings.js?v=20261030n";
 import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=20261030n";
 
@@ -405,24 +406,32 @@ let shotLightTimer = 0;
 
 // ART-01 per-arena lighting. The arena switches at beat 3 (Breach Yard) and beat 6 (Gunship Pad).
 let arenaKey = "perimeter";
+let activeMap = null;
 let lightsOff = false;
 
 function applyArenaLighting(key) {
-  const cfg = ARENA_LIGHTING[key] ? ARENA_LIGHTING[key] : ARENA_LIGHTING.perimeter;
-  arenaKey = ARENA_LIGHTING[key] ? key : "perimeter";
-  populateArenaProps(arenaKey, arenaPropsGroup, TEX_SIZE);
+  // a map id ("depot"/"yard"/"foundry") owns its props; the lighting preset is borrowed from it.
+  // A beat transition passes a legacy lighting key ("gunship"): keep the map's props and only
+  // relight, otherwise every beat would rebuild the arena and forget which map is loaded.
+  const map = mapById(key);
+  const keepMap = !map && activeMap ? activeMap : null;
+  const lightKey = map ? map.light : (ARENA_LIGHTING[key] ? key : "perimeter");
+  const cfg = ARENA_LIGHTING[lightKey];
+  arenaKey = lightKey;
+  activeMap = map || keepMap;
+  populateArenaProps(map ? map.id : keepMap ? keepMap.id : lightKey, arenaPropsGroup, TEX_SIZE);
   renderer.toneMappingExposure = cfg.exposure;
   scene.background.set(hexInt(cfg.background));
   scene.fog.color.set(hexInt(cfg.fog.color));
-  scene.fog.density = cfg.fog.density;
+  scene.fog.density = cfg.fog.density * (activeMap?.fogScale || 1);
   hemi.color.set(hexInt(cfg.hemisphere.sky));
   hemi.groundColor.set(hexInt(cfg.hemisphere.ground));
   hemi.intensity = cfg.hemisphere.intensity;
   sun.color.set(hexInt(cfg.sun.color));
-  sun.intensity = cfg.sun.intensity;
+  sun.intensity = cfg.sun.intensity * (map?.lightBoost || 1);
   sun.position.set(...cfg.sun.position);
   rain.material.color.set(hexInt(PALETTE.rain));
-  rain.material.opacity = cfg.rainOpacity;
+  rain.material.opacity = cfg.rainOpacity * (map?.rainScale || 1);
   floodlights.forEach((fixture, index) => {
     const spec = cfg.floodlights[index];
     if (!spec) {
@@ -656,7 +665,8 @@ if (testMode) {
     },
     getLighting: () => ({
       arena: arenaKey,
-      arenaName: ARENA_LIGHTING[arenaKey].name,
+      map: activeMap ? activeMap.id : null,
+      mapName: activeMap ? activeMap.name : ARENA_LIGHTING[arenaKey].name,
       blackout: state.blackoutActive,
       exposure: renderer.toneMappingExposure,
       fogDensity: scene.fog ? scene.fog.density : null,
@@ -1091,8 +1101,18 @@ function startRun(arenaId = "arena1") {
   const chosenStyle = STARTER_LOADOUTS[state.loadoutIndex || 0]?.id || "spray";
   const secondaryStyle = chosenStyle === "pierce" ? "spray" : "pierce";
   
-  const arenaKeyMap = { arena1: "perimeter", arena2: "breach", arena3: "gunship" };
-  const targetArenaKey = arenaKeyMap[arenaId] || "perimeter";
+  // MAP-04: map selection. `?map=depot|yard|foundry` forces it (boot tests); otherwise rotate
+  // deterministically by seed + how many runs this profile has banked.
+  const forcedMap = urlParams.get("map");
+  const runNo = (state.cyborgProfile && state.cyborgProfile.runs) || 0;
+  const mapMode = TUNING.mapSelection || "rotate";
+  const chosenMap = forcedMap
+    ? (selectMap({ forced: forcedMap }) || MAPS[0])
+    : mapMode === "rotate"
+      ? selectMap({ seed, run: runNo })
+      : (MAPS[Math.max(0, Math.min(MAPS.length - 1, Number(String(arenaId).replace(/\D/g, "")) - 1 || 0))] || MAPS[0]);
+  state.mapId = chosenMap.id;
+  state.mapName = chosenMap.name;
 
   Object.assign(state, {
     phase: "playing",
@@ -1199,7 +1219,7 @@ function startRun(arenaId = "arena1") {
   scoreSystem.airdropsTaken = 0;
   scoreSystem.runStartTime = Date.now();
   
-  applyArenaLighting(targetArenaKey);
+  applyArenaLighting(chosenMap.id);
   setLightsEnabled(true);
   placeCamera();
   hudPhase = null;
@@ -1493,7 +1513,7 @@ function shoot(target) {
       if (result.killed) {
         state.kills++;
         scoreSystem.recordKill(enemy.getScoreValue());
-        cardSystem.addXp(enemy.getXpValue());
+        cardSystem.addXp(TUNING.progression.xpPerKill || 10);
       }
     }
   } else if (pelletCount > 1) {
@@ -1521,7 +1541,7 @@ function shoot(target) {
         if (result.killed) {
           state.kills++;
           scoreSystem.recordKill(best.getScoreValue());
-          cardSystem.addXp(best.getXpValue());
+          cardSystem.addXp(TUNING.progression.xpPerKill || 10);
         }
       }
     }
@@ -1533,7 +1553,7 @@ function shoot(target) {
       state.kills++;
       audioController?.playSfx("kill", { volume: 0.6, pitch: 0.95 + state.rng() * 0.1 });
       scoreSystem.recordKill(target.getScoreValue());
-      cardSystem.addXp(target.getXpValue());
+      cardSystem.addXp(TUNING.progression.xpPerKill || 10);
       state.runXp = (state.runXp || 0) + target.getXpValue() * 1.5;
     }
   }

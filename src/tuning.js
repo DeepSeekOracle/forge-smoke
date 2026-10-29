@@ -39,6 +39,9 @@ export const TUNING = {
     perCardReduction: 0.14,
     minMult: 0.35,
   },
+  // Map selection: "rotate" by seed+run, or "fixed" to honour the bay's arena choice (MAP-04)
+  mapSelection: "rotate",
+
   // Player
   player: {
     maxHealth: 100,
@@ -441,6 +444,53 @@ export const TUNING = {
 
 /* --- added for WPN-01..03: anti-air, breacher, heavy rail -------------------------------- */
 Object.assign(TUNING.weapons, {
+  // MGR-06 / MATH-04: the nine styles that used to fall back to spray stats now have their own
+  // numbers, so the manager can show real damage/RPM/mag and loadout choice actually changes play.
+  ricochet: {
+    ...TUNING.weapons.spray, style: "ricochet", family: "carbine", damage: 20, cycle: 0.42,
+    magazine: 12, reload: 1.5, range: 15, spread: 2.5, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xa6ff7a, tracerLife: 0.09, muzzleFlashSize: 0.3,
+  },
+  burst: {
+    ...TUNING.weapons.spray, style: "burst", family: "rifle", damage: 18, cycle: 0.62,
+    magazine: 24, reload: 1.9, range: 18, spread: 2, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xffe36f, tracerLife: 0.1, muzzleFlashSize: 0.3,
+  },
+  beam: {
+    ...TUNING.weapons.spray, style: "beam", family: "beam", damage: 9, cycle: 0.09,
+    magazine: 60, reload: 1.2, range: 16, spread: 1, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0x6fe3ff, tracerLife: 0.05, muzzleFlashSize: 0.26,
+  },
+  chain: {
+    ...TUNING.weapons.spray, style: "chain", family: "arc", damage: 12, cycle: 0.22,
+    magazine: 20, reload: 1.6, range: 13, spread: 2, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xc6a4ff, tracerLife: 0.08,
+  },
+  spinup: {
+    ...TUNING.weapons.spray, style: "spinup", family: "minigun", damage: 7, cycle: 0.07,
+    magazine: 100, reload: 2.4, range: 12, spread: 12, bloomPerShot: 0.4, maxBloom: 16,
+    tracerColor: 0xff5a5a, tracerLife: 0.06,
+  },
+  rail: {
+    ...TUNING.weapons.spray, style: "rail", family: "rail", damage: 120, cycle: 1.6,
+    magazine: 4, reload: 2.1, range: 34, spread: 0.2, pierceCount: 2, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xf2f8ff, tracerLife: 0.12, muzzleFlashSize: 0.5,
+  },
+  flamer: {
+    ...TUNING.weapons.spray, style: "flamer", family: "flamer", damage: 4, cycle: 0.05,
+    magazine: 120, reload: 1.8, range: 6.5, spread: 20, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xffa23c, tracerLife: 0.05, muzzleFlashSize: 0.4,
+  },
+  arc: {
+    ...TUNING.weapons.spray, style: "arc", family: "launcher", damage: 60, cycle: 1.1,
+    magazine: 5, reload: 2.6, range: 12, spread: 0, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0xff6fd6, tracerLife: 0.14, muzzleFlashSize: 0.4,
+  },
+  sentry: {
+    ...TUNING.weapons.spray, style: "sentry", family: "sentry", damage: 8, cycle: 0.15,
+    magazine: 40, reload: 1.5, range: 14, spread: 4, bloomPerShot: 0, maxBloom: 0,
+    tracerColor: 0x6fff9a, tracerLife: 0.08,
+  },
   flak: {
     ...TUNING.weapons.burst,
     style: "flak", family: "aa", damage: 22, cycle: 0.55, magazine: 6, reload: 2.4,
