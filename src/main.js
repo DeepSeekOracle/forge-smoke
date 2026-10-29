@@ -1351,6 +1351,12 @@ function shoot(target) {
 
     for (const enemy of enemiesInLine) {
       const result = enemyManager.damageEnemy(enemy, effectiveDamage, isGrenade, 0, shieldPierce);
+  // AUD-04 wiring: pick the impact timbre by what the shot actually hit
+  if (result !== undefined && !state.attractSim) {
+    const blocked = enemy.type === "shieldbearer" && enemy.isShielded && !isGrenade && shieldPierce === 0;
+    audioController?.playSfx(blocked ? "impact_shield"
+      : (effectiveDamage >= 40 ? "impact_heavy" : "impact_light"), { volume: blocked ? 0.5 : 0.3 });
+  }
       damageDealt += effectiveDamage;
       if (result.killed) {
         state.kills++;

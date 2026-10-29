@@ -2,6 +2,21 @@
  * Audio Module Contract & Procedural Web Audio Implementation
  * Responsibilities: Web Audio context, sound pooling, music crossfade, SFX playback
  * @module audio
+ *
+ * Mix Table (relative volumes at master = 1.0, SFX bus = 0.6):
+ * ---------------------------------------------------------------
+ * fire           : 0.18  (sawtooth 220→55 Hz, 90 ms)
+ * reload         : 0.18  (triangle 340→520 Hz, 140 ms)
+ * hit (body)     : 0.18  (square 180→90 Hz, 60 ms)
+ * pickup         : 0.18  (sine 440→880 Hz, 180 ms)
+ * hurt           : 0.18  (sawtooth 130→45 Hz, 220 ms)
+ * impact_light   : 0.12  (triangle 520→260 Hz, 50 ms)  — glancing blow
+ * impact_heavy   : 0.18  (square 140→60 Hz, 120 ms)    — solid armor/structure
+ * impact_shield  : 0.10  (sine 880→1760 Hz, 40 ms)     — distinct metallic tink
+ * ---------------------------------------------------------------
+ * Shield hits use impact_shield (pure sine, upward sweep) to
+ * clearly differentiate from body hits (square, downward sweep).
+ * Pitch variation ±6% applied at playback for weapon reports.
  */
 
 
@@ -25,12 +40,17 @@ function createSynthSfx(ctx, masterGain, sfxGain, key, options = {}) {
         hit: { type: "square", freq: 180 * pitch, endFreq: 90, dur: 0.06 },
         pickup: { type: "sine", freq: 440 * pitch, endFreq: 880, dur: 0.18 },
         hurt: { type: "sawtooth", freq: 130 * pitch, endFreq: 45, dur: 0.22 },
+        // Impact set — distinct timbres per surface
+        impact_light: { type: "triangle", freq: 520 * pitch, endFreq: 260, dur: 0.05, vol: 0.12 },
+        impact_heavy: { type: "square", freq: 140 * pitch, endFreq: 60, dur: 0.12, vol: 0.18 },
+        impact_shield: { type: "sine", freq: 880 * pitch, endFreq: 1760, dur: 0.04, vol: 0.10 },
       };
       const p = presets[key] || presets.hit;
       osc.type = p.type;
       osc.frequency.setValueAtTime(p.freq, now);
       osc.frequency.exponentialRampToValueAtTime(Math.max(20, p.endFreq), now + p.dur);
-      gain.gain.setValueAtTime(0.18 * vol, now);
+      const baseVol = p.vol ?? 0.18;
+      gain.gain.setValueAtTime(baseVol * vol, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + p.dur);
       osc.connect(gain);
       gain.connect(sfxGain || masterGain || ctx.destination);
