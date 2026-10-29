@@ -18,11 +18,11 @@ import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610310a";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610320a";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610310a";
 import { bossHp } from "./balance.js?v=20261030p";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
-import { pilot } from "./autopilot.js?v=202610310b";
+import { pilot } from "./autopilot.js?v=202610310c";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030n";
 import { createStartMenu } from "./startmenu.js?v=20261030n";
 import { createGamepad } from "./gamepad.js?v=20261030m";
@@ -44,7 +44,7 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610310a";
+} from "./models.js?v=202610310b";
 import * as levelModule from "./level.js?v=20261030m";
 import * as menuModule from "./menu.js?v=20261030m";
 import * as audioModule from "./audio.js?v=20261030n";
@@ -354,6 +354,152 @@ const enemyProjectiles = [];
 const chargeZones = [];
 const mortarZones = [];
 
+// ── enemy fire (visible bolts with travel time) ────────────────────────────────────────────────
+// Enemy shots used to be instant damage rolls with no visual. They are now real projectiles: a
+// muzzle flash at the shooter, a bolt in flight, a recoil pose, and a dodge window for the pilot.
+const ENEMY_SHOT_CAP = 40;
+const enemyShots = [];
+const enemyMuzzles = [];
+{
+  const shotGeo = new THREE.BoxGeometry(0.05, 0.05, 1.0);
+  const flashGeo = new THREE.SphereGeometry(0.17, 8, 8);
+  for (let i = 0; i < ENEMY_SHOT_CAP; i += 1) {
+    const mesh = new THREE.Mesh(shotGeo, new THREE.MeshBasicMaterial({
+      color: 0xff7a4a, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false,
+    }));
+    mesh.visible = false;
+    scene.add(mesh);
+    enemyShots.push({ mesh, alive: false, vx: 0, vy: 0, vz: 0, dmg: 0, life: 0, x: 0, y: 0, z: 0 });
+    const flash = new THREE.Mesh(flashGeo, new THREE.MeshBasicMaterial({
+      color: 0xffd08a, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false,
+    }));
+    flash.visible = false;
+    scene.add(flash);
+    enemyMuzzles.push({ mesh: flash, life: 0 });
+  }
+}
+let enemyShotCursor = 0;
+let enemyMuzzleCursor = 0;
+
+function spawnEnemyShot(enemy, damage, speed = 16, color = 0xff7a4a) {
+  if (!enemy || !enemy.position) return;
+  const slot = enemyShots[enemyShotCursor % enemyShots.length];
+  enemyShotCursor += 1;
+  const ox = enemy.position.x;
+  const oz = enemy.position.z;
+  const oy = (enemy.mesh ? enemy.mesh.position.y : enemy.position.y) + 0.35;
+  // aim at where the player is, with a small lead and spread (a perfect aimbot is not dodgeable)
+  const lead = 0.22;
+  const tx = state.pos.x + (state.moveVel ? state.moveVel.x * lead : 0);
+  const tz = state.pos.z + (state.moveVel ? state.moveVel.z * lead : 0);
+  let dx = tx - ox;
+  let dz = tz - oz;
+  const len = Math.hypot(dx, dz) || 1;
+  dx /= len; dz /= len;
+  const spread = 0.055;
+  const ang = (state.rng() - 0.5) * spread * 2;
+  const ca = Math.cos(ang); const sa = Math.sin(ang);
+  const nx = dx * ca - dz * sa;
+  const nz = dx * sa + dz * ca;
+  slot.alive = true;
+  slot.x = ox + nx * 0.55;
+  slot.y = oy;
+  slot.z = oz + nz * 0.55;
+  slot.vx = nx * speed;
+  slot.vy = (1.15 - slot.y) / Math.max(0.15, len / speed);
+  slot.vz = nz * speed;
+  slot.dmg = damage;
+  slot.life = 1.6 + len / speed;
+  slot.mesh.position.set(slot.x, slot.y, slot.z);
+  slot.mesh.lookAt(slot.x + nx, slot.y, slot.z + nz);
+  slot.mesh.scale.set(1, 1, 0.6 + speed * 0.05);
+  slot.mesh.material.color.setHex(color);
+  slot.mesh.visible = true;
+
+  const muzzle = enemyMuzzles[enemyMuzzleCursor % enemyMuzzles.length];
+  enemyMuzzleCursor += 1;
+  muzzle.mesh.position.set(slot.x, slot.y, slot.z);
+  muzzle.mesh.material.color.setHex(color);
+  muzzle.mesh.visible = true;
+  muzzle.life = 0.06;
+  if (enemy.mesh) enemy.mesh.visible = true;
+  enemy._recoil = 0.2;
+  state.enemyShotsFired = (state.enemyShotsFired || 0) + 1;
+}
+
+/** Advance bolts, apply hits, and publish the nearest incoming threat for the pilot. */
+function updateEnemyShots(dt) {
+  let threat = null;
+  let bestT = 1.15;
+  for (const s of enemyShots) {
+    if (!s.alive) continue;
+    s.life -= dt;
+    const px = s.x;
+    const pz = s.z;
+    s.x += s.vx * dt;
+    s.y += s.vy * dt;
+    s.z += s.vz * dt;
+    s.mesh.position.set(s.x, s.y, s.z);
+    if (s.life <= 0) {
+      s.alive = false;
+      s.mesh.visible = false;
+      continue;
+    }
+    // cover stops bolts
+    if (segmentHitsCollider(px, pz, s.x, s.z, arenaColliders)) {
+      s.alive = false;
+      s.mesh.visible = false;
+      continue;
+    }
+    // hit test against the operator capsule
+    const d2 = Math.hypot(s.x - state.pos.x, s.z - state.pos.z);
+    if (d2 < 0.55 && s.y > 0.3 && s.y < 2.1) {
+      hurt(s.dmg);
+      state.enemyShotsHit = (state.enemyShotsHit || 0) + 1;
+      s.alive = false;
+      s.mesh.visible = false;
+      globalThis.__studio?.hud?.flash("#ff5a4a", 0.14);
+      continue;
+    }
+    // threat estimate: time to closest approach and miss distance at that moment
+    // R points from the player to the bolt; closest approach t = -(R.v)/|v|^2.
+    // (The old order flipped the sign, so an approaching bolt never registered as a threat.)
+    const rx = s.x - state.pos.x;
+    const rz = s.z - state.pos.z;
+    const v2 = s.vx * s.vx + s.vz * s.vz;
+    if (v2 < 1e-4) continue;
+    const t = -(rx * s.vx + rz * s.vz) / v2;
+    if (t > 0 && t < bestT) {
+      const cx = rx + s.vx * t;
+      const cz = rz + s.vz * t;
+      const miss = Math.hypot(cx, cz);
+      if (miss < 1.3) {
+        // step perpendicular to the bolt, to the side the player is already on
+        const inv = 1 / Math.sqrt(v2);
+        const perpX = -s.vz * inv;
+        const perpZ = s.vx * inv;
+        const side = (rx * perpX + rz * perpZ) >= 0 ? -1 : 1;
+        threat = { x: perpX * side, z: perpZ * side, t };
+        bestT = t;
+      }
+    }
+  }
+  state.incomingShot = threat;
+  if (threat) state.incomingFrames = (state.incomingFrames || 0) + 1;
+  for (const m of enemyMuzzles) {
+    if (m.life <= 0) { m.mesh.visible = false; continue; }
+    m.life -= dt;
+    if (m.life <= 0) m.mesh.visible = false;
+  }
+}
+
+function clearEnemyShots() {
+  for (const s of enemyShots) { s.alive = false; s.mesh.visible = false; }
+  for (const m of enemyMuzzles) { m.life = 0; m.mesh.visible = false; }
+  state.incomingShot = null;
+}
+
+
 scene.add(soldier);
 
 const arenaPropsGroup = new THREE.Group();
@@ -613,6 +759,14 @@ if (testMode) {
       };
     },
     getEnemyTypes: () => Object.keys(ENEMY_TYPES),
+    getCombat: () => ({
+      fired: state.enemyShotsFired || 0,
+      hit: state.enemyShotsHit || 0,
+      incoming: state.incomingShot ? +state.incomingShot.t.toFixed(2) : null,
+      incomingFrames: state.incomingFrames || 0,
+      mode: state.pilotMode,
+      health: Math.round(state.health),
+    }),
     // MGR-07: nearest live body plus the state the pilot is reacting to
     getNearest: () => {
       const live = enemyManager.enemies.filter((e) => e.hp > 0);
@@ -1236,6 +1390,7 @@ function clearEffects() {
   state.flash = 0;
   flash.visible = false;
   casings.clear();
+  clearEnemyShots();
 }
 
 function placeCamera() {
@@ -1298,6 +1453,9 @@ function startRun(arenaId = "arena1") {
     pilotTimer: 0.4,
     pilotStrafe: 1,
     pilotWantsMove: false,
+    enemyShotsFired: 0,
+    enemyShotsHit: 0,
+    incomingShot: null,
     odometer: 0,
     camPushMax: 0,
     bossDodgeMax: 0,
@@ -2341,10 +2499,7 @@ function update(dt, ctx) {
       if (action.type === "melee") {
         hurt(action.damage || cfg.meleeDamage || 9);
       } else if (action.type === "rangedShot") {
-        if (los && d < 18) {
-          const hitChance = Math.max(0.15, 0.5 - d * 0.015) * (state.painted ? 1.15 : 1);
-          if (state.rng() < hitChance) hurt(action.damage || 6);
-        }
+        if (los && d < 18) spawnEnemyShot(enemy, action.damage || 6, 12, 0xff7a4a);
       } else if (action.type === "dive") {
         if (d < 3.2) hurt(cfg.diveDamage || 18);
       } else if (action.type === "shell") {
@@ -2352,7 +2507,7 @@ function update(dt, ctx) {
       } else if (action.type === "stomp") {
         if (d < (cfg.stompRadius || 3)) hurt(cfg.stompDamage || 50);
       } else if (action.type === "minigun") {
-        if (los && d < 16) hurt(cfg.minigunDamage || 8);
+        if (los && d < 18) spawnEnemyShot(enemy, cfg.minigunDamage || 8, 19, 0xffb347);
       } else if (action.type === "charge") {
         if (d < 2.2) hurt(cfg.chargeDamage || 40);
       } else if (action.type === "paint") {
@@ -2483,6 +2638,7 @@ function update(dt, ctx) {
       }
     }
 
+    updateEnemyShots(dt);
     updateGrenades(dt);
     casings.update(dt);
 

@@ -15,16 +15,17 @@ ignored (`TUNE_NOCARDS=1`); "with cards" = the tray is always taken.
 | 5 | boss threshold 105 s / 110 kills | 10 | 101.2 s | 4 | 40 % | 0 % |
 | 6 | clear = boss killed; ground boss `hpScale 0.2`; boss 75 s / 75 kills; salvo 7 s, 26/14/6 | 10 | **105.1 s** | **4** | 90 % | **30 %** |
 | 7 | same build, **no upgrades** | 5 | 76.1 s | 0 | 100 % | — |
+| 8 | enemy fire is now visible, travelling and dodgeable (12-19 m/s bolts, pilot sidestep) | 10 | 173.2 s | 5 | 100 % | 40 % |
 
 ## Against the targets
 
 | Metric | Target | Measured | Verdict |
 |---|---|---|---|
 | Median survival, no upgrades | 45-75 s | 76.1 s | +1.1 s over the band |
-| Median survival, with cards | 110-170 s | 105.1 s | just under (runs bank 4 cards, not 6) |
+| Median survival, with cards | 110-170 s | 173.2 s | +3 s over (dodgeable fire removed most chip damage) |
 | Boss reached | ~50 % | 90 % | over — the boss is the run's climax at 75 s; nearly every run sees it |
 | Boss killed, given reached | 35-55 % | 3/9 = 33 % | close |
-| Arena cleared | 20-35 % | **30 %** | met |
+| Arena cleared | 20-35 % | **40 %** | +5 over |
 | Cards offered per run | 3-5 | 4 (median) | met |
 
 ## The clear definition changed

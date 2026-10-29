@@ -176,6 +176,13 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
     mode = "dodge";
     throttle = profile.dodgeThrottle || 1;
     resetBeat(state);
+  } else if (state.incomingShot) {
+    // a bolt is on a collision course: step perpendicular to it, hard, for as long as it threatens
+    dirX = state.incomingShot.x;
+    dirZ = state.incomingShot.z;
+    mode = "dodge-shot";
+    throttle = 1;
+    state.pilotBeatMode = null;
   } else if (lowIntegrityFor(state, profile)) {
     dirX = -nx;
     dirZ = -nz;

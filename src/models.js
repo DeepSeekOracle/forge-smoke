@@ -239,16 +239,18 @@ function cacheHumanoidArmBones(rig) {
  * tactical rifle firing stance right after `mixer.update(dt)`, so the legs/hips run naturally
  * while both hands grip the weapon at shoulder height (`y = 1.45m`).
  */
-function applyTwoHandedRiflePose(bones, aimYaw = 0, reloadTilt = 0) {
+function applyTwoHandedRiflePose(bones, aimYaw = 0, reloadTilt = 0, recoil = 0) {
   if (!bones || !bones.rArm || !bones.rFore || !bones.lArm || !bones.lFore) return;
   const clampedYaw = Math.max(-0.55, Math.min(0.55, aimYaw));
+  const kick = Math.max(0, Math.min(0.35, recoil));
   if (bones.spine2) {
     bones.spine2.rotation.y += clampedYaw * 0.45;
+    bones.spine2.rotation.x = -kick * 0.55;   // shoulders rock back on the shot
   }
   // Right hand grips pistol grip at [-0.14, 1.45, 0.25]; Left hand cradles barrel at [0.00, 1.48, 0.36]
-  bones.rArm.rotation.set(0.63 + reloadTilt * 0.5, 0.17 - clampedYaw * 0.35, 1.35);
-  bones.rFore.rotation.set(1.01, -0.95, 0);
-  bones.lArm.rotation.set(-0.79 - reloadTilt * 0.6, -0.92 - clampedYaw * 0.35, 1.31);
+  bones.rArm.rotation.set(0.63 + reloadTilt * 0.5 - kick * 1.1, 0.17 - clampedYaw * 0.35, 1.35);
+  bones.rFore.rotation.set(1.01 - kick * 0.8, -0.95, 0);
+  bones.lArm.rotation.set(-0.79 - reloadTilt * 0.6 + kick * 0.7, -0.92 - clampedYaw * 0.35, 1.31);
   bones.lFore.rotation.set(-0.48, -1.76, -0.32);
 }
 
@@ -896,7 +898,8 @@ export function animateEnemyMesh(enemy, mesh, dt) {
   if (mesh.userData.mixer) {
     mesh.userData.mixer.update(dt);
     if (mesh.userData.armBones) {
-      applyTwoHandedRiflePose(mesh.userData.armBones, 0, 0);
+      if (enemy._recoil > 0) enemy._recoil = Math.max(0, enemy._recoil - dt * 1.6);
+      applyTwoHandedRiflePose(mesh.userData.armBones, 0, 0, enemy._recoil || 0);
     }
   }
   if (mesh.userData.rotors) {

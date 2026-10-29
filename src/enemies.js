@@ -99,7 +99,7 @@ export class Enemy {
 
   updateRifleman(dt, dirX, dirZ, distance) {
     const meleeRange = this.config.meleeRange || 1.6;
-    const carbineRange = 10.5;
+    const carbineRange = 14;
     const strafeSign = this.phase > Math.PI ? 1 : -1;
     if (distance > carbineRange) {
       this.velocity.x = dirX * this.speed;
@@ -111,7 +111,7 @@ export class Enemy {
       this.velocity.x = (dirX * 0.35 + perpX * 0.75) * this.speed;
       this.velocity.z = (dirZ * 0.35 + perpZ * 0.75) * this.speed;
       if (this.specialCooldown <= 0) {
-        this.specialCooldown = 1.6 + (this.phase % 0.5);
+        this.specialCooldown = 1.15 + (this.phase % 0.4);
         return {
           type: "rangedShot",
           dirX,
