@@ -1,0 +1,58 @@
+FORGE WORKER JOB JOB-6CB68EB0
+Skill: forge-worker
+Project: forge-smoke
+Project path: C:\Users\justi\AI Games\forge-smoke
+Task id: UI-08
+Priority: normal | Risk: low
+Title: UI-08 - Ground zone markers wired to objZones
+Depends on: AUD-04
+
+READ FIRST in the project: AGENTS.md, then .forge/STATE.md (known-broken list), then .forge/VERIFY.md (the only accepted evidence format). Follow AGENTS.md exactly: work only in this folder, never touch D:/excavationpro-ca, never change the save schema destructively, bump every module ?v= together with index.html, add no runtime network calls, use only CC0/CC-BY/MIT art and record the licence in docs/ASSETS-SOURCES.md.
+
+Two related jobs; they share the "does it look/sound intentional" test. Split into A and B.
+
+## A. Audio
+
+**Problem:** the only ambience was a 48–64 Hz oscillator that hummed (removed). Now there is nothing
+under the SFX, and weapon reports are one sample pitched.
+
+1. **Ambience bed** — a real CC0 rain/wind loop (Freesound CC0, or the LYGO soundboard if licensed),
+   looped at `volume 0.10`, through a `BiquadFilterNode` lowpass at ~1.8 kHz so it sits *behind* the
+   mix. Fade in over 1.5 s on run start, out on results.
+2. **Weapon reports** — give each `style` its own sample family (3 variants, random pick, ±6 % pitch).
+   Sources: the existing `assets/sfx/*.mp3` set + generated layers; keep total under 4 MB.
+3. **Impacts** — light hit vs heavy hit vs shield ricochet (the "tink" matters — it teaches the shield).
+4. **Mix table** — write the actual gains in a comment; master 0.8, sfx 0.7, ambience 0.1, barks 0.9.
+
+**Acceptance:** report the mix table, confirm all files 200 on the preview, and demonstrate that no
+sample is under 0.4 s or over 3 s. A short screen recording or at least the file list with durations.
+
+## B. UI
+
+1. **Ground zone markers** — the objectives have no visual. Paint a ring decal at each `objZones` centre
+   (`assets/zones/` art from brief 01), amber when current, dim when held, pulsing during a hold.
+2. **HUD hierarchy** — health, mag, objective, boss bar. Objective line currently sits at `y: 0.115`
+   and can collide with the boss name at `0.045`; define a fixed stack with explicit slots.
+3. **Card tray on small screens** — verify at 390×844: cards must not overflow the viewport or hide the
+   HUD. Screenshot at that size.
+4. **Results screen** — RUN REPORT plus a clear "what you earned" line, and a single obvious button back
+   to the bay.
+5. **Accessibility** — every interactive element reachable by Tab; focus ring visible on the amber button;
+   `prefers-reduced-motion` disables the GIF backdrop (use the still poster).
+
+**Acceptance:** screenshots at 1440×900 and 390×844, plus a Tab-order walk printed as a list.
+
+FILES EXPECTED TO CHANGE:
+  - src/main.js
+
+ACCEPTANCE - paste the command output for each line:
+  - ring per zone, amber current, pulse on hold
+  - screenshot
+
+REPORT SHAPE (required):
+TASK UI-08 - Ground zone markers wired to objZones
+Changed: <files>
+Evidence: <command> -> <output>
+Screenshot: <path or n/a>
+Not verified: <list>
+Broke / left open: <list>

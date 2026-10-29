@@ -223,3 +223,112 @@ procedural maps, mod support, bundler or framework.
 - Texture memory ceiling: 96 MB
 - Baseline measurement: TBD (to be measured on low-end reference device)
 - Fail condition: Any frame exceeding 16.6 ms frame time, draw-call count exceeding 90, triangle count exceeding 150,000, or texture memory exceeding 96 MB triggers a performance failure. Baseline must be measured on low-end hardware (e.g., Intel UHD 620 or equivalent) at 1280x720.
+
+---
+
+## Engine Profile
+- Web 2D: Canvas 2D or Phaser/PixiJS
+- Target: 60 FPS at 1280x720
+- Draw calls: ≤ 90
+- Triangles: ≤ 150,000
+- Textures: ≤ 96 MB
+
+## Build Validation Rules
+- All edits must pass assertive replace helper
+- Missing anchor raises error
+- Output must differ from input
+- Demoed on real edit
+
+## Low-End Budget
+- 90 draw calls
+- 150,000 triangles
+- 96 MB textures
+- 60 FPS at 1280x720
+
+## Tooling
+- `patch()` function validates input/output
+- Asserts output differs from input
+- Raises on missing anchor
+- All changes must be demonstrable in real edit
+
+## Task Scope
+- DBG-01: tools/patch.py assertive replace helper
+- Applies only to .forge/briefs/08-debug.md
+- No external tool calls
+- Implementation must pass live browser test
+
+## Design Principles
+- First 30 seconds: immediate feedback
+- 30th minute: consistent behavior
+- Every number has a reason and a test
+- Design for both initial engagement and sustained play
+
+## Enforcement
+- No feature additions outside scope
+- No engine changes without explicit approval
+- All changes must be traceable in TASKS.json
+- All assertions must pass in real edit
+
+---
+
+# TECH SPEC
+
+## Engine Profile
+- Web 2D (Canvas 2D or Phaser/PixiJS)
+
+## Task: DBG-02 — Global error surface strip
+- `window.onerror` must render a red strip across the screen with the current version number
+- The red strip must remain visible during error states
+- All game loops must survive the error state (no crash, no unhandled rejection)
+- Error strip must not interfere with gameplay or rendering
+- Must operate within 90 draw calls, 150,000 triangles, 96 MB textures, 60 FPS at 1280x720
+
+## Implementation Requirements
+- Use Canvas 2D for error strip rendering
+- Strip should be 10px tall, positioned at top of screen
+- Color: solid red (#FF0000)
+- Version number must be dynamically injected via `window.__version__`
+- Strip must be drawn in a dedicated render loop that does not block main game loop
+- Error state must not cause unhandled rejections or uncaught exceptions
+- All game logic must continue running during error state
+
+## Performance Constraints
+- Draw calls: ≤ 90
+- Triangles: ≤ 150,000
+- Texture memory: ≤ 96 MB
+- Target FPS: 60 at 1280x720
+- Frame time budget: ≤ 16.67 ms
+
+## Error Handling
+- `window.onerror` must be intercepted and used to trigger red strip
+- Error strip must persist until user navigates away or refreshes
+- No console.log or debug output during error state
+- All errors must be caught and handled gracefully
+
+## Acceptance Criteria
+- Red strip appears on error with version number
+- Strip remains visible during error
+- Game loop continues running
+- No performance degradation
+- No crash or unhandled rejection
+- Version number is correctly displayed
+- Strip does not interfere with gameplay
+
+---
+
+## UI-11: Tab Order, Focus Ring, Reduced-Motion
+
+- **Tab Order**: Elements must follow logical, accessible tab order (keyboard navigation) as defined by the UI flow. All interactive elements (buttons, toggles, inputs) are assigned a tab index in the order of user interaction.
+- **Focus Ring**: On keyboard focus, interactive elements must display a visible focus ring (a 2px solid outline, 1px border, 100% opacity, color: #0000ff) to indicate active focus state. The focus ring must be visible in all lighting conditions and on all screen sizes.
+- **Reduced-Motion**: When reduced motion is enabled (via user preference or OS setting), all animations, transitions, and visual effects (including UI element transitions) must be disabled or replaced with static, still visuals. The UI must remain fully functional and accessible in reduced motion mode.
+
+### Implementation Requirements
+
+- Tab order must be validated via automated tab walk testing (e.g., browser dev tools, axe accessibility checker).
+- Focus ring must be implemented using CSS `:focus` pseudo-class with a consistent, high-contrast style.
+- Reduced-motion handling must be detected via `prefers-reduced-motion` media query and must disable all dynamic animations (e.g., fade-ins, transitions, hover effects).
+
+### Evidence
+- Tab walk printed in QA.md
+- Reduced-motion uses still visuals in all components
+- All focus states are visually distinct and accessible

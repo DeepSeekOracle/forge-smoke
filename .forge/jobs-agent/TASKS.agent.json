@@ -1,0 +1,860 @@
+{
+  "project": "forge-smoke",
+  "profile": "web-2d",
+  "tasks": [
+    {
+      "id": "DBG-01",
+      "title": "tools/patch.py assertive replace helper",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "tools/patch.py"
+      ],
+      "acceptance": [
+        "patch() raises on a missing anchor",
+        "asserts the output differs",
+        "demoed on a real edit"
+      ],
+      "depends_on": [],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "DBG-02",
+      "title": "Global error surface strip",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "src/main.js"
+      ],
+      "acceptance": [
+        "window.onerror renders a red strip with the version",
+        "loop survives where possible"
+      ],
+      "depends_on": [
+        "DBG-01"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "DBG-03",
+      "title": "tools/bump.py bumps every import + index together",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "tools/bump.py",
+        "src/main.js",
+        "index.html"
+      ],
+      "acceptance": [
+        "one command changes every ?v= and index.html",
+        "prints the new version"
+      ],
+      "depends_on": [
+        "DBG-02"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "DBG-04",
+      "title": "tools/regress.mjs end-to-end gate",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "tools/regress.mjs"
+      ],
+      "acceptance": [
+        "start\u2192bay\u2192play\u2192card\u2192boss\u2192death\u2192summary",
+        "non-zero exit on any pageerror"
+      ],
+      "depends_on": [
+        "DBG-03"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "DBG-05",
+      "title": "Close the known-defect list (D4)",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "src/main.js",
+        "assets/**"
+      ],
+      "acceptance": [
+        "each of six D4 items has before/after",
+        "economy untouched"
+      ],
+      "depends_on": [
+        "DBG-04"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "DBG-06",
+      "title": "Card tray opens on a real level-up",
+      "brief": ".forge/briefs/08-debug.md",
+      "files": [
+        "src/cardsui.js",
+        "src/main.js"
+      ],
+      "acceptance": [
+        "grind XP in preview, tray appears",
+        "no canvas banner string remains"
+      ],
+      "depends_on": [
+        "DBG-05"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-01",
+      "title": "6 new card art plates",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/cards/"
+      ],
+      "acceptance": [
+        "6 new 768x512 JPEGs",
+        "one visible in a forced card drop",
+        "licences recorded"
+      ],
+      "depends_on": [
+        "DBG-06"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-02",
+      "title": "Painted zone marker decals",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/zones/"
+      ],
+      "acceptance": [
+        "4 ring decals with alpha",
+        "consumed by UI-08"
+      ],
+      "depends_on": [
+        "ART-01"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-03",
+      "title": "Weapon silhouette icons (12 styles)",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/icons/"
+      ],
+      "acceptance": [
+        "12 PNGs 512x256 alpha"
+      ],
+      "depends_on": [
+        "ART-02"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-04",
+      "title": "Enemy portraits (5 archetypes)",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/portraits/enemies/"
+      ],
+      "acceptance": [
+        "5 PNGs 256px used visibly"
+      ],
+      "depends_on": [
+        "ART-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-05",
+      "title": "Boss OG plate 1200x630",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/og-boss.jpg"
+      ],
+      "acceptance": [
+        "under 250 KB"
+      ],
+      "depends_on": [
+        "ART-04"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "ART-06",
+      "title": "Start-screen fallback stills",
+      "brief": ".forge/briefs/01-assets.md",
+      "files": [
+        "assets/start-still-*.jpg"
+      ],
+      "acceptance": [
+        "1536x864, used for reduced-motion"
+      ],
+      "depends_on": [
+        "ART-05"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "AUD-02",
+      "title": "CC0 rain/wind ambience bed",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/audio.js",
+        "assets/sfx/"
+      ],
+      "acceptance": [
+        "looped, lowpass ~1.8kHz, gain 0.10",
+        "fades with run",
+        "licence recorded"
+      ],
+      "depends_on": [
+        "ART-06"
+      ],
+      "priority": "high",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "AUD-03",
+      "title": "Per-style weapon reports (3 variants)",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/audio.js",
+        "assets/sfx/"
+      ],
+      "acceptance": [
+        "6+ families x3 variants",
+        "random with \u00b16% pitch",
+        "under 4 MB"
+      ],
+      "depends_on": [
+        "AUD-02"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "AUD-04",
+      "title": "Impact set: light / heavy / shield tink",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/audio.js"
+      ],
+      "acceptance": [
+        "shield hit audibly distinct",
+        "mix table documented"
+      ],
+      "depends_on": [
+        "AUD-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "UI-08",
+      "title": "Ground zone markers wired to objZones",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/main.js"
+      ],
+      "acceptance": [
+        "ring per zone, amber current, pulse on hold",
+        "screenshot"
+      ],
+      "depends_on": [
+        "AUD-04"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "UI-09",
+      "title": "HUD stack slots (health/mag/objective/boss)",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/main.js"
+      ],
+      "acceptance": [
+        "no overlap at 1440x900 or 1280x720"
+      ],
+      "depends_on": [
+        "UI-08"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "UI-10",
+      "title": "Mobile layout 390x844",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/cardsui.js",
+        "src/main.js"
+      ],
+      "acceptance": [
+        "screenshot at 390x844",
+        "cards usable"
+      ],
+      "depends_on": [
+        "UI-09"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "UI-11",
+      "title": "Tab order, focus ring, reduced-motion",
+      "brief": ".forge/briefs/09-audio-ui.md",
+      "files": [
+        "src/startmenu.js"
+      ],
+      "acceptance": [
+        "tab walk printed",
+        "reduced-motion uses the still"
+      ],
+      "depends_on": [
+        "UI-10"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MATH-01",
+      "title": "src/math.js pure combat module",
+      "brief": ".forge/briefs/03-engine-math.md",
+      "files": [
+        "src/math.js"
+      ],
+      "acceptance": [
+        "armourSoak/shieldGate/spread/falloff/xpForRun/bossHp/timeToKill",
+        "unit table printed"
+      ],
+      "depends_on": [
+        "UI-11"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MATH-02",
+      "title": "Route enemies.js damage through math.js",
+      "brief": ".forge/briefs/03-engine-math.md",
+      "files": [
+        "src/enemies.js",
+        "src/math.js"
+      ],
+      "acceptance": [
+        "shield logic only in shieldGate",
+        "TTK before/after"
+      ],
+      "depends_on": [
+        "MATH-01"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MATH-03",
+      "title": "Boss HP formula + scaling",
+      "brief": ".forge/briefs/03-engine-math.md",
+      "files": [
+        "src/main.js",
+        "src/math.js"
+      ],
+      "acceptance": [
+        "bossHp() used",
+        "level-1 kill 60-90 s or explained"
+      ],
+      "depends_on": [
+        "MATH-02"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MATH-04",
+      "title": "XP curve + card pacing constants",
+      "brief": ".forge/briefs/03-engine-math.md",
+      "files": [
+        "src/tuning.js"
+      ],
+      "acceptance": [
+        "3-5 cards per run in a 20-run table",
+        "economy untouched"
+      ],
+      "depends_on": [
+        "MATH-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "WPN-01",
+      "title": "AA FLAK weapon (air-only profile)",
+      "brief": ".forge/briefs/05-weapons.md",
+      "files": [
+        "src/weapons.js",
+        "src/models.js"
+      ],
+      "acceptance": [
+        "strong vs air, weak vs ground",
+        "TTK row",
+        "screenshot"
+      ],
+      "depends_on": [
+        "MATH-04"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "WPN-02",
+      "title": "BREACHER shotgun, +pierce vs shields",
+      "brief": ".forge/briefs/05-weapons.md",
+      "files": [
+        "src/weapons.js"
+      ],
+      "acceptance": [
+        "close, slow, pierce 0.7"
+      ],
+      "depends_on": [
+        "WPN-01"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "WPN-03",
+      "title": "RAIL variant with 3-target penetration",
+      "brief": ".forge/briefs/05-weapons.md",
+      "files": [
+        "src/weapons.js"
+      ],
+      "acceptance": [
+        "hits up to 3 in a line"
+      ],
+      "depends_on": [
+        "WPN-02"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "WPN-04",
+      "title": "Roster balance table + card weights",
+      "brief": ".forge/briefs/05-weapons.md",
+      "files": [
+        "src/weapons.js",
+        "src/models.js"
+      ],
+      "acceptance": [
+        "12+ weapons, weakness stated",
+        "weapon weight 0.6, no repeats"
+      ],
+      "depends_on": [
+        "WPN-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "FX-01",
+      "title": "spark1.png muzzle sprite + impact bursts",
+      "brief": ".forge/briefs/04-weapon-fx.md",
+      "files": [
+        "src/fx.js",
+        "src/main.js"
+      ],
+      "acceptance": [
+        "pooled sprite 60-90 ms",
+        "per-kind impacts",
+        "\u22656 style screenshots"
+      ],
+      "depends_on": [
+        "WPN-04"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "FX-02",
+      "title": "Shell casings for ballistic styles",
+      "brief": ".forge/briefs/04-weapon-fx.md",
+      "files": [
+        "src/fx.js"
+      ],
+      "acceptance": [
+        "pooled, right-down",
+        "no per-shot allocation"
+      ],
+      "depends_on": [
+        "FX-01"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "FX-03",
+      "title": "Per-style screen kick + tracer taper",
+      "brief": ".forge/briefs/04-weapon-fx.md",
+      "files": [
+        "src/weapons.js",
+        "src/fx.js"
+      ],
+      "acceptance": [
+        "shake \u22642px @1080p",
+        "taper visible",
+        "\u2264+2 ms frame time"
+      ],
+      "depends_on": [
+        "FX-02"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MAP-01",
+      "title": "src/maps.js + DEPOT layout",
+      "brief": ".forge/briefs/02-maps.md",
+      "files": [
+        "src/maps.js",
+        "src/models.js"
+      ],
+      "acceptance": [
+        "cover radius 18-30 only",
+        "collider count printed",
+        "camera displacement \u22641 m"
+      ],
+      "depends_on": [
+        "FX-03"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MAP-02",
+      "title": "YARD layout",
+      "brief": ".forge/briefs/02-maps.md",
+      "files": [
+        "src/maps.js"
+      ],
+      "acceptance": [
+        "open, aerial friendly",
+        "60 s run travels >40 m"
+      ],
+      "depends_on": [
+        "MAP-01"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MAP-03",
+      "title": "FOUNDRY layout",
+      "brief": ".forge/briefs/02-maps.md",
+      "files": [
+        "src/maps.js"
+      ],
+      "acceptance": [
+        "10 props radius 17-26, clear centre"
+      ],
+      "depends_on": [
+        "MAP-02"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MAP-04",
+      "title": "Map rotation + spawn safety",
+      "brief": ".forge/briefs/02-maps.md",
+      "files": [
+        "src/main.js",
+        "src/maps.js"
+      ],
+      "acceptance": [
+        "spawn ring and zones never blocked",
+        "deterministic by seed"
+      ],
+      "depends_on": [
+        "MAP-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MOV-01",
+      "title": "Arrive+seek+separation steering",
+      "brief": ".forge/briefs/06-movement.md",
+      "files": [
+        "src/autopilot.js"
+      ],
+      "acceptance": [
+        "no zero-velocity frames while a target exists",
+        "55-90 m per 60 s"
+      ],
+      "depends_on": [
+        "MAP-04"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MOV-02",
+      "title": "Enemy slot flanking + separation",
+      "brief": ".forge/briefs/06-movement.md",
+      "files": [
+        "src/enemies.js"
+      ],
+      "acceptance": [
+        "mean spacing \u22652.2 m",
+        "shield takes the front slot"
+      ],
+      "depends_on": [
+        "MOV-01"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MOV-03",
+      "title": "Camera spring arm, no clipping",
+      "brief": ".forge/briefs/06-movement.md",
+      "files": [
+        "src/main.js"
+      ],
+      "acceptance": [
+        "max displacement \u22641 m",
+        "screenshot near cover"
+      ],
+      "depends_on": [
+        "MOV-02"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "MOV-04",
+      "title": "Boss dodge distance measured",
+      "brief": ".forge/briefs/06-movement.md",
+      "files": [
+        "src/autopilot.js"
+      ],
+      "acceptance": [
+        "\u22654 m during telegraph",
+        "metric printed"
+      ],
+      "depends_on": [
+        "MOV-03"
+      ],
+      "priority": "normal",
+      "risk": "low",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "TUNE-01",
+      "title": "20-run harness + baseline table",
+      "brief": ".forge/briefs/07-tuning.md",
+      "files": [
+        "tools/sim.mjs"
+      ],
+      "acceptance": [
+        "20 seeded runs tabulated"
+      ],
+      "depends_on": [
+        "MOV-04"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "TUNE-02",
+      "title": "Curve pass: spawn/HP/boss threshold",
+      "brief": ".forge/briefs/07-tuning.md",
+      "files": [
+        "src/tuning.js",
+        "src/main.js"
+      ],
+      "acceptance": [
+        "targets met or explained",
+        "economy untouched"
+      ],
+      "depends_on": [
+        "TUNE-01"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "TUNE-03",
+      "title": "Card pool weights + pacing",
+      "brief": ".forge/briefs/07-tuning.md",
+      "files": [
+        "src/tuning.js",
+        "src/weapons.js"
+      ],
+      "acceptance": [
+        "3-5 cards/run, no duplicate weapons"
+      ],
+      "depends_on": [
+        "TUNE-02"
+      ],
+      "priority": "high",
+      "risk": "high",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    },
+    {
+      "id": "TUNE-04",
+      "title": "Aerial retune: gunship TTK + attack range",
+      "brief": ".forge/briefs/07-tuning.md",
+      "files": [
+        "src/enemies.js",
+        "src/tuning.js"
+      ],
+      "acceptance": [
+        "TTK 8-15 s",
+        "fires from altitude"
+      ],
+      "depends_on": [
+        "TUNE-03"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "status": "todo",
+      "owner": "free-agent",
+      "evidence": []
+    }
+  ]
+}

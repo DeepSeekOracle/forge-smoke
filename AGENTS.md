@@ -50,3 +50,21 @@ if you must, on a branch named `agent/<your-task-id>`. The steward reviews and s
 A task is done when: the acceptance test in its brief passes **on the preview server**, the game still
 boots to the start menu, a 60-second autonomous run completes without a page error, and your report
 states what you did not verify. Not before.
+
+## Quality gate (binding, added after repeated self-inflicted breakage)
+
+1. **One change per step.** State the file, the reason, and the rollback *before* editing. If the rollback
+   is not one command, do not start.
+2. **Backup by hash.** copy -> sha256 -> edit -> re-hash. Restoring means comparing hashes, not hoping a
+   backup exists. Never restore "the oldest" backup; restore the one you hashed.
+3. **Assert the edit landed.** Every text edit runs through a helper that raises when the anchor is
+   missing or the file is unchanged. A patch that reports success while changing nothing is a defect.
+4. **Stop on the first failure.** Any nonzero exit, HTTP 500, or unexpected output: stop, revert to the
+   hashed file, report. No fixing forward.
+5. **Evidence or it did not happen.** Paste the command and its output. Screenshot anything visual and
+   actually look at it. Adjectives are not evidence.
+6. **Nothing outside this project without asking.** Config, scheduled tasks, services, other repos: ask
+   first, every time.
+7. **Independent review before calling it done.** Hand the diff to a second agent whose only job is to
+   find what is wrong. No investment in the author's theory.
+8. **Deploy is the steward's call.** Prepare and verify; never push or deploy.
