@@ -16,13 +16,13 @@ const CARD_POOL = [
 
 /**
  * MATH-04 — XP and card pacing, one source of truth.
- * Level N costs `levelXpBase + levelXpPerLevel * (N - 1)` (300, 600, 900, …), a kill pays
+ * Level L costs `base * L * (L + 1) / 2` (300, 900, 1800, 3000, 4500 …), a kill pays
  * `xpPerKill`, damage pays `xpPerDamage` per point, and surviving pays `xpPerSecond`.
  * Everything else in the file reads these numbers; none of them are re-typed elsewhere.
  */
 const CARD_PACING = {
   levelXpBase: 300,
-  levelXpPerLevel: 300,
+  levelXpShape: "triangular",
   xpPerKill: 10,
   xpPerDamage: 1 / 25,
   xpPerSecond: 2,

@@ -16,11 +16,11 @@ function ok(cond, msg) {
   }
 }
 
-// MATH-04 — one pacing block, thresholds 300 / 600 / 900, aliases equal to it
+// MATH-04 — one pacing block, triangular thresholds 300 / 900 / 1800 / 4500
 const p = TUNING.progression.cardPacing;
-ok(p && p.levelXpBase === 300 && p.levelXpPerLevel === 300, "cardPacing constants missing");
-ok(xpThreshold(1) === 300 && xpThreshold(2) === 600 && xpThreshold(3) === 900 && xpThreshold(5) === 1500,
-  "xpThreshold is not 300/600/900/1500");
+ok(p && p.levelXpBase === 300 && p.levelXpShape === "triangular", "cardPacing constants missing");
+ok(xpThreshold(1) === 300 && xpThreshold(2) === 900 && xpThreshold(3) === 1800 && xpThreshold(5) === 4500,
+  "xpThreshold is not 300/900/1800/4500");
 ok(TUNING.progression.levelBaseXp === p.levelXpBase, "levelBaseXp drifted from cardPacing");
 ok(TUNING.progression.cardChoices === p.cardChoices && TUNING.progression.maxQueuedCards === p.maxQueuedCards,
   "cardChoices/maxQueuedCards drifted from cardPacing");

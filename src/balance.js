@@ -65,13 +65,16 @@ export function multiplier(blackoutsSurvived, evolutions, airdropsTaken) {
   return Math.max(TUNING.scoring.multiplier.base, Math.min(TUNING.scoring.multiplier.cap, m));
 }
 
-/** XP required to advance out of level L (1-indexed): base + perLevel * (L - 1). */
+/**
+ * XP required to advance out of level L: base * L * (L + 1) / 2 — a triangular curve.
+ * L1 300, L2 900, L3 1800, L4 3000, L5 4500. Linear thresholds handed out 13 cards in a 3-minute
+ * run (TUNE before-table); triangular lands a full run at 3-5.
+ */
 export function xpThreshold(level) {
   const lv = Math.max(1, Math.floor(Number(level) || 1));
   const pacing = TUNING.progression.cardPacing || {};
   const base = pacing.levelXpBase ?? TUNING.progression.levelBaseXp;
-  const per = pacing.levelXpPerLevel ?? base;
-  return base + per * (lv - 1);
+  return (base * lv * (lv + 1)) / 2;
 }
 
 /** Spawn budget at time t (minutes): min(400, floor(8 + 3.2 * t)). */

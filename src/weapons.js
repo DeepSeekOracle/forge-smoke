@@ -514,20 +514,39 @@ export class CardSystem {
       },
     ];
     const options = [];
+    const used = new Set();
+    const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry", "flak", "breach", "rail2"];
+    const pickUnique = (pool) => {
+      let p = pool[Math.floor(this.rng() * pool.length)];
+      for (let k = 0; k < 6 && used.has(p.id); k += 1) p = pool[Math.floor(this.rng() * pool.length)];
+      used.add(p.id);
+      return p;
+    };
     for (let i = 0; i < TUNING.progression.cardChoices; i++) {
       if (i === 0) {
-        const chosenMod = lightAndReloadPool[Math.floor(this.rng() * lightAndReloadPool.length)];
+        const chosenMod = pickUnique(lightAndReloadPool);
         options.push({ type: "part", name: chosenMod.name, part: chosenMod });
       } else if (i === 1 && this.rng() < 0.65) {
-        const chosenMod = lightAndReloadPool[(Math.floor(this.rng() * lightAndReloadPool.length) + 1) % lightAndReloadPool.length];
+        const chosenMod = pickUnique(lightAndReloadPool);
         options.push({ type: "part", name: chosenMod.name, part: chosenMod });
       } else if (this.rng() < 0.4) {
-        const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry", "flak", "breach", "rail2"];
-        const st = styles[Math.floor(this.rng() * styles.length)];
+        // never offer the same weapon twice in one tray
+        const open = styles.filter((s) => !used.has(`wpn_${s}`));
+        const st = open.length ? open[Math.floor(this.rng() * open.length)] : styles[Math.floor(this.rng() * styles.length)];
+        used.add(`wpn_${st}`);
         options.push({ type: "weapon", name: `WEAPON: ${st.toUpperCase()}`, style: st });
       } else {
-        const p = rollPart(this.rng, TUNING.airdrop.partSlotWeights, TUNING.airdrop.rarityWeights);
-        options.push({ type: "part", name: p?.name || "Tactical Part", part: p });
+        let p = rollPart(this.rng, TUNING.airdrop.partSlotWeights, TUNING.airdrop.rarityWeights);
+        for (let k = 0; k < 6 && p && used.has(p.id); k += 1) {
+          p = rollPart(this.rng, TUNING.airdrop.partSlotWeights, TUNING.airdrop.rarityWeights);
+        }
+        if (p && !used.has(p.id)) {
+          used.add(p.id);
+          options.push({ type: "part", name: p.name, part: p });
+        } else {
+          const fallback = pickUnique(lightAndReloadPool);
+          options.push({ type: "part", name: fallback.name, part: fallback });
+        }
       }
     }
     this.queuedCards.push(options);

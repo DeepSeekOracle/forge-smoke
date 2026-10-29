@@ -13,14 +13,14 @@ import {
   POINT_LIGHT_SCALE,
   hexInt,
 } from "./theme.js?v=20261030m";
-import { TUNING } from "./tuning.js?v=20261030p";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030o";
+import { TUNING } from "./tuning.js?v=20261030q";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030p";
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
 import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030s";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
-import { bossHp } from "./balance.js?v=20261030n";
+import { bossHp } from "./balance.js?v=20261030o";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
 import { pilot } from "./autopilot.js?v=20261030r";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030n";
@@ -609,6 +609,9 @@ if (testMode) {
     },
     // MOV-04: skip to the boss threshold so the telegraph dodge can be measured without an 80 s run
     forceBoss: () => { state.kills = Math.max(state.kills || 0, 18); return state.kills; },
+    // MGR-06/08 evidence: what each equipped item does to the run's stat block, and the clear drop
+    getStatsFor: (equipped) => statsForLevel((state.cyborgProfile && state.cyborgProfile.level) || 1, equipped || {}),
+    grantClear: () => bankRun(true),
     getSlots: () => enemyManager.enemies.filter((e) => e.hp > 0).map((e) => {
       const dx = e.position.x - state.pos.x;
       const dz = e.position.z - state.pos.z;
