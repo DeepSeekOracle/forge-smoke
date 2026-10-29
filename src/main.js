@@ -18,11 +18,11 @@ import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./
 import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030s";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610310a";
 import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
 import { bossHp } from "./balance.js?v=20261030p";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
-import { pilot } from "./autopilot.js?v=20261030u";
+import { pilot } from "./autopilot.js?v=202610310b";
 import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=20261030n";
 import { createStartMenu } from "./startmenu.js?v=20261030n";
 import { createGamepad } from "./gamepad.js?v=20261030m";
@@ -44,7 +44,7 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=20261030n";
+} from "./models.js?v=202610310a";
 import * as levelModule from "./level.js?v=20261030m";
 import * as menuModule from "./menu.js?v=20261030m";
 import * as audioModule from "./audio.js?v=20261030n";
@@ -278,6 +278,18 @@ function part(geo, mat, tag, x = 0, y = 0, z = 0) {
 }
 const soldier = new THREE.Group();
 soldier.userData.tag = "soldier";
+// Contact shadow + cyan rim light: without them the operator reads as a floating low-poly blob.
+const playerShadow = new THREE.Mesh(
+  new THREE.CircleGeometry(0.74, 28),
+  new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.36, depthWrite: false })
+);
+playerShadow.rotation.x = -Math.PI / 2;
+playerShadow.position.y = 0.02;
+playerShadow.renderOrder = 1;
+scene.add(playerShadow);
+const playerRim = new THREE.PointLight(0x6fe3ff, 2.4, 8.5, 2);
+playerRim.position.set(0, 2.35, -1.45);
+soldier.add(playerRim);
 const steel = standardMaterial({ ...MATERIAL_RECIPES.playerSteel, size: TEX_SIZE });
 const gunPivot = new THREE.Group();
 gunPivot.position.set(-0.08, 1.46, 0.16);
@@ -601,6 +613,26 @@ if (testMode) {
       };
     },
     getEnemyTypes: () => Object.keys(ENEMY_TYPES),
+    // MGR-07: nearest live body plus the state the pilot is reacting to
+    getNearest: () => {
+      const live = enemyManager.enemies.filter((e) => e.hp > 0);
+      if (!live.length) return null;
+      live.sort((a, b) => Math.hypot(a.position.x - state.pos.x, a.position.z - state.pos.z)
+        - Math.hypot(b.position.x - state.pos.x, b.position.z - state.pos.z));
+      const e = live[0];
+      const dx = e.position.x - state.pos.x;
+      const dz = e.position.z - state.pos.z;
+      let a = Math.atan2(dx, dz) - (e.shieldAngle ?? 0);
+      a = Math.atan2(Math.sin(a), Math.cos(a));
+      return {
+        type: e.type,
+        d: +Math.hypot(dx, dz).toFixed(2),
+        isShielded: Boolean(e.isShielded),
+        flanked: Boolean(e.flanked),
+        hp: Math.round(e.hp),
+        angleToShield: +a.toFixed(2),
+      };
+    },
     // MOV-02 evidence: drop an archetype at a world point and read the live ring around the player
     spawnAt: (t, x, z) => {
       const e = enemyManager.spawn(String(t), { x, z }, 0);
@@ -618,6 +650,8 @@ if (testMode) {
     // TUNE-04 evidence hooks
     setWeapon: (style) => { try { weaponManager.replaceWeapon("primary", String(style)); } catch (e) { return null; } return weaponManager.active.styleKey; },
     forceBossKind: (kind) => { state.arenaBossKind = String(kind); return state.arenaBossKind; },
+    clearEnemies: () => { clearEnemies(); return true; },
+    setSpawns: (on) => { state.spawnsEnabled = Boolean(on); return state.spawnsEnabled; },
     getBoss: () => (state.bossEnemy ? {
       type: state.bossEnemy.type,
       hp: Math.round(state.bossEnemy.hp),
@@ -830,19 +864,54 @@ function syncHud() {
   const activeLoadout = STARTER_LOADOUTS[state.loadoutIndex || 0] || STARTER_LOADOUTS[0];
 
   if (state.phase === "playing") {
-    const color = state.health > 60 ? PALETTE.healthOk : state.health > 30 ? PALETTE.healthWarn : PALETTE.healthCrit;
+    const ratio = Math.max(0, state.health / Math.max(1, state.maxHealth));
+    const color = ratio > 0.6 ? PALETTE.healthOk : ratio > 0.3 ? PALETTE.healthWarn : PALETTE.healthCrit;
+
+    // ── compact HUD for phones (the desktop layout is laid out in viewport-height units, so at
+    // 390 px wide the right-hand modules run off-screen) ─────────────────────────────
+    if ((globalThis.innerWidth || 1280) < 700) {
+      const w = weaponManager.active;
+      const beat = beatDirector.getCurrentBeat();
+      const ammo = w.isHeatWeapon ? `${Math.round(w.heat)} HEAT` : `${w.magazine} / ${w.maxMagazine}`;
+      T("vitals-title", activeSkin.name.toUpperCase(), { x: 0.012, y: 0.018, size: TYPE_SCALE.micro, color: "#aec2d6", weight: 800 });
+      B("health", ratio, { x: 0.012, y: 0.033, w: 0.24, h: 0.013, color, back: "rgba(255,255,255,0.08)" });
+      T("health-num", String(Math.round(state.health)), { x: 0.262, y: 0.028, size: TYPE_SCALE.numeral, color, weight: 800 });
+      T("kills", `THREATS ${state.kills}   LV ${cardSystem.level}`, { x: 0.012, y: 0.052, size: TYPE_SCALE.micro, color: "#cfdeee", weight: 700 });
+      T("beat", `${beat.name.toUpperCase()} ${beatDirector.getBeatTimeRemaining().toFixed(0)}s`, { x: 0.012, y: 0.070, size: TYPE_SCALE.micro, color: PALETTE.ui, weight: 800 });
+      T("ammo-count", `${String(weaponManager.active.styleKey).toUpperCase()}  ${ammo}`, { x: 0.012, y: 0.088, size: TYPE_SCALE.small, color: "#eaf3ff", weight: 800 });
+      const boss = enemyManager.getEnemies().find((e) => e.type === "gunship" || e.type === "mech");
+      if (boss) {
+        T("boss-label", `BOSS ${Math.max(0, Math.round(boss.hp))} HP`, { x: 0.012, y: 0.104, size: TYPE_SCALE.micro, color: "#ffb8bc", weight: 800 });
+        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.012, y: 0.116, w: 0.30, h: 0.008, color: PALETTE.healthCrit, back: "rgba(255,255,255,0.08)" });
+      } else {
+        h.remove("boss-label"); h.remove("boss-bar");
+      }
+      if (ratio < 0.5) h.flash("#7e0c14", Math.min(0.3, (0.5 - ratio) * 0.5));
+      if (changed) hudPhase = state.phase;
+      return;
+    }
     if (hudHealth !== state.health) {
       hudHealth = state.health;
-      P("vitals", { x: 0.022, y: 0.03, w: 0.68, h: 0.165, radius: 0.014, fill: PALETTE.panels.status, stroke: PALETTE.strokes.status, width: 0.002 });
-      T("vitals-title", `FORGE SMOKE // ${activeSkin.name}`, { x: 0.032, y: 0.042, size: TYPE_SCALE.label, color: PALETTE.hudLabel, weight: 700 });
-      B("health", state.health / state.maxHealth, { x: 0.032, y: 0.069, w: 0.18, h: 0.023, color, back: PALETTE.strokes.barBack });
-      T("health-num", String(state.health), { x: 0.218, y: 0.064, size: TYPE_SCALE.numeral, color, weight: 800 });
+      // ── operator status card (top-left) ─────────────────────────────────────
+      P("vitals", { x: 0.015, y: 0.026, w: 0.292, h: 0.134, radius: 0.009, fill: "rgba(6,10,16,0.86)", stroke: "rgba(126,150,176,0.20)", width: 0.0012 });
+      P("vitals-accent", { x: 0.015, y: 0.026, w: 0.292, h: 0.0038, radius: 0.002, fill: color, stroke: "rgba(0,0,0,0)", width: 0 });
+      P("vitals-tick", { x: 0.015, y: 0.026, w: 0.007, h: 0.020, radius: 0.002, fill: "rgba(255,179,71,0.22)", stroke: "rgba(0,0,0,0)", width: 0 });
+      T("vitals-title", activeSkin.name.toUpperCase(), { x: 0.026, y: 0.039, size: TYPE_SCALE.micro, color: "#aec2d6", weight: 800 });
+      T("vitals-sub", "AUTONOMOUS COMBAT FRAME", { x: 0.026, y: 0.056, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      B("health", ratio, { x: 0.026, y: 0.076, w: 0.193, h: 0.018, color, back: "rgba(255,255,255,0.07)" });
+      T("health-num", String(Math.round(state.health)), { x: 0.226, y: 0.069, size: TYPE_SCALE.numeral, color, weight: 800 });
+      T("health-cap", "INTEGRITY", { x: 0.026, y: 0.099, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      // ── weapon module (bottom-right) ────────────────────────────────────────
+      P("weapon-module", { x: 0.742, y: 0.826, w: 0.243, h: 0.128, radius: 0.009, fill: "rgba(6,10,16,0.86)", stroke: "rgba(126,150,176,0.20)", width: 0.0012 });
+      P("weapon-accent", { x: 0.742, y: 0.826, w: 0.243, h: 0.0038, radius: 0.002, fill: PALETTE.ui, stroke: "rgba(0,0,0,0)", width: 0 });
+      T("weapon-tag", "PRIMARY", { x: 0.752, y: 0.830, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
     }
     const killsKey = `${state.kills}:${cardSystem.level}`;
     if (hudKills !== killsKey) {
       hudKills = killsKey;
       weaponManager.syncReloadMeta(cardSystem.level, weaponManager.reloadUpgradesCount);
-      T("kills", `THREATS DOWN  ${state.kills}   ·   LV ${cardSystem.level}`, { x: 0.032, y: 0.125, size: TYPE_SCALE.small, color: PALETTE.hudSecondary });
+      T("kills", `THREATS ${state.kills}`, { x: 0.026, y: 0.113, size: TYPE_SCALE.small, color: "#cfdeee", weight: 700 });
+      T("level-chip", `LV ${cardSystem.level}`, { x: 0.196, y: 0.113, size: TYPE_SCALE.small, color: PALETTE.ui, weight: 800 });
     }
 
     const activeConfig = weaponManager.getActiveConfig();
@@ -850,56 +919,69 @@ function syncHud() {
     const activeWeapon = weaponManager.active;
     const rldSpd = activeWeapon.reloadSpeedMultiplier || 1;
 
-    let ammoText = activeWeapon.isReloading
-      ? `AUTO-RELOAD ${Math.round(activeWeapon.reloadProgress * 100)}%  ·  RLD ${rldSpd.toFixed(2)}x`
-      : `MAG  ${activeWeapon.magazine} / ${activeWeapon.maxMagazine}  ·  RLD ${rldSpd.toFixed(2)}x`;
-    if (activeWeapon.isHeatWeapon) {
-      ammoText = activeWeapon.isReloading
-        ? `VENTING ${Math.round(activeWeapon.reloadProgress * 100)}%  ·  RLD ${rldSpd.toFixed(2)}x`
-        : `HEAT  ${Math.round(activeWeapon.heat)} / ${activeWeapon.maxHeat}  ·  RLD ${rldSpd.toFixed(2)}x`;
-    }
+    const activeStyle = activeConfig?.style || activeWeapon?.styleKey || "spray";
+    const inactiveStyle = inactiveConfig?.style || weaponManager.inactive?.styleKey || "pierce";
+    const activeName = String(activeStyle).toUpperCase();
+    const inactiveName = String(inactiveStyle).toUpperCase();
+
+    const ammoNow = activeWeapon.isHeatWeapon ? Math.round(activeWeapon.heat) : activeWeapon.magazine;
+    const ammoMax = activeWeapon.isHeatWeapon ? Math.max(1, activeWeapon.maxHeat) : activeWeapon.maxMagazine;
+    const ammoText = activeWeapon.isReloading
+      ? `RLD ${Math.round(activeWeapon.reloadProgress * 100)}%`
+      : `${ammoNow} / ${ammoMax}`;
     if (hudAmmo !== ammoText) {
       hudAmmo = ammoText;
-      T("ammo", ammoText, { x: 0.032, y: 0.151, size: TYPE_SCALE.label, color: activeWeapon.isReloading ? PALETTE.healthWarn : PALETTE.ui, weight: 700 });
+      T("weapon-active", activeName, { x: 0.752, y: 0.852, size: TYPE_SCALE.label, color: "#f2f7ff", weight: 800 });
+      T("weapon-inactive", `ALT  ${inactiveName}`, { x: 0.752, y: 0.919, size: TYPE_SCALE.micro, color: "#8ea3b8", weight: 600 });
+      T("ammo-tag", activeWeapon.isReloading ? "RELOADING" : (activeWeapon.isHeatWeapon ? "HEAT" : "MAGAZINE"), { x: 0.800, y: 0.884, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      T("ammo-count", ammoText, { x: 0.800, y: 0.862, size: TYPE_SCALE.subhead, color: activeWeapon.isReloading ? PALETTE.healthWarn : "#eaf3ff", weight: 800 });
       const barFrac = activeWeapon.isReloading
         ? activeWeapon.reloadProgress
         : activeWeapon.isHeatWeapon
           ? Math.max(0, 1 - activeWeapon.heat / Math.max(1, activeWeapon.maxHeat))
           : activeWeapon.magazine / Math.max(1, activeWeapon.maxMagazine);
-      B("reload-bar", barFrac, { x: 0.032, y: 0.098, w: 0.18, h: 0.012, color: activeWeapon.isReloading ? PALETTE.healthWarn : PALETTE.ui, back: PALETTE.strokes.barBack });
+      B("reload-bar", barFrac, { x: 0.752, y: 0.898, w: 0.168, h: 0.007, color: activeWeapon.isReloading ? PALETTE.healthWarn : PALETTE.ui, back: "rgba(255,255,255,0.08)" });
     }
 
-    // Weapon plates (ART-01 iconography): name + 48 px silhouette, one per style.
-    const activeStyle = activeConfig?.style || activeWeapon?.styleKey || "spray";
-    const inactiveStyle = inactiveConfig?.style || weaponManager.inactive?.styleKey || "pierce";
-    const activeName = String(activeStyle).toUpperCase();
-    const inactiveName = String(inactiveStyle).toUpperCase();
-    T("weapon-active", `${activeName}`, { x: 0.325, y: 0.045, size: TYPE_SCALE.micro, color: PALETTE.ui, weight: 700 });
-    T("weapon-inactive", `${inactiveName}`, { x: 0.325, y: 0.088, size: TYPE_SCALE.micro, color: PALETTE.hudLabel, weight: 500 });
-
-    // Weapon icons, drawn at 28 px from the 48 px sheet cells.
+    // Weapon icons (ART-01 sheet), sized for the module.
     const activeIconSrc = weaponIconDataUrls[activeStyle];
     const inactiveIconSrc = weaponIconDataUrls[inactiveStyle];
     if (activeIconSrc && h.get("weapon-icon-active")?.src !== activeIconSrc) {
-      h.image("weapon-icon-active", activeIconSrc, { x: 0.278, y: 0.038, h: 0.039 });
+      h.image("weapon-icon-active", activeIconSrc, { x: 0.752, y: 0.858, h: 0.026 });
     }
     if (inactiveIconSrc && h.get("weapon-icon-inactive")?.src !== inactiveIconSrc) {
-      h.image("weapon-icon-inactive", inactiveIconSrc, { x: 0.278, y: 0.082, h: 0.033 });
+      h.image("weapon-icon-inactive", inactiveIconSrc, { x: 0.752, y: 0.914, h: 0.014 });
     }
 
-    // Beat name + timer
+    // Low-integrity wash: the HUD "flash" layer covers the whole frame (a panel is laid out in the
+    // square HUD stage, so w:1 only covers one stage width, not the viewport).
+    if (ratio < 0.5) {
+      const pulse = ratio < 0.25 ? 0.03 * Math.sin(state.t * 7) : 0;
+      const alpha = Math.min(0.34, (0.5 - ratio) * 0.55 + pulse + 0.05);
+      h.flash("#7e0c14", alpha * 0.55);
+      T("vitals-warning", ratio < 0.25 ? "INTEGRITY CRITICAL" : "INTEGRITY LOW", { x: 0.026, y: 0.128, size: TYPE_SCALE.micro, color: PALETTE.healthCrit, weight: 800 });
+    } else {
+      h.remove("vitals-warning");
+    }
+
+    // Beat name + timer, in a compact top-centre chip
     const beat = beatDirector.getCurrentBeat();
-    const beatText = `${beat.name}  ${beatDirector.getBeatTimeRemaining().toFixed(1)}s`;
-    if (hudBeat !== beatText) {
-      hudBeat = beatText;
-      T("beat", beatText, { x: 0.5, y: 0.03, size: TYPE_SCALE.subhead, color: PALETTE.ui, weight: 700, align: "center" });
+    const beatText = beat.name.toUpperCase();
+    const beatTimer = `${beatDirector.getBeatTimeRemaining().toFixed(1)}s`;
+    const beatKey = `${beatText}:${beatTimer}`;
+    if (hudBeat !== beatKey) {
+      hudBeat = beatKey;
+      P("beat-chip", { x: 0.398, y: 0.024, w: 0.204, h: 0.050, radius: 0.007, fill: "rgba(6,10,16,0.74)", stroke: "rgba(255,179,71,0.28)", width: 0.001, });
+      T("beat", beatText, { x: 0.5, y: 0.030, size: TYPE_SCALE.small, color: PALETTE.ui, weight: 800, align: "center" });
+      T("beat-timer", beatTimer, { x: 0.5, y: 0.047, size: TYPE_SCALE.micro, color: "#8ea3b8", weight: 700, align: "center" });
     }
 
     // Score
     const currentScore = scoreSystem.getCurrentScore(beatDirector.runTime);
     if (hudScore !== currentScore) {
       hudScore = currentScore;
-      T("score", `SCORE  ${currentScore}`, { x: 0.5, y: 0.055, size: TYPE_SCALE.small, color: PALETTE.hudSecondary, align: "center" });
+      T("score", `${currentScore}`, { x: 0.5, y: 0.086, size: TYPE_SCALE.label, color: "#cfdeee", weight: 800, align: "center" });
+      T("score-cap", "SCORE", { x: 0.5, y: 0.098, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700, align: "center" });
     }
 
     // Airdrop countdown
@@ -926,13 +1008,17 @@ function syncHud() {
       if (hudBoss !== bossKey) {
         hudBoss = bossKey;
         const bossLabel = boss.type === "gunship" ? "BOSS // ASSAULT GUNSHIP" : "ELITE // SIEGE MECH";
-        T("boss-label", `${bossLabel}  (${Math.max(0, Math.round(boss.hp))} HP)`, { x: 0.5, y: HUD_SLOTS.bossLabel, size: TYPE_SCALE.micro, color: PALETTE.deadPrompt, weight: 700, align: "center" });
-        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.39, y: HUD_SLOTS.bossBar, w: 0.22, h: 0.014, color: PALETTE.healthCrit, back: PALETTE.strokes.barBack });
+        P("boss-frame", { x: 0.352, y: 0.104, w: 0.296, h: 0.056, radius: 0.006, fill: "rgba(12,6,9,0.78)", stroke: "rgba(242,84,91,0.35)", width: 0.0012 });
+        P("boss-pip", { x: 0.352, y: 0.104, w: 0.004, h: 0.056, radius: 0.002, fill: PALETTE.healthCrit, stroke: "rgba(0,0,0,0)", width: 0 });
+        T("boss-label", `${bossLabel}   ${Math.max(0, Math.round(boss.hp))} HP`, { x: 0.5, y: 0.110, size: TYPE_SCALE.micro, color: "#ffb8bc", weight: 800, align: "center" });
+        B("boss-bar", Math.max(0, boss.hp / boss.maxHp), { x: 0.362, y: 0.134, w: 0.276, h: 0.010, color: PALETTE.healthCrit, back: "rgba(255,255,255,0.08)" });
       }
     } else if (hudBoss !== null) {
       hudBoss = null;
       h.remove("boss-label");
       h.remove("boss-bar");
+      h.remove("boss-frame");
+      h.remove("boss-pip");
     }
 
     // Objective readout removed with the defend-location system: there are no capture zones.
@@ -1106,7 +1192,7 @@ function clearEffects() {
 }
 
 function placeCamera() {
-  camera.position.set(state.pos.x, 6.4, state.pos.z + 9);
+  camera.position.set(state.pos.x, 5.9, state.pos.z + 8.0);
   camera.lookAt(state.pos.x, 1.25, state.pos.z);
 }
 
@@ -2037,6 +2123,7 @@ function update(dt, ctx) {
     }
     soldier.position.copy(state.pos);
     soldier.rotation.y = state.yaw;
+    playerShadow.position.set(state.pos.x, 0.02, state.pos.z);
 
     // Aim mode
     if (held(ctx, ["Mouse2"])) {
@@ -2192,9 +2279,9 @@ function update(dt, ctx) {
       }
     }
 
-    // Handle spawning
+    // Handle spawning (a test can freeze the director to isolate one archetype)
     const beat = beatDirector.getCurrentBeat();
-    enemyManager.updateSpawning(dt, state.pos, beat);
+    if (state.spawnsEnabled !== false) enemyManager.updateSpawning(dt, state.pos, beat);
 
     // Targeting (auto-orient Operator & Gun Floodlight toward nearest threat)
     // anti-air: helicopters sit high, so acquire them from further out and pitch the gun at them
@@ -2317,7 +2404,7 @@ function update(dt, ctx) {
     }
 
     // Camera
-    vDesired.set(state.pos.x + Math.sin(state.orbit) * 9, 6.4, state.pos.z + Math.cos(state.orbit) * 9);
+    vDesired.set(state.pos.x + Math.sin(state.orbit) * 8.0, 5.9, state.pos.z + Math.cos(state.orbit) * 8.0);
     const lerpFactor = 1 - Math.exp(-dt * 5.5);
     camera.position.lerp(vDesired, lerpFactor);
     // keep the camera out of cover: a container swallowing the view reads as a broken game

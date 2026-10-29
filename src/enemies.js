@@ -164,14 +164,20 @@ export class Enemy {
 
   updateShieldbearer(dt, dirX, dirZ, distance, playerPos) {
     const meleeRange = this.config.meleeRange || 1.8;
-    // Shield faces player
-    this.shieldAngle = Math.atan2(dirX, dirZ);
+    // The wall turns toward the player at a limited rate. Snapping it instantly made `flanked`
+    // unreachable by position (angleDiff was always 0), so the shield could never be outmanoeuvred.
+    const want = Math.atan2(dirX, dirZ);
+    let turn = want - this.shieldAngle;
+    turn = Math.atan2(Math.sin(turn), Math.cos(turn));
+    const maxTurn = 0.75 * dt; // ~43 deg/s: a heavy shield, a fighter can beat it on the outside
+    this.shieldAngle += Math.max(-maxTurn, Math.min(maxTurn, turn));
     // Check if flanked (player behind shield)
     const toPlayer = Math.atan2(playerPos.x - this.position.x, playerPos.z - this.position.z);
     // strict frontal arc: the wall covers the front 220 degrees, so only a genuine flank (or an
     // explosive / grenade) gets through. Walking around him takes real effort.
-    const angleDiff = Math.abs(toPlayer - this.shieldAngle);
-    this.flanked = angleDiff > Math.PI / 2 && angleDiff < 3 * Math.PI / 2;
+    let angleDiff = toPlayer - this.shieldAngle;
+    angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+    this.flanked = Math.abs(angleDiff) > Math.PI / 2;
     this.isShielded = !this.flanked;
 
     if (distance > meleeRange) {

@@ -359,7 +359,7 @@ export function buildOperatorRig(soldier, gunPivot, texSize = 256, skinIndex = 0
     rig.name = "OperatorVanguardRig";
     rig.userData.tag = "operator-rig";
     rig.userData.asset = "soldier-rig";
-    rig.scale.setScalar(1.24);
+    rig.scale.setScalar(1.32);
     rig.position.set(0, 0, 0);
     rig.rotation.set(0, Math.PI, 0);
 

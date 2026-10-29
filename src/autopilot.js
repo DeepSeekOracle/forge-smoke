@@ -107,6 +107,21 @@ function resetBeat(state) {
 }
 
 /**
+ * MGR-07: how the pilot adapts to each archetype. Range is the preferred standoff; the shield is
+ * special-cased into a flank because its wall only covers the front arc.
+ */
+const ARCHETYPE_RANGE = {
+  rifleman: 9.5,
+  sapper: 6.5,
+  shieldbearer: 5,
+  spotter: 10,
+  drone: 11.5,
+  mortar: 4.5,
+  mech: 11,
+  gunship: 13.5,
+};
+
+/**
  * Movement intent for this frame.
  * @returns {{mx:number,mz:number,mode:string,throttle:number,wantsMove:boolean,distance:number,target:any}}
  */
@@ -138,7 +153,11 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
   const tz = nx;
 
   const isBoss = target === state.bossEnemy;
-  const idealRange = isBoss ? (profile.bossRange || 13.5) : (profile.idealRange || 9.5);
+  // MGR-07: standoff depends on what is being fought — mortars get rushed, drones get space,
+  // shields get circled. Bosses keep their own envelope.
+  const idealRange = isBoss
+    ? (profile.bossRange || 13.5)
+    : (ARCHETYPE_RANGE[target.type] ?? profile.idealRange ?? 9.5);
   const closeRange = idealRange * 0.55;
   const farRange = idealRange * 1.35;
 
@@ -163,12 +182,30 @@ export function pilot(state, enemyManager, dt, profile = PILOT_PROFILE) {
     mode = "retreat";
     // bounding retreat: 0.8 s of movement, half a second to shoot back
     throttle = beat(state, "retreat", 0.8, 0.5, 0.8) ? (profile.retreatThrottle || 0.8) : 0;
+  } else if (target.type === "shieldbearer" && target.isShielded) {
+    // MGR-07: the wall only covers the front arc. Close first, then circle it until the shield is
+    // no longer facing the gun. This is the archetype that forces a movement decision, not DPS.
+    state.pilotBeatMode = null;
+    if (dist > 6) {
+      dirX = nx;
+      dirZ = nz;
+      mode = "advance";
+      throttle = 0.6;
+    } else {
+      const sign = state.flankSign || 1;
+      dirX = tx * sign + nx * 0.1;
+      dirZ = tz * sign + nz * 0.1;
+      mode = "flank";
+      throttle = 0.72;
+    }
   } else if (dist > farRange) {
     dirX = nx;
     dirZ = nz;
     mode = "advance";
-    // bounding advance: short pushes with pauses, not one long sprint across the arena
-    throttle = beat(state, "advance", 0.9, 1.9, 2.5) ? (profile.advanceThrottle || 0.55) : 0;
+    // bounding advance for most targets; a mortar/sapper gets a committed rush (their design is to
+    // keep range, so a stop-start walk never closes the gap)
+    const rush = target.type === "mortar" || target.type === "sapper";
+    throttle = (rush || beat(state, "advance", 0.9, 1.9, 2.5)) ? (profile.advanceThrottle || 0.55) : 0;
   } else if (dist < closeRange) {
     dirX = -nx;
     dirZ = -nz;

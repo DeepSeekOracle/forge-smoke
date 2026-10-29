@@ -26,9 +26,14 @@ await page.waitForTimeout(1200);
 if ((await page.evaluate(() => window.__forgeSmokeTest.getState().phase)) !== "loadout") await fail("bay not reached");
 await page.evaluate(() => document.querySelector("#cyborg-manager [data-launch]").click());
 await page.waitForTimeout(8000);
-const s = await page.evaluate(() => { const st = window.__forgeSmokeTest.getState(); return { phase: st.phase, kills: st.kills }; });
+// enemies are tankier since the difficulty pass: wait up to 20 s for the first kill
+let s = await page.evaluate(() => { const st = window.__forgeSmokeTest.getState(); return { phase: st.phase, kills: st.kills }; });
+for (let i = 0; i < 6 && s.phase === "playing" && !(s.kills > 0); i += 1) {
+  await page.waitForTimeout(2000);
+  s = await page.evaluate(() => { const st = window.__forgeSmokeTest.getState(); return { phase: st.phase, kills: st.kills }; });
+}
 if (s.phase !== "playing") await fail("not playing after launch");
-if (!(s.kills > 0)) await fail("no kills in 8s of autonomous play");
+if (!(s.kills > 0)) await fail("no kills in the first 20 s of autonomous play");
 await page.evaluate(async () => {
   const cs = window.__forgeSmokeTest.getCards();
   cs.queuedCards.push([{ type: "weapon", name: "WEAPON: BEAM", style: "beam" }]);
