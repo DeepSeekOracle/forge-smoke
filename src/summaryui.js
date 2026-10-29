@@ -25,6 +25,10 @@ const CSS = `
 #fs-sum .v.good{color:#7CE6A8}
 #fs-sum .v.gold{color:#FFD166}
 #fs-sum .v.bad{color:#F2545B}
+#fs-sum button{width:100%;margin-top:12px;padding:10px 12px;border:1px solid #FFB347;border-radius:4px;
+  background:linear-gradient(180deg,rgba(255,179,71,.18),rgba(255,179,71,.06));color:#FFD166;
+  font:800 11px ui-monospace,Consolas,monospace;letter-spacing:.22em;cursor:pointer}
+#fs-sum button:hover,#fs-sum button:focus-visible{background:#FFB347;color:#101822;outline:2px solid #FFD166;outline-offset:2px}
 `;
 
 export function createSummary() {
@@ -58,9 +62,16 @@ export function createSummary() {
       row("ARENA", bank.cleared ? "CLEARED" : "NOT CLEARED", bank.cleared ? "good" : ""),
     ];
     if (bank.legendary) rows.push(row("LEGENDARY", String(bank.legendary).toUpperCase(), "gold"));
-    root.innerHTML = `<h3>RUN REPORT</h3>${rows.join("")}`;
+    root.innerHTML = `<h3>RUN REPORT</h3>${rows.join("")}<button id="fs-sum-redeploy" type="button">REDEPLOY</button>`;
     root.classList.add("open");
   }
+
+  // one obvious button back to the bay: reuse the keyboard path the results screen already owns
+  root.addEventListener("click", (event) => {
+    if (event.target && event.target.id === "fs-sum-redeploy") {
+      window.dispatchEvent(new Event("forge:redeploy"));
+    }
+  });
 
   function hide() { root.classList.remove("open"); }
 

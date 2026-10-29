@@ -55,6 +55,10 @@ await page.evaluate(async () => {
   await new Promise((r) => setTimeout(r, 1200));
 });
 if (!(await page.evaluate(() => !!document.querySelector("#fs-cards.open")))) await fail("card tray did not open");
+// WPN-03: picking a weapon card must not silently grant the explosive mod
+if (await page.evaluate(() => Boolean(window.__forgeSmokeTest.getWeapons().hasExplosiveMod))) {
+  await fail("weapon card granted the explosive mod");
+}
 
 // FX-02 / FX-03: real trigger pulls must throw casings and kick the camera
 const feel = await page.evaluate(() => ({
