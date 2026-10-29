@@ -200,7 +200,7 @@ export function rollAirdropOptions(rng) {
   for (let i = 0; i < TUNING.airdrop.optionsCount; i++) {
     if (rng() < TUNING.airdrop.weaponChance) {
       // Weapon option - pick from available styles not already owned
-      const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry"];
+      const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry", "flak", "breach", "rail2"];
       options.push({ type: "weapon", style: styles[Math.floor(rng() * styles.length)] });
     } else {
       options.push({ type: "part", part: rollPart(rng, TUNING.airdrop.partSlotWeights, TUNING.airdrop.rarityWeights) });

@@ -522,7 +522,7 @@ export class CardSystem {
         const chosenMod = lightAndReloadPool[(Math.floor(this.rng() * lightAndReloadPool.length) + 1) % lightAndReloadPool.length];
         options.push({ type: "part", name: chosenMod.name, part: chosenMod });
       } else if (this.rng() < 0.4) {
-        const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry"];
+        const styles = ["spray", "pierce", "cone", "ricochet", "arc", "beam", "chain", "burst", "spinup", "rail", "flamer", "sentry", "flak", "breach", "rail2"];
         const st = styles[Math.floor(this.rng() * styles.length)];
         options.push({ type: "weapon", name: `WEAPON: ${st.toUpperCase()}`, style: st });
       } else {
