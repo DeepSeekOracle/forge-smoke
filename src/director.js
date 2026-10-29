@@ -333,7 +333,8 @@ export class ScoreSystem {
 
 /** Results screen data. */
 export class ResultsScreen {
-  constructor(scoreSystem, runTime, health, waveReached) {
+  constructor(scoreSystem, runTime, health, waveReached, cleared = false) {
+    this.cleared = Boolean(cleared);
     this.breakdown = scoreSystem.getBreakdown(runTime);
     this.runTime = runTime;
     this.health = health;
@@ -348,7 +349,7 @@ export class ResultsScreen {
       return Number.isInteger(v) ? String(v) : v.toFixed(1);
     };
     return {
-      title: "PERIMETER LOST",
+      title: this.cleared ? "SECTOR CLEARED" : "PERIMETER LOST",
       threatsDown: this.threatsDown,
       timeSurvived: this.formatTime(this.runTime),
       scoreBreakdown: {

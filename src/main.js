@@ -19,7 +19,7 @@ import { createCardTray } from "./cardsui.js?v=20261030n";
 import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
 import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610310a";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610310a";
 import { bossHp } from "./balance.js?v=20261030p";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
 import { pilot } from "./autopilot.js?v=202610310b";
@@ -1027,6 +1027,53 @@ function syncHud() {
       h.remove("obj-hud");
     }
 
+    // ── radar (bottom-left, 26 m range, up = facing) ─────────────────────────
+    {
+      const cx = 0.098;
+      const cy = 0.792;
+      P("radar", { x: cx - 0.082, y: cy - 0.082, w: 0.164, h: 0.164, radius: 0.082, fill: "rgba(6,10,16,0.64)", stroke: "rgba(126,150,176,0.24)", width: 0.0012 });
+      P("radar-ping", { x: cx - 0.030, y: cy - 0.030, w: 0.060, h: 0.060, radius: 0.030, fill: "rgba(111,227,255,0.05)", stroke: "rgba(111,227,255,0.12)", width: 0.0008 });
+      T("radar-self", "+", { x: cx, y: cy, size: TYPE_SCALE.micro, color: "#6fe3ff", weight: 800, align: "center" });
+      T("radar-label", "RADAR", { x: cx - 0.022, y: cy + 0.094, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      const live = enemyManager.enemies.filter((e) => e.hp > 0 && e.mesh).slice(0, 14);
+      for (let i = 0; i < 14; i += 1) {
+        const id = `radar-dot-${i}`;
+        const e = live[i];
+        if (!e) { h.remove(id); continue; }
+        const dx = e.position.x - state.pos.x;
+        const dz = e.position.z - state.pos.z;
+        const dist = Math.hypot(dx, dz);
+        if (dist > 26 || dist < 0.4) { h.remove(id); continue; }
+        const rel = Math.atan2(dx, dz) - state.yaw;
+        const rr = Math.min(1, dist / 26) * 0.074;
+        P(id, {
+          x: cx + Math.sin(rel) * rr - 0.004,
+          y: cy - Math.cos(rel) * rr - 0.004,
+          w: 0.008, h: 0.008, radius: 0.004,
+          fill: (e.type === "gunship" || e.type === "mech") ? "#ffb347" : "#ff5a5a",
+          stroke: "rgba(0,0,0,0)", width: 0,
+        });
+      }
+    }
+
+    // ── kill feed (top-right) ────────────────────────────────────────────────
+    {
+      const feed = state.killFeed || [];
+      for (let i = 0; i < 3; i += 1) {
+        const id = `killfeed-${i}`;
+        const entry = feed[i];
+        if (!entry) { h.remove(id); continue; }
+        T(id, entry.text, { x: 0.585, y: 0.176 + i * 0.020, size: TYPE_SCALE.micro, color: i === 0 ? "#ffe9a8" : "#8ea3b8", weight: 800 });
+      }
+    }
+
+    // ── hit marker (screen centre) ───────────────────────────────────────────
+    if ((state.hitMarker || 0) > 0) {
+      T("hitmarker", "X", { x: 0.5, y: 0.5, size: TYPE_SCALE.title, color: state.hitMarkerKill ? "#ff5a5a" : "#ffe9a8", weight: 900, align: "center" });
+    } else {
+      h.remove("hitmarker");
+    }
+
     // "THE DARKNESS COMES" status banner when ambient light dims
     const darkPct = Math.round((state.darknessFactor || 0) * 100);
     const darkKey = darkPct >= 15 ? `DARK:${Math.round(darkPct / 5) * 5}:${weaponManager.lightModLevel}` : null;
@@ -1620,6 +1667,7 @@ function shoot(target) {
       damageDealt += effectiveDamage;
       if (result.killed) {
         state.kills++;
+        noteKill(enemy.type);
         scoreSystem.recordKill(enemy.getScoreValue());
         cardSystem.addXp(TUNING.progression.xpPerKill || 10);
       }
@@ -1648,6 +1696,7 @@ function shoot(target) {
         damageDealt += dmg;
         if (result.killed) {
           state.kills++;
+          noteKill(best.type);
           scoreSystem.recordKill(best.getScoreValue());
           cardSystem.addXp(TUNING.progression.xpPerKill || 10);
         }
@@ -1659,6 +1708,7 @@ function shoot(target) {
     damageDealt = effectiveDamage;
     if (result.killed) {
       state.kills++;
+      noteKill(target.type);
       audioController?.playSfx("kill", { volume: 0.6, pitch: 0.95 + state.rng() * 0.1 });
       scoreSystem.recordKill(target.getScoreValue());
       cardSystem.addXp(TUNING.progression.xpPerKill || 10);
@@ -1667,8 +1717,21 @@ function shoot(target) {
   }
 
   scoreSystem.recordDamage(damageDealt);
-  // MATH-04: damage converts to card XP at the tuned rate (pacing constants live in tuning.js)
-  if (damageDealt > 0) cardSystem.addXp(damageDealt * (TUNING.progression.xpPerDamage || 0));
+  if (damageDealt > 0) {
+    state.hitMarker = 0.12;
+    state.hitMarkerKill = Boolean(state.killFlash);
+    state.killFlash = false;
+    // MATH-04: damage converts to card XP at the tuned rate (pacing constants live in tuning.js)
+    cardSystem.addXp(damageDealt * (TUNING.progression.xpPerDamage || 0));
+  }
+}
+
+/** Kill feed entry (HUD): newest first, at most three. */
+function noteKill(type) {
+  state.killFlash = true;
+  state.killFeed = state.killFeed || [];
+  state.killFeed.unshift({ text: String(type || "hostile").toUpperCase() + " DOWN", t: 2.6 });
+  state.killFeed.length = Math.min(state.killFeed.length, 3);
 }
 
 function nearest(maxDistance = 24) {
@@ -1747,8 +1810,8 @@ function hurt(amount) {
     barks.trigger("died");
     state.showResults = true;
     audioController?.playSfx("death", { volume: 0.8 });
-    if (!state.banked) { state.banked = true; bankRun(false); }
-    state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex);
+    if (!state.banked) { state.banked = true; bankRun(Boolean(state.arenaCleared)); }
+    state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex, Boolean(state.arenaCleared));
     state.cardPickWindow = false;
     state.showCards = false;
     if (state.currentCardOptions) cardTray.hide();
@@ -2032,6 +2095,13 @@ function update(dt, ctx) {
     if (state.painted) {
       state.paintedTimer = (state.paintedTimer || 0) - dt;
       if (state.paintedTimer <= 0) state.painted = false;
+    }
+
+    // HUD transients: hit marker and kill feed
+    if (state.hitMarker > 0) state.hitMarker = Math.max(0, state.hitMarker - dt);
+    if (state.killFeed && state.killFeed.length) {
+      for (const entry of state.killFeed) entry.t -= dt;
+      state.killFeed = state.killFeed.filter((entry) => entry.t > 0);
     }
 
     // MATH-04: a clean run still earns card XP from time survived (tuned in tuning.js)
@@ -2383,6 +2453,9 @@ function update(dt, ctx) {
       const stillUp = enemyManager.enemies.includes(state.bossEnemy) && state.bossEnemy.hp > 0;
       if (!stillUp && !state.bossPaid) {
         state.bossPaid = true;
+        // Killing the boss IS the clear. The old definition (survive to the ~12 minute overtime
+        // line) could never fire in a 100 s run, so clear% was pinned at 0 by construction.
+        state.arenaCleared = true;
         barks.trigger("boss_kill");
         const prof = state.cyborgProfile || {};
         prof.talentPoints = (prof.talentPoints ?? 0) + 1;
@@ -2467,8 +2540,8 @@ function update(dt, ctx) {
   barks.trigger(state.health <= 0 ? "died" : "clear_dead");
       state.showResults = true;
       audioController?.playSfx("death", { volume: 0.8 });
-      if (!state.banked) { state.banked = true; bankRun(false); }
-      state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex);
+      if (!state.banked) { state.banked = true; bankRun(Boolean(state.arenaCleared)); }
+      state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex, Boolean(state.arenaCleared));
       state.cardPickWindow = false;
       state.showCards = false;
       syncHud();
