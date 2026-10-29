@@ -598,6 +598,8 @@ if (testMode) {
       if (e.mesh) e.mesh.position.set(x, 0.72, z);
       return { type: e.type, slot: e.slot, hp: Math.round(e.hp) };
     },
+    // MOV-04: skip to the boss threshold so the telegraph dodge can be measured without an 80 s run
+    forceBoss: () => { state.kills = Math.max(state.kills || 0, 18); return state.kills; },
     getSlots: () => enemyManager.enemies.filter((e) => e.hp > 0).map((e) => {
       const dx = e.position.x - state.pos.x;
       const dz = e.position.z - state.pos.z;
