@@ -46,6 +46,15 @@ if (!(s.kills > 0)) await fail("no kills in the first 20 s of autonomous play");
     shot: window.__forgeSmokeTest.getState().lastShot || null,
   }));
   if (!(r.dmg > d0)) await fail(`secondary weapon ${r.style} dealt no damage after Q (${d0} -> ${r.dmg})`);
+  // the spine pose is applied every frame: it must stay bounded or the head/arms swing out of the
+  // torso and the character reads as invisible from the waist up
+  const spine = await page.evaluate(() => {
+    const bones = (window.__forgeSmokeTest.getSoldier() || {}).userData?.armBones || {};
+    return bones.spine2 ? { x: bones.spine2.rotation.x, y: bones.spine2.rotation.y } : null;
+  });
+  if (spine && !(Number.isFinite(spine.y) && Number.isFinite(spine.x) && Math.abs(spine.y) <= 0.6)) {
+    await fail(`operator spine ran away after swap (x=${spine.x} y=${spine.y})`);
+  }
   await page.keyboard.press("q");
   await page.waitForTimeout(500);
 }

@@ -247,7 +247,9 @@ function applyTwoHandedRiflePose(bones, aimYaw = 0, reloadTilt = 0, recoil = 0) 
   const clampedTilt = Math.max(-1.4, Math.min(1.4, tiltIn));
   const kick = Math.max(0, Math.min(0.35, Number.isFinite(recoil) ? recoil : 0));
   if (bones.spine2) {
-    bones.spine2.rotation.y += clampedYaw * 0.45;
+    // ABSOLUTE, not +=: this runs every frame and the old accumulation twisted the spine without
+    // bound, swinging the head and arms out of the torso ("invisible from the waist up").
+    bones.spine2.rotation.y = clampedYaw * 0.45;
     bones.spine2.rotation.x = -kick * 0.55;   // shoulders rock back on the shot
   }
   // Right hand grips pistol grip at [-0.14, 1.45, 0.25]; Left hand cradles barrel at [0.00, 1.48, 0.36]
