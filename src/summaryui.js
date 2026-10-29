@@ -6,13 +6,17 @@
  */
 
 const CSS = `
-#fs-sum{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:43;display:none;
-  min-width:380px;max-width:min(620px,92vw);padding:18px 22px;border-radius:6px;
+/* MGR-09: the run report is a left-hand sidebar. Centred it sat on top of the results panel. */
+#fs-sum{position:fixed;left:16px;bottom:76px;z-index:44;display:none;
+  width:262px;padding:14px 16px;border-radius:6px;
   background:linear-gradient(180deg,rgba(10,15,21,.97),rgba(7,10,15,.97));
   border:1px solid #2C3A47;box-shadow:0 30px 80px -30px #000;
   font:13px/1.5 ui-sans-serif,system-ui,sans-serif;color:#E8F1F8}
 #fs-sum.open{display:block;animation:sumIn .26s cubic-bezier(.2,.9,.2,1)}
-@keyframes sumIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes sumIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media (max-width:900px){
+  #fs-sum{left:8px;right:8px;bottom:8px;width:auto;max-height:44vh;overflow:auto;z-index:46}
+}
 #fs-sum h3{margin:0 0 10px;font:800 12px ui-monospace,Consolas,monospace;letter-spacing:.24em;color:#FFB347}
 #fs-sum .row{display:flex;justify-content:space-between;gap:20px;padding:5px 0;border-bottom:1px dashed rgba(44,58,71,.6)}
 #fs-sum .row:last-child{border-bottom:0}

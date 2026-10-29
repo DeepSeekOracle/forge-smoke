@@ -65,9 +65,13 @@ export function multiplier(blackoutsSurvived, evolutions, airdropsTaken) {
   return Math.max(TUNING.scoring.multiplier.base, Math.min(TUNING.scoring.multiplier.cap, m));
 }
 
-/** XP threshold for level L: 100 * L. */
+/** XP required to advance out of level L (1-indexed): base + perLevel * (L - 1). */
 export function xpThreshold(level) {
-  return TUNING.progression.levelBaseXp * level;
+  const lv = Math.max(1, Math.floor(Number(level) || 1));
+  const pacing = TUNING.progression.cardPacing || {};
+  const base = pacing.levelXpBase ?? TUNING.progression.levelBaseXp;
+  const per = pacing.levelXpPerLevel ?? base;
+  return base + per * (lv - 1);
 }
 
 /** Spawn budget at time t (minutes): min(400, floor(8 + 3.2 * t)). */

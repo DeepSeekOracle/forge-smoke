@@ -92,6 +92,28 @@ const CSS = `
 #fs-cards .tag{font:700 8px ui-monospace,Consolas,monospace;letter-spacing:.2em;color:#6F8296;margin-top:7px}
 @media (max-width:900px){#fs-cards{gap:10px;padding-bottom:64px}#fs-cards .card{width:170px;min-height:240px}
   #fs-cards .art{height:92px}}
+/* UI-10: a 390x844 phone must show all three cards without clipping or horizontal scroll.
+   3 x 116 + 2 x 6 gap + 16 padding = 376 of 390 available. */
+@media (max-width:480px){
+  #fs-cards{gap:6px;padding:0 8px 52px}
+  #fs-cards .card{width:min(29.5vw,116px);min-height:0;padding:1px;border-width:1px}
+  #fs-cards .card:hover{transform:none}
+  #fs-cards .art{height:66px}
+  #fs-cards .art b{font-size:24px}
+  #fs-cards .rarity{top:4px;left:5px;right:5px;font-size:5.5px;letter-spacing:.08em}
+  #fs-cards .body{padding:6px 6px 9px}
+  #fs-cards h4{font-size:9px;line-height:1.2;margin-bottom:2px}
+  #fs-cards li{font-size:6.8px;line-height:1.4;padding-left:7px}
+  #fs-cards li:before{font-size:6px}
+  #fs-cards .key{font-size:7px;padding:1px 4px;bottom:4px;right:5px}
+  #fs-cards .tag{display:none}
+  #fs-cards .hdr{display:none}
+}
+@media (max-width:340px){
+  #fs-cards{gap:4px;padding:0 5px 46px}
+  #fs-cards .card{width:min(30vw,100px)}
+  #fs-cards .art{height:58px}
+}
 `;
 
 export function createCardTray(opts = {}) {

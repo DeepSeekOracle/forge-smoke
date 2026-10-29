@@ -4,7 +4,7 @@
  */
 
 import { TUNING } from "./tuning.js";
-import { weaponStatsWithParts, rollAirdropOptions, rollPart as _rollPart } from "./balance.js";
+import { weaponStatsWithParts, rollAirdropOptions, rollPart as _rollPart, xpThreshold } from "./balance.js";
 
 const DEFAULT_RELOAD_META = {
   startMult: 1.40,        // Starts 40% slower at Level 1 (~0.71x speed)
@@ -439,7 +439,7 @@ export class CardSystem {
     this.maxQueued = TUNING.progression.maxQueuedCards;
     this.xp = 0;
     this.level = 1;
-    this.nextLevelXp = TUNING.progression.levelBaseXp;
+    this.nextLevelXp = xpThreshold(1);
   }
 
   /** Add XP and check for level up. Returns card options if level up. */
@@ -447,7 +447,7 @@ export class CardSystem {
     this.xp += amount;
     if (this.xp >= this.nextLevelXp && this.queuedCards.length < this.maxQueued) {
       this.level++;
-      this.nextLevelXp = TUNING.progression.levelBaseXp * this.level;
+      this.nextLevelXp = xpThreshold(this.level);
       return this.generateCardOptions();
     }
     return null;

@@ -14,6 +14,24 @@ const CARD_POOL = [
   { id: "ceramic", name: "Ceramic Plate", slot: "plate", rarity: "common", effect: { armour: 15 } },
 ];
 
+/**
+ * MATH-04 — XP and card pacing, one source of truth.
+ * Level N costs `levelXpBase + levelXpPerLevel * (N - 1)` (300, 600, 900, …), a kill pays
+ * `xpPerKill`, damage pays `xpPerDamage` per point, and surviving pays `xpPerSecond`.
+ * Everything else in the file reads these numbers; none of them are re-typed elsewhere.
+ */
+const CARD_PACING = {
+  levelXpBase: 300,
+  levelXpPerLevel: 300,
+  xpPerKill: 10,
+  xpPerDamage: 1 / 25,
+  xpPerSecond: 2,
+  maxQueuedCards: 1,
+  cardChoices: 3,
+  firstCardSeconds: 22,       // design target: first card around 0:22 of an average run
+  targetCardsPerMinute: 2.4,  // design target once the run is in full contact
+};
+
 export const TUNING = {
   reloadMeta: {
     startMult: 1.40,
@@ -295,12 +313,13 @@ export const TUNING = {
   // Level-up / Parts
   progression: {
     cards: CARD_POOL,
-    xpPerKill: 10,
-    xpPerDamage: 1 / 25,
-    xpPerSecond: 2,
-    levelBaseXp: 300,
-    maxQueuedCards: 1,
-    cardChoices: 3,
+    xpPerKill: CARD_PACING.xpPerKill,
+    xpPerDamage: CARD_PACING.xpPerDamage,
+    xpPerSecond: CARD_PACING.xpPerSecond,
+    levelBaseXp: CARD_PACING.levelXpBase,
+    maxQueuedCards: CARD_PACING.maxQueuedCards,
+    cardChoices: CARD_PACING.cardChoices,
+    cardPacing: CARD_PACING,
     parts: {
       barrel: [
         { id: "long_barrel", name: "Long Barrel", rarity: "common", effect: { rangeMult: 1.25, spreadMult: 0.8 } },

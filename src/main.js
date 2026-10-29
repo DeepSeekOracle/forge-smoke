@@ -13,13 +13,13 @@ import {
   POINT_LIGHT_SCALE,
   hexInt,
 } from "./theme.js?v=20261030m";
-import { TUNING } from "./tuning.js?v=20261030m";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030m";
-import { createCardTray } from "./cardsui.js?v=20261030m";
-import { createSummary } from "./summaryui.js?v=20261030m";
+import { TUNING } from "./tuning.js?v=20261030n";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=20261030n";
+import { createCardTray } from "./cardsui.js?v=20261030n";
+import { createSummary } from "./summaryui.js?v=20261030n";
 import { createBarks } from "./barks.js?v=20261030m";
 import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=20261030m";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030m";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=20261030n";
 import { bossHp } from "./balance.js?v=20261030n";
 import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=20261030m";
 import { pilot } from "./autopilot.js?v=20261030m";
@@ -49,6 +49,8 @@ import * as levelModule from "./level.js?v=20261030m";
 import * as menuModule from "./menu.js?v=20261030m";
 import * as audioModule from "./audio.js?v=20261030m";
 import * as fxModule from "./fx.js?v=20261030m";
+import { createCasings } from "./casings.js?v=20261030n";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=20261030n";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -233,6 +235,7 @@ weaponIconAtlas.userData.tag = "weapon-icon-atlas";
 
 const proceduralArtSprites = typeof bakeProceduralArtSprites === "function" ? bakeProceduralArtSprites() : {};
 const fxController = typeof fxModule?.createFx === "function" ? fxModule.createFx(renderer.domElement) : null;
+const casings = createCasings(scene);
 const menuController = typeof menuModule?.createMenu === "function" ? menuModule.createMenu(renderer.domElement, {}) : null;
 let audioController = null;
 if (typeof audioModule?.initAudio === "function") {
@@ -549,6 +552,9 @@ const state = {
   optionsCaller: "title",
   menuCooldown: 0,
   lastRenderedWeaponStyle: "spray",
+  // FX-03: camera kick accumulates from trigger pulls and decays; kickShots is the visible counter
+  camKick: { x: 0, y: 0, roll: 0, recover: 10 },
+  kickShots: 0,
 };
 
 if (testMode) {
@@ -572,7 +578,44 @@ if (testMode) {
       .map((e) => ({ type: e.type, hp: Math.round(e.hp), y: +e.mesh.position.y.toFixed(1) })),
     getTracerColors: () => tracers.filter((t) => t.life > 0).map((t) => t.mesh.material.color.getHex()),
     getCruise: () => ({ style: weaponManager.active.styleKey, vfx: STYLE_VFX[weaponManager.active.styleKey] || null }),
+    // FX-02 / FX-03 evidence: live casings, cases thrown, and camera-kick trigger pulls
+    getCasings: () => ({ live: casings.count(), total: casings.total(), cap: casings.cap }),
+    getFeel: () => ({
+      kickShots: state.kickShots || 0,
+      kick: { x: +(state.camKick?.x || 0).toFixed(4), y: +(state.camKick?.y || 0).toFixed(4) },
+      style: weaponManager.active?.styleKey || null,
+      feel: feelFor(weaponManager.active?.styleKey),
+    }),
+    // FX-03 acceptance: the added per-frame CPU cost of casings + kick authoring, in ms
+    benchFx: (n = 3000) => {
+      const t0 = performance.now();
+      for (let i = 0; i < n; i += 1) {
+        casings.update(1 / 60);
+        kickImpulse("cone", Math.random);
+      }
+      return (performance.now() - t0) / n;
+    },
     getEnemies: () => enemyManager,
+    getEnemyTypes: () => Object.keys(ENEMY_TYPES),
+    // MGR-07: spawn a real archetype and report the stat block the run will fight
+    spawnType: (t) => {
+      const e = enemyManager.spawn(String(t), state.pos, 0);
+      return e ? {
+        type: e.type,
+        hp: Math.round(e.hp),
+        speed: Number((e.speed || 0).toFixed(2)),
+        behaviour: (e.config && e.config.behaviour) || "",
+      } : null;
+    },
+    // MGR-08: the legendary pool the manager can equip, plus what the profile already owns
+    getLegendaryPool: () => ({
+      lightMods: LIGHT_MODS.map((m) => m.id),
+      perks: PERKS.map((p) => p.id),
+      legacy: (state.cyborgProfile && state.cyborgProfile.legacy) || [],
+      equipped: (state.cyborgProfile && state.cyborgProfile.equipped) || {},
+    }),
+    // QA: end a run on demand so the results/summary screen can be photographed
+    hurt: (n = 9999) => { hurt(n); return state.phase; },
     getColliders: () => arenaColliders.map((c) => ({ tag: c.tag, shape: c.shape, hx: +(c.hx || c.radius || 0).toFixed(1), hz: +(c.hz || 0).toFixed(1), x: +c.x.toFixed(1), z: +c.z.toFixed(1) })),
     testPush: (x, z, r = 0.55) => {
       const probe = { x, z };
@@ -706,7 +749,7 @@ const managerUI = createManager({
   },
 });
 
-const vMuzzle = new THREE.Vector3(), vTarget = new THREE.Vector3(), vDesired = new THREE.Vector3();
+const vMuzzle = new THREE.Vector3(), vTarget = new THREE.Vector3(), vDesired = new THREE.Vector3(), vShotDir = new THREE.Vector3();
 let hudPhase = null, hudHealth = null, hudKills = null, hudAmmo = null, hudBeat = null, hudScore = null, hudAirdrop = null, hudCards = null, hudBoss = null, hudDarkness = null, hudObjective = null;
 
 function syncHud() {
@@ -882,7 +925,7 @@ function syncHud() {
       hudDarkness = darkKey;
       if (darkKey) {
         const modTag = weaponManager.lightModLevel > 0 ? `LIGHT MODS LV ${weaponManager.lightModLevel} (+25% LIT DMG)` : "GUN FLOODLIGHT & LIGHT-ORB ROUNDS ENGAGED";
-        T("darkness-alert", `THE DARKNESS COMES (${darkPct}% DIM)  ·  ${modTag}`, { x: 0.5, y: 0.162, size: TYPE_SCALE.micro, color: "#ffd57a", weight: 800, align: "center" });
+        T("darkness-alert", `THE DARKNESS COMES (${darkPct}% DIM)  ·  ${modTag}`, { x: 0.5, y: HUD_SLOTS.statusBanner, size: TYPE_SCALE.micro, color: "#ffd57a", weight: 800, align: "center" });
       } else {
         h.remove("darkness-alert");
       }
@@ -1036,6 +1079,7 @@ function clearEffects() {
   }
   state.flash = 0;
   flash.visible = false;
+  casings.clear();
 }
 
 function placeCamera() {
@@ -1323,8 +1367,29 @@ function shoot(target) {
   if (!fireData) return;
   const vfx = STYLE_VFX[weaponManager.active?.styleKey] || STYLE_VFX.spray;
   const isGrenade = GRENADE_STYLES.has(weaponManager.active?.styleKey);
+  const styleKey = weaponManager.active?.styleKey || "spray";
   if (!state.attractSim) {
     audioController?.playSfx(vfx.sound, { volume: 0.5, pitch: vfx.pitch * (0.96 + state.rng() * 0.08) });
+  }
+
+  // FX-03: per-style camera kick, authored in screen pixels (<=2 px) and converted to world units
+  // at the live camera distance. The jitter comes from the run RNG, so it is reproducible per seed.
+  const impulse = kickImpulse(styleKey, state.rng);
+  if (state.camKick) {
+    const camDist = Math.max(1, camera.position.distanceTo(state.pos));
+    const worldPerPx = (2 * Math.tan((camera.fov * Math.PI) / 360) * camDist) / Math.max(1, globalThis.innerHeight || 1080);
+    state.camKick.x += impulse.x * worldPerPx;
+    state.camKick.y += impulse.y * worldPerPx;
+    state.camKick.roll += impulse.roll;
+    state.camKick.recover = impulse.recover;
+  }
+  state.kickShots = (state.kickShots || 0) + 1;
+
+  // FX-02: ballistic styles throw a case out of the ejection port; energy/thrown styles no-op.
+  // vShotDir is reused so a shot allocates no vector (the case pool is pre-built).
+  if (!state.attractSim) {
+    vShotDir.subVectors(vTarget, vMuzzle).normalize();
+    casings.eject(vMuzzle, vShotDir, styleKey);
   }
 
   // Spawn tracers + Travelling Light-Orb Projectiles
@@ -1351,6 +1416,8 @@ function shoot(target) {
       tracer.mesh.lookAt(endPos);
       const tracerWidth = state.attractSim ? 0.42 : (1 + darkBoost * 0.6) * vfx.tracer;
       tracer.mesh.scale.set(tracerWidth, tracerWidth, Math.max(0.4, vMuzzle.distanceTo(endPos)));
+      tracer.baseWidth = tracerWidth;
+      tracer.feelKey = weaponManager.active?.styleKey;
       tracer.mesh.material.color.setHex(vfx.color);
       tracer.mesh.visible = true;
 
@@ -1391,16 +1458,17 @@ function shoot(target) {
   // Deal damage (+25% bonus when target is illuminated in Darkness or with Floodlight/Light-Orb mods)
   const litBonusMult = (state.darknessFactor > 0.25 || weaponManager.hasFloodlightMod || weaponManager.hasLightOrbMod) ? 1.25 : 1.0;
   const explosive = Boolean(weaponManager.hasExplosiveMod);
-  // WPN-01: anti-air rounds hurt what is overhead and barely scratch what is on the floor
+  const cfgPierce = Number(weaponManager.active?.config?.shieldPierce) || 0;
+  const shieldPierce = isGrenade ? 1 : Math.max(explosive ? 0.55 : 0, cfgPierce);
+  const talentDmg = state.talentMods?.damageMult || 1;
+  let effectiveDamage = Math.round(fireData.damage * litBonusMult * (explosive ? 1.15 : 1) * talentDmg);
+  // WPN-01: anti-air rounds hurt what is overhead and barely scratch what is on the floor.
+  // (Ordered after effectiveDamage is initialised — this used to read it a line too early.)
   const airMult = Number(weaponManager.active?.config?.airDamageMult) || 0;
   if (airMult > 0) {
     const isAirTarget = (target.mesh?.position?.y || 0) > 2.2;
     effectiveDamage = Math.round(effectiveDamage * (isAirTarget ? airMult : 0.45));
   }
-  const cfgPierce = Number(weaponManager.active?.config?.shieldPierce) || 0;
-  const shieldPierce = isGrenade ? 1 : Math.max(explosive ? 0.55 : 0, cfgPierce);
-  const talentDmg = state.talentMods?.damageMult || 1;
-  const effectiveDamage = Math.round(fireData.damage * litBonusMult * (explosive ? 1.15 : 1) * talentDmg);
   let damageDealt = 0;
   if (fireData.pierceCount > 0) {
     // Pierce: hit target and up to pierceCount enemies behind
@@ -1470,6 +1538,8 @@ function shoot(target) {
   }
 
   scoreSystem.recordDamage(damageDealt);
+  // MATH-04: damage converts to card XP at the tuned rate (pacing constants live in tuning.js)
+  if (damageDealt > 0) cardSystem.addXp(damageDealt * (TUNING.progression.xpPerDamage || 0));
 }
 
 function nearest(maxDistance = 24) {
@@ -1541,8 +1611,18 @@ function hurt(amount) {
   audioController?.playSfx("hurt", { volume: 0.45, pitch: 1.0 });
   globalThis.__studio?.hud?.flash("#e5313b", 0.22);
   if (state.health <= 0) {
-    state.phase = "dead";
+    // The run ends here. It has to land on "results" (not "dead") or the results screen and the
+    // between-run summary never appear — that is the MGR-09 path.
+    state.phase = "results";
+    audioController?.stopAmbience?.();
+    barks.trigger("died");
+    state.showResults = true;
+    audioController?.playSfx("death", { volume: 0.8 });
     if (!state.banked) { state.banked = true; bankRun(false); }
+    state.resultsScreen = new ResultsScreen(scoreSystem, beatDirector.runTime, state.health, beatDirector.currentBeatIndex);
+    state.cardPickWindow = false;
+    state.showCards = false;
+    if (state.currentCardOptions) cardTray.hide();
     globalThis.__studio?.hud?.flash("#e5313b", 0.55);
     syncHud();
   }
@@ -1817,6 +1897,9 @@ function update(dt, ctx) {
 
     state.t += dt;
     beatDirector.runTime += dt;
+
+    // MATH-04: a clean run still earns card XP from time survived (tuned in tuning.js)
+    cardSystem.addXp(dt * (TUNING.progression.xpPerSecond || 0));
 
     // Orbit
     state.orbit -= ctx.look.x * 0.0042;
@@ -2105,6 +2188,7 @@ function update(dt, ctx) {
     }
 
     updateGrenades(dt);
+    casings.update(dt);
 
     // Check for card queue
     if (cardSystem.queuedCards.length > 0 && !state.cardPickWindow) {
@@ -2126,6 +2210,20 @@ function update(dt, ctx) {
       camera.position.y = Math.max(camera.position.y, 4.6);
     }
     camera.lookAt(state.pos.x, 1.25, state.pos.z);
+
+    // FX-03: camera kick — applied after lookAt so the roll survives, then decayed per style
+    {
+      const kick = state.camKick;
+      if (kick) {
+        camera.position.x += kick.x;
+        camera.position.y += kick.y;
+        camera.rotation.z += kick.roll;
+        const kDecay = Math.exp(-dt * (kick.recover || 10));
+        kick.x *= kDecay;
+        kick.y *= kDecay;
+        kick.roll *= kDecay;
+      }
+    }
 
     // speech bubble tracks the operator's head in screen space
     const head = new THREE.Vector3(state.pos.x, 2.45, state.pos.z).project(camera);
@@ -2149,8 +2247,8 @@ function update(dt, ctx) {
       }
     }
 
-    // Check death — this is the run's end, so the profile banks here
-    if (state.health <= 0) {
+    // Check death — hurt() already ends the run, this covers direct health drains
+    if (state.phase === "playing" && state.health <= 0) {
       state.phase = "results";
   audioController?.stopAmbience?.();
   barks.trigger(state.health <= 0 ? "died" : "clear_dead");
@@ -2204,6 +2302,12 @@ function update(dt, ctx) {
       continue;
     }
     const progress = 1 - tracer.life / Math.max(0.01, tracer.maxLife || 0.12);
+    // FX-03: tracer taper — heavy styles thin to a needle, light styles stay fat and fade
+    if (tracer.baseWidth) {
+      const w = tracer.baseWidth * tracerTaper(tracer.feelKey, progress);
+      tracer.mesh.scale.x = w;
+      tracer.mesh.scale.y = w;
+    }
     if (tracer.orb) {
       tracer.orb.position.lerpVectors(tracer.start, tracer.end, Math.min(1, progress));
       if (activeOrbLights < orbLights.length) {

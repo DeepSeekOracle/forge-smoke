@@ -343,6 +343,10 @@ export class ResultsScreen {
 
   /** Get formatted results for HUD. */
   getFormatted() {
+    const tidy = (n) => {
+      const v = Math.round((Number(n) || 0) * 10) / 10;
+      return Number.isInteger(v) ? String(v) : v.toFixed(1);
+    };
     return {
       title: "PERIMETER LOST",
       threatsDown: this.threatsDown,
@@ -350,10 +354,10 @@ export class ResultsScreen {
       scoreBreakdown: {
         kills: `${this.breakdown.kills} × ${TUNING.scoring.killScore} = ${this.breakdown.killScore}`,
         damage: `${Math.floor(this.breakdown.damage)} × ${TUNING.scoring.damageScoreMult} = ${Math.floor(this.breakdown.damageScore)}`,
-        time: `${Math.floor(this.runTime)}s × ${TUNING.scoring.timeScore} = ${this.breakdown.timeScore}`,
-        base: this.breakdown.baseScore,
+        time: `${Math.floor(this.runTime)}s × ${TUNING.scoring.timeScore} = ${tidy(this.breakdown.timeScore)}`,
+        base: tidy(this.breakdown.baseScore),
         multiplier: `×${this.breakdown.multiplier.toFixed(2)}`,
-        final: this.breakdown.finalScore,
+        final: tidy(this.breakdown.finalScore),
       },
       unlockTokens: this.breakdown.unlockTokens,
       multiplierDetails: {
