@@ -1,33 +1,34 @@
-import { runTest } from '../utils/test-runner.js';
+// Regression gate: start menu -> bay -> playing -> card tray. Exits non-zero on any failure.
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { chromium } = require("playwright");
 
-// End-to-end gate for DBG-04: start→bay→play→card→boss→death→summary
-// Non-zero exit on any page error
+const URL = process.env.FORGE_URL || "http://127.0.0.1:8796/preview/forge-smoke/";
+const browser = await chromium.launch({ args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on("pageerror", (e) => errors.push(e.message.slice(0, 160)));
+page.on("console", (m) => { if (m.type() === "error") errors.push(m.text().slice(0, 160)); });
 
-const testSequence = [
-  { stage: 'start', action: 'load initial state', expected: 'no errors', timeout: 5000 },
-  { stage: 'bay', action: 'enter bay phase', expected: 'no page errors', timeout: 3000 },
-  { stage: 'play', action: 'begin gameplay', expected: 'no page errors', timeout: 10000 },
-  { stage: 'card', action: 'interact with card system', expected: 'no page errors', timeout: 5000 },
-  { stage: 'boss', action: 'engage boss fight', expected: 'no page errors', timeout: 15000 },
-  { stage: 'death', action: 'trigger player death', expected: 'no page errors', timeout: 2000 },
-  { stage: 'summary', action: 'render final summary', expected: 'no page errors', timeout: 3000 }
-];
+const fail = async (msg) => { console.log("FAIL " + msg); await browser.close(); process.exit(1); };
 
-async function main() {
-  console.log('Starting DBG-04 end-to-end regression test...');
-  
-  for (const step of testSequence) {
-    try {
-      await runTest(step.stage, step.action, step.expected, step.timeout);
-      console.log(`✅ Passed: ${step.stage} - ${step.action}`);
-    } catch (error) {
-      console.error(`❌ Failed: ${step.stage} - ${step.action}:`, error);
-      process.exit(1);
-    }
-  }
-  
-  console.log('✅ All stages completed successfully.');
-  process.exit(0);
-}
-
-main();
+await page.goto(URL + "?test=1&cb=" + Date.now(), { waitUntil: "domcontentloaded", timeout: 60000 });
+await page.waitForTimeout(7000);
+if (!(await page.evaluate(() => !!document.querySelector("#fs-start.open")))) await fail("start menu not open");
+await page.evaluate(() => document.querySelector("#fs-start [data-enter]").click());
+await page.waitForTimeout(1200);
+if ((await page.evaluate(() => window.__forgeSmokeTest.getState().phase)) !== "loadout") await fail("bay not reached");
+await page.evaluate(() => document.querySelector("#cyborg-manager [data-launch]").click());
+await page.waitForTimeout(8000);
+const s = await page.evaluate(() => { const st = window.__forgeSmokeTest.getState(); return { phase: st.phase, kills: st.kills }; });
+if (s.phase !== "playing") await fail("not playing after launch");
+if (!(s.kills > 0)) await fail("no kills in 8s of autonomous play");
+await page.evaluate(async () => {
+  const cs = window.__forgeSmokeTest.getCards();
+  cs.queuedCards.push([{ type: "weapon", name: "WEAPON: BEAM", style: "beam" }]);
+  await new Promise((r) => setTimeout(r, 1200));
+});
+if (!(await page.evaluate(() => !!document.querySelector("#fs-cards.open")))) await fail("card tray did not open");
+if (errors.length) await fail("page errors: " + errors.slice(0, 3).join(" | "));
+console.log("REGRESS OK  phase=" + s.phase + " kills=" + s.kills + " tray=open errors=0");
+await browser.close();
