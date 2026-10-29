@@ -419,3 +419,27 @@ export const TUNING = {
     screenShakeHeavyOnly: true,
   },
 };
+
+/* --- added for WPN-01..03: anti-air, breacher, heavy rail -------------------------------- */
+Object.assign(TUNING.weapons, {
+  flak: {
+    ...TUNING.weapons.burst,
+    style: "flak", family: "aa", damage: 22, cycle: 0.55, magazine: 6, reload: 2.4,
+    range: 34, spread: 2.2, bloomPerShot: 0.2, maxBloom: 4,
+    tracerColor: 0xffb347, tracerLife: 0.09, muzzleFlashSize: 0.34, muzzleFlashLife: 0.07,
+    airDamageMult: 2.6, groundDamageMult: 0.45,
+  },
+  breach: {
+    ...TUNING.weapons.cone,
+    style: "breach", family: "shotgun", damage: 11, cycle: 0.78, magazine: 5, reload: 2.6,
+    range: 6.2, spread: 16, bloomPerShot: 0.9, maxBloom: 24,
+    tracerColor: 0xff8a4a, tracerLife: 0.06, muzzleFlashSize: 0.42, muzzleFlashLife: 0.09,
+    shieldPierce: 0.7,
+  },
+  rail2: {
+    ...TUNING.weapons.rail,
+    style: "rail2", family: "rail", damage: 190, cycle: 2.1, magazine: 2, reload: 3.4,
+    range: 40, pierceCount: 3,
+    tracerColor: 0xf2f8ff, tracerLife: 0.12, muzzleFlashSize: 0.5, muzzleFlashLife: 0.1,
+  },
+});

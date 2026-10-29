@@ -590,6 +590,9 @@ export const STYLE_VFX = {
   flamer:   { color: 0xffa23c, tracer: 1.9, flash: 2.3, sound: "fire",  pitch: 0.62, kind: "flame" },
   arc:      { color: 0xff6fd6, tracer: 1.2, flash: 1.6, sound: "fire",  pitch: 0.70, kind: "grenade" },
   sentry:   { color: 0x6fff9a, tracer: 0.8, flash: 1.0, sound: "laser", pitch: 1.42, kind: "tracer" },
+  flak:     { color: 0xffb347, tracer: 1.3, flash: 1.8, sound: "fire",  pitch: 0.72, kind: "spread" },
+  breach:   { color: 0xff8a4a, tracer: 2.0, flash: 2.2, sound: "fire",  pitch: 0.58, kind: "spread" },
+  rail2:    { color: 0xf2f8ff, tracer: 3.6, flash: 2.4, sound: "laser", pitch: 0.60, kind: "lance" },
 };
 
 /** The one style that carries a real grenade (and therefore bypasses shields). */

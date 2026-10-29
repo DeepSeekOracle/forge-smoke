@@ -73,6 +73,9 @@ export const STARTER_LOADOUTS = [
   { id: "flamer", name: "SOLAR PLASMA // FLAMER [LIGHT GUN]", role: "SOLAR FLARE IGNITER", color: "#ff6a2a", isLightGun: true },
   { id: "arc", name: "THUMPER // ARC", role: "LOBBED BLAST GRENADES", color: "#ff6fd6", isLightGun: false },
   { id: "sentry", name: "DEPLOYER // SENTRY", role: "AUTONOMOUS TURRET LINK", color: "#6fff9a", isLightGun: false },
+  { id: "flak", name: "AA FLAK // FLAK", role: "AIRBURST - AIR ONLY", color: "#ffb347", isLightGun: false },
+  { id: "breach", name: "BREACHER // BREACH", role: "CLOSE RANGE, SHIELD PIERCE", color: "#ff8a4a", isLightGun: false },
+  { id: "rail2", name: "SIEGE RAIL // RAIL2", role: "3-TARGET PENETRATION", color: "#f2f8ff", isLightGun: true },
 ];
 
 export function isLightGunStyle(styleKey) {
@@ -92,6 +95,9 @@ const STYLE_COLORS = {
   rail: 0xffffff,
   flamer: 0xff6a2a,
   sentry: 0x6fff9a,
+  flak: 0xffb347,
+  breach: 0xff8a4a,
+  rail2: 0xf2f8ff,
 };
 
 const gltfLoader = new GLTFLoader();

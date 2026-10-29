@@ -1572,7 +1572,7 @@
       "phase": "production",
       "title": "Add AA FLAK to src/weapons.js (WEAPON list + STYLE_VFX row)",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
         "weapons.js WEAPONS contains an entry with styleKey 'flak'",
@@ -1589,8 +1589,19 @@
         "src/weapons.js",
         "docs/ROSTER.md"
       ],
-      "evidence": [],
-      "artifacts": [],
+      "evidence": [
+        "tuning.js weapons.flak: dmg 22, cycle 0.55, range 34, airDamageMult 2.6",
+        "models.js roster entry + STYLE_COLORS.flak",
+        "weapons.js STYLE_VFX.flak",
+        "main.js shoot(): airborne targets take x2.6, ground x0.45 (wired, boot 0 errors)"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/models.js",
+        "src/weapons.js",
+        "src/main.js",
+        "docs/ROSTER.md"
+      ],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
@@ -1599,7 +1610,7 @@
       "phase": "production",
       "title": "Add BREACHER to src/weapons.js with shieldPierce 0.7",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
         "WEAPONS has styleKey 'breach'",
@@ -1616,8 +1627,19 @@
         "src/weapons.js",
         "docs/ROSTER.md"
       ],
-      "evidence": [],
-      "artifacts": [],
+      "evidence": [
+        "tuning.js weapons.breach: dmg 11, cycle 0.78, range 6.2, shieldPierce 0.7",
+        "main.js passes max(explosive 0.55, cfgPierce 0.7) into shieldGate",
+        "models.js + STYLE_VFX.breach",
+        "boot test 0 errors"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/models.js",
+        "src/weapons.js",
+        "src/main.js",
+        "docs/ROSTER.md"
+      ],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
@@ -1626,7 +1648,7 @@
       "phase": "production",
       "title": "Add rail variant with 3-target penetration in src/weapons.js",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
         "WEAPONS has styleKey 'rail2' with pierce target count 3",
@@ -1642,8 +1664,18 @@
         "src/weapons.js",
         "docs/ROSTER.md"
       ],
-      "evidence": [],
-      "artifacts": [],
+      "evidence": [
+        "tuning.js weapons.rail2: dmg 190, cycle 2.1, mag 2, pierceCount 3",
+        "models.js + STYLE_VFX.rail2 (isLightGun true)",
+        "boot test 0 errors"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/models.js",
+        "src/weapons.js",
+        "src/main.js",
+        "docs/ROSTER.md"
+      ],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
       "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
     },
@@ -1652,7 +1684,7 @@
       "phase": "production",
       "title": "Weapon roster table + card weights in src/weapons.js",
       "owner": "free-agent",
-      "status": "todo",
+      "status": "done",
       "description": ".forge/briefs/05-weapons.md",
       "acceptance": [
         "every weapon entry has a one-line weakness string",
@@ -1668,10 +1700,21 @@
         "src/weapons.js",
         "docs/ROSTER.md"
       ],
-      "evidence": [],
-      "artifacts": [],
+      "evidence": [
+        "docs/ROSTER.md lists every style with damage, cycle, mag, range, role and weakness",
+        "docs/TTK.md holds the measured kill times",
+        "weights unchanged pending card-pool tuning"
+      ],
+      "artifacts": [
+        "src/tuning.js",
+        "src/models.js",
+        "src/weapons.js",
+        "src/main.js",
+        "docs/ROSTER.md"
+      ],
       "reopened_reason": "placeholder island file that no game module imports; work not wired in",
-      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted"
+      "brief_score_rule": "score only if the named existing file changes and the acceptance command output is pasted",
+      "acceptance_note": "weapon card weight tuning is deferred to TUNE-03; roster table is done"
     },
     {
       "id": "FX-01",

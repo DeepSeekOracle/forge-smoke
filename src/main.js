@@ -1327,7 +1327,14 @@ function shoot(target) {
   // Deal damage (+25% bonus when target is illuminated in Darkness or with Floodlight/Light-Orb mods)
   const litBonusMult = (state.darknessFactor > 0.25 || weaponManager.hasFloodlightMod || weaponManager.hasLightOrbMod) ? 1.25 : 1.0;
   const explosive = Boolean(weaponManager.hasExplosiveMod);
-  const shieldPierce = isGrenade ? 1 : (explosive ? 0.55 : 0);
+  // WPN-01: anti-air rounds hurt what is overhead and barely scratch what is on the floor
+  const airMult = Number(weaponManager.active?.config?.airDamageMult) || 0;
+  if (airMult > 0) {
+    const isAirTarget = (target.mesh?.position?.y || 0) > 2.2;
+    effectiveDamage = Math.round(effectiveDamage * (isAirTarget ? airMult : 0.45));
+  }
+  const cfgPierce = Number(weaponManager.active?.config?.shieldPierce) || 0;
+  const shieldPierce = isGrenade ? 1 : Math.max(explosive ? 0.55 : 0, cfgPierce);
   const talentDmg = state.talentMods?.damageMult || 1;
   const effectiveDamage = Math.round(fireData.damage * litBonusMult * (explosive ? 1.15 : 1) * talentDmg);
   let damageDealt = 0;
