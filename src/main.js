@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610322a";
-import { standardMaterial } from "./materials.js?v=202610322a";
-import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610322a";
-import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610322a";
+import { FlowPhase, installStudio, makeRng } from "./studio.js?v=202610322e";
+import { standardMaterial } from "./materials.js?v=202610322e";
+import { makeBush, makeLog, makeTree, swayTree } from "./foliage.js?v=202610322e";
+import { generateWeaponIconAtlas, getWeaponIconUV, createWeaponIconMesh, STYLE_ICON_INDEX, generateWeaponIconDataUrls, loadWeaponIconSheetDataUrls } from "./icons.js?v=202610322e";
 import {
   PALETTE,
   TYPE_SCALE,
@@ -12,23 +12,23 @@ import {
   ARENA_LIGHTING,
   POINT_LIGHT_SCALE,
   hexInt,
-} from "./theme.js?v=202610322a";
-import { TUNING } from "./tuning.js?v=202610322a";
-import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610322a";
-import { createCardTray } from "./cardsui.js?v=202610322a";
-import { createSummary } from "./summaryui.js?v=202610322a";
-import { createBarks } from "./barks.js?v=202610322a";
-import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610322a";
-import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610322a";
-import { bossHp } from "./balance.js?v=202610322a";
-import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610322a";
-import { pilot } from "./autopilot.js?v=202610322a";
-import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610322a";
-import { createStartMenu } from "./startmenu.js?v=202610322a";
-import { createGamepad } from "./gamepad.js?v=202610322a";
-import { createTalentWindow } from "./talentui.js?v=202610322a";
-import { aggregate, toRunMods } from "./talents.js?v=202610322a";
-import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610322a";
+} from "./theme.js?v=202610322e";
+import { TUNING } from "./tuning.js?v=202610322e";
+import { WeaponManager, CardSystem, Weapon, STYLE_VFX, GRENADE_STYLES } from "./weapons.js?v=202610322e";
+import { createCardTray } from "./cardsui.js?v=202610322e";
+import { createSummary } from "./summaryui.js?v=202610322e";
+import { createBarks } from "./barks.js?v=202610322e";
+import { EnemyManager, ENEMY_TYPES } from "./enemies.js?v=202610322e";
+import { BeatDirector, ScoreSystem, ResultsScreen } from "./director.js?v=202610322e";
+import { bossHp } from "./balance.js?v=202610322e";
+import { loadSave, saveSave, updateBestScore, updateBestTime, getSettings, updateSettings, DEFAULT_SAVE, addProfileXp, grantLegacy, saveProfile } from "./save.js?v=202610322e";
+import { pilot } from "./autopilot.js?v=202610322e";
+import { createManager, statsForLevel, applyStatsToRun, LIGHT_MODS, PERKS } from "./manager.js?v=202610322e";
+import { createStartMenu } from "./startmenu.js?v=202610322e";
+import { createGamepad } from "./gamepad.js?v=202610322e";
+import { createTalentWindow } from "./talentui.js?v=202610322e";
+import { aggregate, toRunMods } from "./talents.js?v=202610322e";
+import { bakeProceduralArtSprites, PROCEDURAL_ART_MODULES } from "./art/index.js?v=202610322e";
 import {
   PLAYER_SKINS,
   STARTER_LOADOUTS,
@@ -44,20 +44,20 @@ import {
   buildBossMesh,
   segmentHitsCollider,
   warmGlbAssets,
-} from "./models.js?v=202610322a";
-import * as levelModule from "./level.js?v=202610322a";
-import * as menuModule from "./menu.js?v=202610322a";
-import * as audioModule from "./audio.js?v=202610322a";
-import * as fxModule from "./fx.js?v=202610322a";
-import { MAPS, mapById, selectMap } from "./maps.js?v=202610322a";
-import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610322a";
+} from "./models.js?v=202610322e";
+import * as levelModule from "./level.js?v=202610322e";
+import * as menuModule from "./menu.js?v=202610322e";
+import * as audioModule from "./audio.js?v=202610322e";
+import * as fxModule from "./fx.js?v=202610322e";
+import { MAPS, mapById, selectMap } from "./maps.js?v=202610322e";
+import { PICKUP_DEFS, planPickupSites, choosePickup, speedMultiplier, powerMultiplier, HEALTH_SPACING } from "./pickups.js?v=202610322e";
 
 // D3: one readable build stamp, so a stale module in the console is obvious.
 const BUILD = new URL(import.meta.url).searchParams.get("v") || "dev";
 window.__forgeBuild = BUILD;
 console.info("[forge] BUILD " + BUILD);
-import { createCasings } from "./casings.js?v=202610322a";
-import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610322a";
+import { createCasings } from "./casings.js?v=202610322e";
+import { feelFor, kickImpulse, tracerTaper } from "./stylefeel.js?v=202610322e";
 
 const TAU = Math.PI * 2;
 const urlParams = new URLSearchParams(window.location.search);
@@ -1363,18 +1363,30 @@ function syncHud() {
     if (hudHealth !== Math.round(state.health)) {
       hudHealth = Math.round(state.health);
       // ── operator status card (top-left) ─────────────────────────────────────
-      P("vitals", { x: 0.015, y: 0.026, w: 0.292, h: 0.134, radius: 0.009, fill: "rgba(6,10,16,0.86)", stroke: "rgba(126,150,176,0.20)", width: 0.0012 });
+      // Photographic card skin: a still behind smoked glass, then hairline gold brackets.
+      h.image("vitals-photo", "./assets/start-still-a.jpg", { x: 0.015, y: 0.026, w: 0.292, h: 0.134 });
+      P("vitals", { x: 0.015, y: 0.026, w: 0.292, h: 0.134, radius: 0.009, fill: "rgba(6,10,16,0.84)", stroke: "rgba(160,184,208,0.34)", width: 0.0012 });
+      const br = "rgba(255,179,71,0.85)";
+      P("vitals-br-tl-h", { x: 0.015, y: 0.026, w: 0.022, h: 0.0022, fill: br });
+      P("vitals-br-tl-v", { x: 0.015, y: 0.026, w: 0.0022, h: 0.012, fill: br });
+      P("vitals-br-br-h", { x: 0.285, y: 0.158, w: 0.022, h: 0.0022, fill: br });
+      P("vitals-br-br-v", { x: 0.305, y: 0.148, w: 0.0022, h: 0.012, fill: br });
       P("vitals-accent", { x: 0.015, y: 0.026, w: 0.292, h: 0.0038, radius: 0.002, fill: color, stroke: "rgba(0,0,0,0)", width: 0 });
       P("vitals-tick", { x: 0.015, y: 0.026, w: 0.007, h: 0.020, radius: 0.002, fill: "rgba(255,179,71,0.22)", stroke: "rgba(0,0,0,0)", width: 0 });
-      T("vitals-title", activeSkin.name.toUpperCase(), { x: 0.026, y: 0.039, size: TYPE_SCALE.micro, color: "#aec2d6", weight: 800 });
-      T("vitals-sub", "AUTONOMOUS COMBAT FRAME", { x: 0.026, y: 0.056, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
-      B("health", ratio, { x: 0.026, y: 0.076, w: 0.193, h: 0.018, color, back: "rgba(255,255,255,0.07)" });
-      T("health-num", String(Math.round(state.health)), { x: 0.226, y: 0.069, size: TYPE_SCALE.numeral, color, weight: 800 });
-      T("health-cap", "INTEGRITY", { x: 0.026, y: 0.099, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      T("vitals-title", activeSkin.name.toUpperCase(), { x: 0.028, y: 0.039, size: TYPE_SCALE.micro, color: "#aec2d6", weight: 800 });
+      T("vitals-sub", "AUTONOMOUS COMBAT FRAME", { x: 0.028, y: 0.056, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      B("health", ratio, { x: 0.028, y: 0.076, w: 0.196, h: 0.018, color, back: "rgba(255,255,255,0.07)" });
+      T("health-num", String(Math.round(state.health)), { x: 0.232, y: 0.069, size: TYPE_SCALE.numeral, color, weight: 800 });
+      T("health-cap", "INTEGRITY", { x: 0.028, y: 0.099, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
       // ── weapon module (bottom-right) ────────────────────────────────────────
-      P("weapon-module", { x: 0.742, y: 0.826, w: 0.243, h: 0.128, radius: 0.009, fill: "rgba(6,10,16,0.86)", stroke: "rgba(126,150,176,0.20)", width: 0.0012 });
+      h.image("weapon-photo", "./assets/art-05.jpg", { x: 0.742, y: 0.826, w: 0.243, h: 0.128 });
+      P("weapon-module", { x: 0.742, y: 0.826, w: 0.243, h: 0.128, radius: 0.009, fill: "rgba(6,10,16,0.84)", stroke: "rgba(160,184,208,0.34)", width: 0.0012 });
+      P("weapon-br-tl-h", { x: 0.742, y: 0.826, w: 0.022, h: 0.0022, fill: "rgba(255,179,71,0.85)" });
+      P("weapon-br-tl-v", { x: 0.742, y: 0.826, w: 0.0022, h: 0.012, fill: "rgba(255,179,71,0.85)" });
+      P("weapon-br-br-h", { x: 0.963, y: 0.952, w: 0.022, h: 0.0022, fill: "rgba(255,179,71,0.85)" });
+      P("weapon-br-br-v", { x: 0.983, y: 0.942, w: 0.0022, h: 0.012, fill: "rgba(255,179,71,0.85)" });
       P("weapon-accent", { x: 0.742, y: 0.826, w: 0.243, h: 0.0038, radius: 0.002, fill: PALETTE.ui, stroke: "rgba(0,0,0,0)", width: 0 });
-      T("weapon-tag", "PRIMARY", { x: 0.752, y: 0.830, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
+      T("weapon-tag", "PRIMARY", { x: 0.754, y: 0.830, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
     }
     const killsKey = `${state.kills}:${cardSystem.level}`;
     if (hudKills !== killsKey) {
@@ -1401,26 +1413,26 @@ function syncHud() {
       : `${ammoNow} / ${ammoMax}`;
     if (hudAmmo !== ammoText) {
       hudAmmo = ammoText;
-      T("weapon-active", activeName, { x: 0.752, y: 0.852, size: TYPE_SCALE.label, color: "#f2f7ff", weight: 800 });
+      T("weapon-active", activeName, { x: 0.754, y: 0.852, size: TYPE_SCALE.label, color: "#f2f7ff", weight: 800 });
       T("weapon-inactive", `ALT  ${inactiveName}`, { x: 0.752, y: 0.919, size: TYPE_SCALE.micro, color: "#8ea3b8", weight: 600 });
-      T("ammo-tag", activeWeapon.isReloading ? "RELOADING" : (activeWeapon.isHeatWeapon ? "HEAT" : "MAGAZINE"), { x: 0.800, y: 0.884, size: TYPE_SCALE.micro, color: "#576a7e", weight: 700 });
-      T("ammo-count", ammoText, { x: 0.800, y: 0.862, size: TYPE_SCALE.subhead, color: activeWeapon.isReloading ? PALETTE.healthWarn : "#eaf3ff", weight: 800 });
+      T("ammo-tag", activeWeapon.isReloading ? "RELOADING" : (activeWeapon.isHeatWeapon ? "HEAT" : "MAGAZINE"), { x: 0.962, y: 0.880, size: TYPE_SCALE.micro, color: "#6b7f92", weight: 700, align: "right" });
+      T("ammo-count", ammoText, { x: 0.962, y: 0.850, size: TYPE_SCALE.subhead, color: activeWeapon.isReloading ? PALETTE.healthWarn : "#eaf3ff", weight: 800, align: "right" });
       const barFrac = activeWeapon.isReloading
         ? activeWeapon.reloadProgress
         : activeWeapon.isHeatWeapon
           ? Math.max(0, 1 - activeWeapon.heat / Math.max(1, activeWeapon.maxHeat))
           : activeWeapon.magazine / Math.max(1, activeWeapon.maxMagazine);
-      B("reload-bar", barFrac, { x: 0.752, y: 0.898, w: 0.168, h: 0.007, color: activeWeapon.isReloading ? PALETTE.healthWarn : PALETTE.ui, back: "rgba(255,255,255,0.08)" });
+      B("reload-bar", barFrac, { x: 0.754, y: 0.902, w: 0.219, h: 0.007, color: activeWeapon.isReloading ? PALETTE.healthWarn : PALETTE.ui, back: "rgba(255,255,255,0.08)" });
     }
 
     // Weapon icons (ART-01 sheet), sized for the module.
     const activeIconSrc = weaponIconDataUrls[activeStyle];
     const inactiveIconSrc = weaponIconDataUrls[inactiveStyle];
     if (activeIconSrc && h.get("weapon-icon-active")?.src !== activeIconSrc) {
-      h.image("weapon-icon-active", activeIconSrc, { x: 0.752, y: 0.858, h: 0.026 });
+      h.image("weapon-icon-active", activeIconSrc, { x: 0.946, y: 0.828, h: 0.016 });
     }
     if (inactiveIconSrc && h.get("weapon-icon-inactive")?.src !== inactiveIconSrc) {
-      h.image("weapon-icon-inactive", inactiveIconSrc, { x: 0.752, y: 0.914, h: 0.014 });
+      h.image("weapon-icon-inactive", inactiveIconSrc, { x: 0.946, y: 0.930, h: 0.010 });
     }
 
     // Low-integrity wash: the HUD "flash" layer covers the whole frame (a panel is laid out in the
@@ -1429,7 +1441,7 @@ function syncHud() {
       const pulse = ratio < 0.25 ? 0.03 * Math.sin(state.t * 7) : 0;
       const alpha = Math.min(0.34, (0.5 - ratio) * 0.55 + pulse + 0.05);
       h.flash("#7e0c14", alpha * 0.55);
-      T("vitals-warning", ratio < 0.25 ? "INTEGRITY CRITICAL" : "INTEGRITY LOW", { x: 0.026, y: 0.128, size: TYPE_SCALE.micro, color: PALETTE.healthCrit, weight: 800 });
+      T("vitals-warning", ratio < 0.25 ? "INTEGRITY CRITICAL" : "INTEGRITY LOW", { x: 0.028, y: 0.128, size: TYPE_SCALE.micro, color: PALETTE.healthCrit, weight: 800 });
     } else {
       h.remove("vitals-warning");
     }
@@ -2813,7 +2825,7 @@ function update(dt, ctx) {
     if (beamCone) {
       beamCone.visible = ownsFlood;
       if (ownsFlood) {
-        beamCone.material.opacity = (0.045 + dark * 0.13) * (weaponManager.hasFloodlightMod ? 1.35 : 1.0);
+        beamCone.material.opacity = (0.018 + dark * 0.05) * (weaponManager.hasFloodlightMod ? 1.2 : 1.0);
       }
     }
     const lampBody = gunPivot.getObjectByName?.("tac-lamp-body")

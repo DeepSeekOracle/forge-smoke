@@ -6,9 +6,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { clone as skeletonClone } from "three/addons/utils/SkeletonUtils.js";
-import { standardMaterial, bakeTexture } from "./materials.js?v=202610322a";
-import { PALETTE, hexInt } from "./theme.js?v=202610322a";
-import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610322a";
+import { standardMaterial, bakeTexture } from "./materials.js?v=202610322e";
+import { PALETTE, hexInt } from "./theme.js?v=202610322e";
+import { mapById, PROP_COLLIDERS } from "./maps.js?v=202610322e";
 
 export const PLAYER_SKINS = [
   {
@@ -554,8 +554,8 @@ export function rebuildWeaponMesh(gunPivot, styleKey, steelMat) {
 
   // Underbarrel Tactical Flashlight Housing + Volumetric Beam Cone (ONLY turns on when `tac_flashlight` card or Light Gun is active!)
   const lampHousing = makePart(new THREE.CylinderGeometry(0.02, 0.022, 0.12, 8), steelMat, "tac-lamp-body", 0, -0.04, 0.48, Math.PI / 2, 0, 0);
-  const coneGeo = new THREE.ConeGeometry(1.45, 8.2, 16, 1, true);
-  coneGeo.translate(0, -4.1, 0);
+  const coneGeo = new THREE.ConeGeometry(0.5, 5.4, 24, 1, true);
+  coneGeo.translate(0, -2.7, 0);
   coneGeo.rotateX(-Math.PI / 2);
   const coneMat = new THREE.MeshBasicMaterial({
     color: lightGun ? accentHex : 0xffe6a3,
