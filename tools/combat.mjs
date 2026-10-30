@@ -132,6 +132,11 @@ try {
   // boss must spawn even at the body cap, and lose HP to the gun
   await page.evaluate(() => {
     const T = window.__forgeSmokeTest;
+    const s = T.getState();
+    // the run may already have spawned its own boss during the 20 s play section (kills >= 60);
+    // reset the boss slot so this check always measures the forced gunship
+    s.bossSpawned = false; s.bossEnemy = null; s.bossPaid = false;
+    T.clearEnemies();
     T.setSpawns(true);
     for (let i = 0; i < 24; i += 1) T.spawnAt('rifleman', -10 + (i % 6) * 4, 12 + Math.floor(i / 6) * 3);
     T.forceBossKind('gunship'); T.forceBoss();
