@@ -152,6 +152,27 @@ try {
   const bossMoved = Math.hypot(bossB.boss.x - bossA.boss.x, bossB.boss.z - bossA.boss.z);
   assert('boss actually moves', bossMoved > 2, `${bossMoved.toFixed(2)} m in 8 s`);
 
+  // melee contact: unarmed rifle-carriers used to orbit at carbine range forever. Four of them
+  // must close and draw blood inside 12 s.
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    T.setSpawns(false); T.clearEnemies(); T.setPlayerPos(0, 0);
+    const s = T.getState(); s.health = s.maxHealth; s.fire = 999; s.autopilot = false;
+    for (let i = 0; i < 4; i += 1) T.spawnAt('rifleman', Math.cos(i * 1.6) * 9, Math.sin(i * 1.6) * 9);
+    T.getEnemies().getEnemies().forEach((e) => { e.canShoot = false; });
+  });
+  const meleeHp0 = await page.evaluate(() => Math.round(window.__forgeSmokeTest.getState().health));
+  await page.waitForTimeout(12000);
+  const meleeEnd = await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    const hp = Math.round(T.getState().health);
+    const d = T.getEnemyMotion().map((e) => e.d);
+    return { hp, closest: d.length ? +Math.min(...d).toFixed(1) : null };
+  });
+  assert('unarmed bodies close to melee', meleeEnd.closest !== null && meleeEnd.closest < 2.0, `closest ${meleeEnd.closest} m`);
+  assert('melee contact draws blood', meleeEnd.hp < meleeHp0, `${meleeHp0} -> ${meleeEnd.hp}`);
+  await page.evaluate(() => { const s = window.__forgeSmokeTest.getState(); s.fire = 0; });
+
   assert('no page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 } catch (e) {
   fail('harness', String(e).slice(0, 300));

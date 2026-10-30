@@ -42,7 +42,18 @@ through kenney.nl's own flow and vendored under `assets/ki`, `assets/kc`, `asset
   blocks the direct line, otherwise blend 35 % of it so they round corners. `tools/pathing.mjs`
   drops ten bodies on the perimeter of each map: **3/3 maps, 5-6 of 8-10 reach the operator**.
 
-    PATHING OK 3/3 maps · TRAVERSE OK 5/5 · COMBAT OK 24/24 · gate green
+    PATHING OK 3/3 maps · TRAVERSE OK 5/5 · COMBAT OK 26/26 · gate green
+
+Follow-ups after playtest feedback ("walking backwards", "stuck doing nothing"):
+- **Unarmed rifle-carriers orbited at carbine range forever** (they rolled `canShoot = false`, so
+  they never fired, and their AI only advances beyond 14 m). They now charge and melee.
+- **The melee ring parked bodies at 2.3 m while melee range is 1.6 m** — attackers could never land a
+  hit. Ring is 1.3 m, separation 1.5 m.
+- Facing is now computed for **every** body (mech, mortar, aircraft included); the shieldbearer's
+  hard-coded yaw override was removed.
+- Camera raised (chase 3.75 m, orbit 3.05, sideline 2.65, wide 7.2, hero 1.95), float halved,
+  follow/look smoothing relaxed and shot dwell 10-15 s so the framing stops pumping.
+- `combat.mjs` now asserts unarmed bodies close to melee (0.5 m) and draw blood.
 
 ## Third pass (same day) — measured the fight, then tuned it
 
