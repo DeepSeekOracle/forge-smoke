@@ -130,8 +130,8 @@ and the arm override is removed (clips own the arms).
 
 | Target | Ref | Verified |
 |---|---|---|
-| Source repo `DeepSeekOracle/forge-smoke` | `master` + `main` @ `9c08387` | clean default-branch clone reports build `202610325v` and passes `node tools/combat.mjs` 16/16 |
-| Live site `https://excavationpro.ca/games/forgesmoke/` | `deepseekoracle/excavationpro-ca` @ `b29439e` | Pages build `built`; page serves `?v=202610325v`; live boot test: title + manager + play, 7 bodies, 0 errors |
+| Source repo `DeepSeekOracle/forge-smoke` | `master` + `main` @ `7c277b6` (+ docs) | clean default-branch clone reports the current build and passes `tools/combat.mjs` 23/23 + `tools/traverse.mjs` 5/5 |
+| Live site `https://excavationpro.ca/games/forgesmoke/` | `deepseekoracle/excavationpro-ca` @ `76052d8` | Pages build `built`; page serves `?v=202610326m`; live boot test clean, live `traverse.mjs` 5/5, live full run: boss spawned, 4 cards, 62 kills, died at 1:22, 1 talent point, results screen, 0 errors |
 
 `main` on the source repo was a separate 2026-10-29 snapshot with an unrelated history. It is now
 merged into `master` with `-s ours --allow-unrelated-histories`, so both branches carry this tree and
