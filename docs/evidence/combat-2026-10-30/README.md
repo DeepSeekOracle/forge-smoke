@@ -181,8 +181,8 @@ and the arm override is removed (clips own the arms).
 
 | Target | Ref | Verified |
 |---|---|---|
-| Source repo `DeepSeekOracle/forge-smoke` | `master` + `main` @ `b4b07a6` | passes `tools/combat.mjs` 24/24 (three consecutive runs) + `tools/traverse.mjs` 5/5 |
-| Live site `https://excavationpro.ca/games/forgesmoke/` | `deepseekoracle/excavationpro-ca` @ `53fb67f` | Pages build `built`; page serves `?v=202610326u`; live `traverse.mjs` 5/5; **live full run cleared the arena** — gunship boss killed (paid), 99 kills, 5 cards, 5 talent points, results at 1:52, 0 errors |
+| Source repo `DeepSeekOracle/forge-smoke` | `master` + `main` @ `3a2abc9` | gate green; `combat.mjs` 24/24, `traverse.mjs` 5/5, `pathing.mjs` 3/3 (twice) |
+| Live site `https://excavationpro.ca/games/forgesmoke/` | `deepseekoracle/excavationpro-ca` @ `4369b96` | Pages build `built`; page serves `?v=202610327h`; live `pathing.mjs` **3/3**; live play: 8 bodies, 5 kills, 0 errors; Kenney assets served 200 |
 
 `main` on the source repo was a separate 2026-10-29 snapshot with an unrelated history. It is now
 merged into `master` with `-s ours --allow-unrelated-histories`, so both branches carry this tree and
