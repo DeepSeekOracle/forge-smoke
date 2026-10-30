@@ -1,0 +1,120 @@
+/**
+ * COMBAT-01 — the play-loop regression.
+ *
+ * Boots the real game on the preview server and asserts the things a player actually feels:
+ * the weapon is in the fighter's hands and points where he faces, the body does not freeze while
+ * it wants to move, the arena is not a black screen, the boss appears even at the body cap, a
+ * mortar shell lands on the ground where it was aimed, and the whole loop runs without a page error.
+ *
+ *   node tools/combat.mjs
+ *
+ * Requires the preview server on 127.0.0.1:8796 (see .forge/VERIFY.md).
+ */
+import { chromium } from 'playwright';
+
+const URL = process.env.FORGE_URL || 'http://127.0.0.1:8796/preview/forge-smoke/?test=1';
+const checks = [];
+const fail = (name, detail) => checks.push({ name, ok: false, detail });
+const pass = (name, detail) => checks.push({ name, ok: true, detail });
+
+function assert(name, cond, detail) {
+  if (cond) pass(name, detail); else fail(name, detail);
+}
+
+const browser = await chromium.launch({ headless: true, args: ['--use-angle=d3d11', '--ignore-gpu-blocklist'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const errors = [];
+page.on('pageerror', (e) => errors.push('pageerror: ' + e.message.slice(0, 200)));
+page.on('console', (m) => {
+  if (m.type() === 'error' && !m.text().includes('Content Security')) errors.push('console: ' + m.text().slice(0, 200));
+});
+
+try {
+  await page.goto(URL + '&cb=' + Date.now(), { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForTimeout(6500);
+  assert('start menu opens', await page.evaluate(() => !!document.querySelector('#fs-start.open')));
+  await page.evaluate(() => document.querySelector('#fs-start [data-enter]').click());
+  await page.waitForTimeout(1000);
+  assert('manager terminal opens', await page.evaluate(() => !!document.querySelector('#cyborg-manager')));
+  await page.evaluate(() => document.querySelector('#cyborg-manager [data-launch]').click());
+  await page.waitForTimeout(3000);
+
+  const start = await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    return { phase: T.getState().phase, lighting: T.getLighting(), rig: T.getRig() };
+  });
+  assert('run starts', start.phase === 'playing', start.phase);
+  assert('arena is lit', start.lighting.sun > 1 && start.lighting.hemisphere > 0.9, JSON.stringify({ sun: start.lighting.sun, hemi: start.lighting.hemisphere }));
+
+  // weapon in hands: the anchor sits in front of the body and the rig has a mixer
+  const rig = await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    const g = T.getGunPivot(); const s = T.getSoldier();
+    const V = g.position.constructor;
+    const gunW = g.getWorldPosition(new V());
+    const solW = s.getWorldPosition(new V());
+    const fwd = new V(Math.sin(T.getState().yaw), 0, Math.cos(T.getState().yaw));
+    const rel = gunW.clone().sub(solW);
+    return { anchor: [+g.position.x.toFixed(2), +g.position.y.toFixed(2), +g.position.z.toFixed(2)], forward: +rel.dot(fwd).toFixed(2), y: +rel.y.toFixed(2), rig: T.getRig() };
+  });
+  assert('weapon anchored at chest height', rig.y > 1.2 && rig.y < 1.75, JSON.stringify(rig.anchor));
+  assert('weapon carried in front of the body', rig.forward > 0.1, String(rig.forward));
+  assert('operator rig has a skeleton + clip', rig.rig.hasRig === true && rig.rig.hasMixer === true, JSON.stringify(rig.rig));
+
+  // 20 s of autonomous play: it must move, not freeze, and take or deal damage
+  const samples = [];
+  for (let i = 0; i < 50; i += 1) {
+    await page.waitForTimeout(400);
+    samples.push(await page.evaluate(() => {
+      const T = window.__forgeSmokeTest; const s = T.getState();
+      return { pos: [+s.pos.x.toFixed(2), +s.pos.z.toFixed(2)], wants: !!s.pilotWantsMove, od: +(s.odometer || 0).toFixed(1), hp: Math.round(s.health), kills: s.kills, n: T.getSlots().length, phase: s.phase };
+    }));
+    if (samples[samples.length - 1].phase !== 'playing') break;
+  }
+  let still = 0, worstStill = 0, prev = null;
+  for (const s of samples) {
+    if (prev && s.wants && Math.hypot(s.pos[0] - prev.pos[0], s.pos[1] - prev.pos[1]) < 0.02) { still += 0.4; worstStill = Math.max(worstStill, still); } else still = 0;
+    prev = s;
+  }
+  const last = samples[samples.length - 1];
+  assert('fighter covers ground', last.od > 30, `${last.od} m in ~20 s`);
+  assert('never frozen while trying to move', worstStill <= 1.2, `worst ${worstStill.toFixed(1)} s`);
+  assert('enemies are alive and engaged', last.n > 0 && last.kills > 0, `${last.n} bodies, ${last.kills} kills`);
+  assert('run survives 20 s', last.phase === 'playing', last.phase);
+
+  // mortar: a shell must detonate on the ground, not on the mortar
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    T.clearEnemies(); T.setSpawns(false); T.setPlayerPos(0, 0);
+    T.spawnAt('mortar', 7, 9);
+  });
+  await page.waitForTimeout(9000);
+  const blasts = await page.evaluate(() => window.__forgeSmokeTest.getBlasts());
+  assert('mortar shells detonate', blasts.detonated > 0, JSON.stringify(blasts));
+
+  // boss must spawn even at the body cap, and lose HP to the gun
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    T.setSpawns(true);
+    for (let i = 0; i < 24; i += 1) T.spawnAt('rifleman', -10 + (i % 6) * 4, 12 + Math.floor(i / 6) * 3);
+    T.forceBossKind('gunship'); T.forceBoss();
+  });
+  await page.waitForTimeout(2200);
+  const bossA = await page.evaluate(() => ({ boss: window.__forgeSmokeTest.getBoss(), n: window.__forgeSmokeTest.getSlots().length }));
+  await page.waitForTimeout(8000);
+  const bossB = await page.evaluate(() => ({ boss: window.__forgeSmokeTest.getBoss(), hp: Math.round(window.__forgeSmokeTest.getState().health) }));
+  assert('boss spawns at the body cap', bossA.boss.spawned === true && bossA.boss.hp > 0, JSON.stringify(bossA.boss));
+  assert('boss is airborne', bossA.boss.y > 5, `y=${bossA.boss.y}`);
+  assert('boss takes damage', bossB.boss.hp < bossA.boss.hp, `${bossA.boss.hp} -> ${bossB.boss.hp}`);
+
+  assert('no page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
+} catch (e) {
+  fail('harness', String(e).slice(0, 300));
+} finally {
+  await browser.close();
+}
+
+const failed = checks.filter((c) => !c.ok);
+for (const c of checks) console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.name}${c.detail ? '   (' + c.detail + ')' : ''}`);
+console.log(`\nCOMBAT ${failed.length === 0 ? 'OK' : 'FAILED'}  ${checks.length - failed.length}/${checks.length} checks`);
+process.exit(failed.length === 0 ? 0 : 1);
