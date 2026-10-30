@@ -95,9 +95,19 @@ and the arm override is removed (clips own the arms).
   camera-only blocker volume.
 
 ## Not verified / left open
-- Browser matrix: tested Chromium (GPU + swiftshader) only, not Firefox/Safari/mobile.
+- Not tested in Firefox/Safari/mobile.
 - The two-hand IK grip is approximate: hands land on the grips, but finger curl is not solved.
 - The gunship model reads as a red mass at altitude; it is visible and framed, not pretty.
 - Manual play was smoke-tested (W moves 10.4 m in 1.6 s) but not played for a full run.
-- The live site (`https://excavationpro.ca/games/forgesmoke/`) is deployed from
-  `D:\excavationpro-ca` by the steward; this pass changes the source repo only.
+- Browser matrix: Chromium (GPU + swiftshader) only.
+
+## Shipped
+
+| Target | Ref | Verified |
+|---|---|---|
+| Source repo `DeepSeekOracle/forge-smoke` | `master` + `main` @ `9c08387` | clean default-branch clone reports build `202610325v` and passes `node tools/combat.mjs` 16/16 |
+| Live site `https://excavationpro.ca/games/forgesmoke/` | `deepseekoracle/excavationpro-ca` @ `b29439e` | Pages build `built`; page serves `?v=202610325v`; live boot test: title + manager + play, 7 bodies, 0 errors |
+
+`main` on the source repo was a separate 2026-10-29 snapshot with an unrelated history. It is now
+merged into `master` with `-s ours --allow-unrelated-histories`, so both branches carry this tree and
+the snapshot commit stays an ancestor (nothing was force-pushed).
