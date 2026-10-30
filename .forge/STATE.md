@@ -10,7 +10,7 @@ updating this file.
 | Project repo | `C:\Users\justi\AI Games\forge-smoke` |
 | Deployed copy | `D:\excavationpro-ca\games\forgesmoke` |
 | Live URL | `https://excavationpro.ca/games/forgesmoke/` |
-| Module version at snapshot | `?v=202610327s` (all modules bumped together by `tools/bump.py`) |
+| Module version at snapshot | `?v=202610328b` (all modules bumped together by `tools/bump.py`) |
 | Build stamp | `console.info("[forge] BUILD …")`, `window.__forgeBuild`, red error strip reads it |
 | Verify one command | `python tools/gate.py` → SYNTAX + ASSETS + UNIT + REGRESS |
 
@@ -82,7 +82,11 @@ licences at `assets/ki`, `assets/kc`, `assets/kr` and recorded in `docs/ASSETS-S
 - Pathing (`node tools/pathing.mjs`): **3/3 maps**, 7-8 of 8 bodies arrive, **0 % backpedal** (live too).
 - Combat (`node tools/combat.mjs`): **26/26** including unarmed bodies close to melee (0.5 m) and melee draws blood.
 - Map selection (`node tools/mapselection.mjs`): **3/3 distinct** maps.
-- Results screen: combat numbers and barks render only while playing; verified clean on a live FOUNDRY run at 202610327s (`results-clean.png`).
+- Results screen: combat numbers and barks render only while playing; verified clean on a live FOUNDRY run (`results-clean.png`).
+- Ranged combat: planted 0.5 s aim with a red laser sight + muzzle charge, then fire/reposition; spotters 0.75 s; melee 0.3 s wind-up. `getTelegraphs()` measures t 0.4-1.0, speed 0.00.
+- Boss phase 2 at 50 % hp: glowing core (+35 % damage taken), salvo 6 -> 4.2 s, telegraphed area attack per type; asserted in `combat.mjs` (29/29).
+- Ambience bed: procedural rain/wind (pink noise, lowpass + wind LFO) at 0.10, fades with phase; `getAudio()` reports it.
+- Level art: Kenney atlases regraded + grime skirt/parapet caps per building.
 
 ## Hooks available for tests (`window.__forgeSmokeTest`)
 

@@ -2260,7 +2260,7 @@
     {
       "id": "REL-03",
       "phase": "release",
-      "title": "Final debug pass: maps, pathing, facing, camera, map selection",
+      "title": "Final polish: maps, pathing, facing, camera, map selection, ranged telegraph, boss phase 2, art grade, ambience",
       "owner": "free-agent",
       "status": "done",
       "description": "Playtest feedback round: three maps rebuilt from CC0 level assets, enemies routing and facing, camera tuning, and the arena pick actually loading the chosen map.",
@@ -2295,7 +2295,12 @@
         "camera raised ~0.5-1 m per shot, float halved, follow 2.8 / look 3.6, dwell 10-15 s",
         "live https://excavationpro.ca/games/forgesmoke/?v=202610327q verified; gate green, TRAVERSE 5/5",
         "results screen: floating damage numbers (z-index 70) and the bark no longer render outside phase 'playing'; live FOUNDRY re-check clean at ?v=202610327s",
-        "final live build 202610327s (source bfad8e5, site c7fc303), 0 page errors"
+        "final live build 202610327s (source bfad8e5, site c7fc303), 0 page errors",
+        "ranged telegraph: planted 0.5 s aim (laser sight + charge glow), spotters 0.75 s, melee 0.3 s wind-up; getTelegraphs() t 0.4-1.0 with speed 0.00",
+        "boss phase 2 at 50 % hp: glowing core (+35 % damage), salvo 6 -> 4.2 s, telegraphed area attack (gunship bomb / mech shockwave); combat.mjs 29/29",
+        "Kenney atlases regraded (desaturate 25 %, darken 8 %, grime) + grime skirt and parapet cap per building",
+        "procedural ambience bed: pink-noise rain, 1150 Hz lowpass with wind LFO, 0.10 gain, fades with phase; getAudio() reports ambient true/false",
+        "live ?v=202610328b: COMBAT 29/29, ambience running, boss phase 2 core, 0 errors"
       ],
       "artifacts": [
         "src/maps.js",
@@ -2307,7 +2312,9 @@
         "tools/pathing.mjs",
         "tools/mapselection.mjs",
         "docs/ASSETS-SOURCES.md",
-        "docs/evidence/combat-2026-10-30/results-clean.png"
+        "docs/evidence/combat-2026-10-30/results-clean.png",
+        "docs/evidence/combat-2026-10-30/boss-phase2-core.png",
+        "docs/evidence/combat-2026-10-30/ranged-telegraph.png"
       ]
     }
   ]
