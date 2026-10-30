@@ -66,6 +66,10 @@ Final end-to-end run (2026-10-30, TOWN selected through the manager): 53 kills, 
 gunship boss was killed and **paid** (arena cleared), 5 cards played, **0 page/console errors**.
 Screenshot: `final-run-results.png`.
 
+Results-screen fix (same pass): floating damage numbers (z-index 70) and the bark bubble were frozen
+over the results panel, piling big gold digits on the score breakdown. Combat numbers and barks now
+only render while `phase === "playing"`. Re-shot: `results-clean.png`.
+
 ## Third pass (same day) — measured the fight, then tuned it
 
 New tool: `node tools/fightlab.mjs` drives the real loop and reports TTK per weapon style, incoming
