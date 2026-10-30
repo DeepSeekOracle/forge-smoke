@@ -35,22 +35,33 @@ for (const map of ['depot', 'yard', 'foundry']) {
       }
       return { nav: T.getNavInfo(), n: T.getSlots().length };
     }, [map]);
-    await page.waitForTimeout(22000);
+    // sample motion: backpedalling is the "walking backwards" bug
+    let moving = 0, back = 0;
+    for (let i = 0; i < 8; i += 1) {
+      await page.waitForTimeout(350);
+      const m = await page.evaluate(() => window.__forgeSmokeTest.getEnemyMotion());
+      for (const e of m) {
+        if (e.speed > 0.6) { moving += 1; if (e.dot < -0.35) back += 1; }
+      }
+    }
+    const backFrac = moving ? +(back / moving).toFixed(2) : 0;
+    await page.waitForTimeout(14000);
     const end = await page.evaluate(() => {
       const T = window.__forgeSmokeTest;
       const slots = T.getSlots();
       const hp = Math.round(T.getState().health);
       return {
         n: slots.length,
-        near: slots.filter((e) => e.d < 7).length,
+        // riflemen hold a 10-14 m firing line by design, so "arrived" means inside that envelope
+        near: slots.filter((e) => e.d <= 14).length,
         dists: slots.map((e) => +e.d.toFixed(1)).sort((a, b) => a - b),
         hp,
       };
     });
     const arrived = end.near;
-    const ok = arrived >= 5;
+    const ok = arrived >= 5 && backFrac < 0.15;
     if (!ok) failed = true;
-    results.push({ map, start, end, arrived, ok, errors: [...new Set(errors)].slice(0, 2) });
+    results.push({ map, arrived, backpedal: backFrac, movingSamples: moving, end, ok, errors: [...new Set(errors)].slice(0, 2) });
   } catch (e) {
     failed = true;
     results.push({ map, error: String(e).slice(0, 200) });
