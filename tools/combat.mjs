@@ -152,12 +152,45 @@ try {
   const bossMoved = Math.hypot(bossB.boss.x - bossA.boss.x, bossB.boss.z - bossA.boss.z);
   assert('boss actually moves', bossMoved > 2, `${bossMoved.toFixed(2)} m in 8 s`);
 
+  // phase 2: at half health the boss exposes a glowing core (hits land 35 % harder) and adds a
+  // telegraphed area attack on its salvo beat
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    const b = T.getBoss();
+    // the pilot drives state.fire every frame, so stop the pilot or the boss dies before it attacks
+    T.getState().autopilot = false;
+    T.getState().fire = 0;
+    T.getState().health = T.getState().maxHealth;   // survive the phase-2 salvo for the whole window
+    if (b && b.hp > 0) T.setBossHp(Math.round(b.maxHp * 0.45));
+  });
+  await page.waitForTimeout(900);
+  const p2 = await page.evaluate(() => ({ boss: window.__forgeSmokeTest.getBoss(), blasts: window.__forgeSmokeTest.getBlasts() }));
+  assert('boss enters phase 2', p2.boss.bossPhase === 2, JSON.stringify(p2.boss));
+  assert('boss core is exposed', p2.boss.core === true, String(p2.boss.core));
+  await page.waitForTimeout(5200);
+  // keep it alive through its salvo beat so the area attack has a chance to fire
+  await page.evaluate(() => { const T = window.__forgeSmokeTest; T.setBossHp(T.getBoss().maxHp); });
+  await page.waitForTimeout(5200);
+  const p2b = await page.evaluate(() => window.__forgeSmokeTest.getBlasts());
+  assert('phase 2 adds an area attack', p2b.detonated > p2.blasts.detonated || p2b.ringsVisible > 0, JSON.stringify(p2b));
+  // drop the boss reference before the melee test clears bodies: a live boss left in state would be
+  // "paid" by that clear and push the run to results, freezing the arena
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    const s = T.getState();
+    s.bossEnemy = null; s.bossPaid = true; s.bossSpawned = true;
+    s.autopilot = true; s.fire = 999;
+  });
+
   // melee contact: unarmed rifle-carriers used to orbit at carbine range forever. Four of them
   // must close and draw blood inside 12 s.
   await page.evaluate(() => {
     const T = window.__forgeSmokeTest;
     T.setSpawns(false); T.clearEnemies(); T.setPlayerPos(0, 0);
-    const s = T.getState(); s.health = s.maxHealth; s.fire = 999; s.autopilot = false;
+    const s = T.getState();
+    // if the phase-2 salvo ended the run, bring it back to play for this isolated check
+    if (s.phase !== 'playing') { s.phase = 'playing'; s.showResults = false; }
+    s.health = s.maxHealth; s.fire = 999; s.autopilot = false;
     for (let i = 0; i < 4; i += 1) T.spawnAt('rifleman', Math.cos(i * 1.6) * 9, Math.sin(i * 1.6) * 9);
     T.getEnemies().getEnemies().forEach((e) => { e.canShoot = false; });
   });

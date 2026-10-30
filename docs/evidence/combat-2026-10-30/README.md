@@ -18,6 +18,28 @@ preview server with Playwright on the **real GPU** (ANGLE / D3D11, RTX 4060 Ti),
 ![Fight after the pass](after-fight.jpg)
 ![Boss framing](after-boss.jpg)
 
+## Fifth pass (same day) — the four open items closed
+
+1. **Ranged bodies stopped moonwalking and now telegraph.** Rifle-carriers hold a planted 0.5 s aim
+   (a red laser sight + charging muzzle glow), fire, then reposition for ~1 s; spotters aim 0.75 s.
+   Measured: telegraph reaches 0.4-1.0, body speed is 0.00 while aiming, and the shot still lands
+   (`combat.mjs`, `getTelegraphs()`), so they are readable and dodgeable instead of sliding sideways
+   under a run clip. Melee hits carry a 0.3 s wind-up and are resolved with fresh range/LOS.
+2. **Bosses have a phase 2.** At half health a boss vents its core: a glowing red core + point light
+   appears, every hit lands **35 % harder**, the salvo cadence shortens 6 s -> 4.2 s, and it gains a
+   telegraphed area attack per type (gunship bombs the operator's position after a 1.25 s ring; the
+   mech slams a 6.5 m shockwave after 0.95 s). `combat.mjs` now asserts phase 2, the exposed core and
+   that the area attack detonates.
+3. **Style mismatch narrowed.** The Kenney atlases are regraded (25 % desaturated, 8 % darker, grime
+   noise) and every building gets a procedural grime skirt and a dark parapet cap, plus a faint
+   self-lit floor so facades read at night without the toy brightness.
+4. **Ambience bed shipped.** The missing rain/wind loop is now synthesised in Web Audio (two
+   decorrelated pink-noise channels, loop-point crossfade, 1150 Hz lowpass with a 0.06 Hz wind LFO)
+   at 0.10 gain; it fades in over 2.4 s on launch and fades out when the phase leaves play.
+   Measured: `getAudio()` reports `ambient:true` while playing and `false` on the results screen.
+
+Gate green, COMBAT **29/29**, PATHING 3/3, TRAVERSE 5/5, MAPSELECTION 3/3.
+
 ## Fourth pass (same day) — maps rebuilt from real level assets
 
 The three arenas were prop scatter on an empty plane: signs everywhere, bushes in the streets, no
