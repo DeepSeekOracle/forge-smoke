@@ -62,6 +62,10 @@ so they could not even be selected. `mapSelection` is `"select"`, the tiles are 
 FOUNDRY and all three are unlocked. New `tools/mapselection.mjs` clicks each tile, launches, and reads
 back the map: **3/3 distinct** (depot 30 colliders, yard 21, foundry 23).
 
+Final end-to-end run (2026-10-30, TOWN selected through the manager): 53 kills, run ended at 2:17, the
+gunship boss was killed and **paid** (arena cleared), 5 cards played, **0 page/console errors**.
+Screenshot: `final-run-results.png`.
+
 ## Third pass (same day) — measured the fight, then tuned it
 
 New tool: `node tools/fightlab.mjs` drives the real loop and reports TTK per weapon style, incoming

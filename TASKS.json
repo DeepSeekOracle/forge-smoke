@@ -2256,6 +2256,56 @@
         "src/main.js",
         "tools/gunship.mjs"
       ]
+    },
+    {
+      "id": "REL-03",
+      "phase": "release",
+      "title": "Final debug pass: maps, pathing, facing, camera, map selection",
+      "owner": "free-agent",
+      "status": "done",
+      "description": "Playtest feedback round: three maps rebuilt from CC0 level assets, enemies routing and facing, camera tuning, and the arena pick actually loading the chosen map.",
+      "acceptance": [
+        "three themed maps, one brand board each, no prop/sign spam",
+        "enemies route around buildings and look where they travel",
+        "no body orbits forever without attacking",
+        "the arena picked in the manager loads that map",
+        "camera higher and less erratic"
+      ],
+      "depends_on": [
+        "MAP-04",
+        "MOV-04",
+        "DBG-06"
+      ],
+      "priority": "high",
+      "risk": "med",
+      "files": [
+        "src/maps.js",
+        "src/models.js",
+        "src/enemies.js",
+        "src/menu.js",
+        "src/tuning.js",
+        "src/main.js"
+      ],
+      "evidence": [
+        "Kenney City Kits (CC0) vendored at assets/ki|kc|kr: DEPOT container terminal, TOWN square + skyline, FOUNDRY plant; docs/ASSETS-SOURCES.md",
+        "2.5 m flow-field nav grid in src/models.js; tools/pathing.mjs 3/3 maps, 7-8 of 8 arrive, 0 % backpedal (live too)",
+        "unarmed rifle-carriers charge and melee; melee ring 1.3 m inside the 1.6 m reach; tools/combat.mjs 26/26",
+        "facing computed for every body from travel when routing/backpedalling (mech/mortar/aircraft included)",
+        "TUNING.mapSelection 'select' + all arenas unlocked; tools/mapselection.mjs 3/3 distinct maps (30/21/23 colliders)",
+        "camera raised ~0.5-1 m per shot, float halved, follow 2.8 / look 3.6, dwell 10-15 s",
+        "live https://excavationpro.ca/games/forgesmoke/?v=202610327q verified; gate green, TRAVERSE 5/5"
+      ],
+      "artifacts": [
+        "src/maps.js",
+        "src/models.js",
+        "src/enemies.js",
+        "src/menu.js",
+        "src/tuning.js",
+        "src/main.js",
+        "tools/pathing.mjs",
+        "tools/mapselection.mjs",
+        "docs/ASSETS-SOURCES.md"
+      ]
     }
   ]
 }

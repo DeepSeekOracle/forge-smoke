@@ -1,4 +1,4 @@
-# Forge Smoke — verified state (2026-10-29)
+# Forge Smoke — verified state (2026-10-30)
 
 Snapshot of what actually exists, measured, not remembered. If you change something here, you own
 updating this file.
@@ -10,7 +10,7 @@ updating this file.
 | Project repo | `C:\Users\justi\AI Games\forge-smoke` |
 | Deployed copy | `D:\excavationpro-ca\games\forgesmoke` |
 | Live URL | `https://excavationpro.ca/games/forgesmoke/` |
-| Module version at snapshot | `?v=202610320m` (all modules bumped together by `tools/bump.py`) |
+| Module version at snapshot | `?v=202610327q` (all modules bumped together by `tools/bump.py`) |
 | Build stamp | `console.info("[forge] BUILD …")`, `window.__forgeBuild`, red error strip reads it |
 | Verify one command | `python tools/gate.py` → SYNTAX + ASSETS + UNIT + REGRESS |
 
@@ -23,9 +23,11 @@ operator rig, rain and swaying trees.
 |---|---|---|
 | Weapons + per-style VFX | `src/weapons.js` | **15 styles**, own damage/cycle/crit/pellets, own VFX row and sample |
 | Enemies | `src/enemies.js` | rifleman, sapper, shieldbearer, spotter, mortar, drone, mech, gunship; altitude gunship 6.4 / drone 4.6 |
+| Maps | `src/maps.js` + level kit in `src/models.js` | three themed arenas built from CC0 Kenney city kits; arena1/2/3 -> DEPOT/TOWN/FOUNDRY |
+| Pathing | `src/models.js` | 2.5 m flow-field nav grid, rebuilt per map; walkers route around cover, escape blocked cells |
 | Enemy fire | `src/main.js` | **travelling bolts** (12 m/s rifle, 19 m/s minigun) with muzzle flash + recoil; cover blocks; pilot dodges |
-| Shooter ramp | `enemies.js spawn()` | 12 % of bodies can fire at t=0 → 85 % by ~110 s (rest advance and melee) |
-| Boss | `main.js` + `models.js` | spawns at `runTime > 75 || kills >= 75`; gunship 900 HP, mech 624 HP (`hpScale 0.2`); salvo every 7 s |
+| Shooter ramp | `enemies.js spawn()` | rifle-carriers only: 35 % at t=0 → 85 % by ~90 s; mortar/mech/gunship/sapper always armed; unarmed carriers charge and melee |
+| Boss | `main.js` + `models.js` | spawns at `runTime > 65 || kills >= 60`; gunship 900 HP (real helicopter model), mech 624 HP (own mech model); salvo every 7 s |
 | Autopilot | `src/autopilot.js` | tactical beats (HOLD/REPOSITION/bounding ADVANCE), boss dodge, `dodge-shot`, pickup fetch |
 | Pickups | `src/pickups.js` | health 50 % over 10 s, speed +25 %/stack, power +25 %/stack; auto-apply, stack, 60 s respawn |
 | Talent tree | `src/talents.js` | constellation disc, 969 nodes / 1,262 edges, 8 keystones, 96 masteries |
@@ -47,6 +49,23 @@ operator rig, rain and swaying trees.
 
 Banking lives in `bankRun()`. No click-to-earn screen exists and there must not be one.
 
+## Maps (2026-10-30)
+
+Rebuilt from **CC0 1.0 Kenney City Kits** (Industrial, Commercial, Roads), vendored with their
+licences at `assets/ki`, `assets/kc`, `assets/kr` and recorded in `docs/ASSETS-SOURCES.md`.
+
+| Map | Theme | Content |
+|---|---|---|
+| DEPOT (`depot`) | container terminal | two 5-container walls framing an avenue, flank stacks, kerbside trucks, gate barriers, watchtowers, warehouse, water tower, 20 m chimney; asphalt + pad + lane paint |
+| TOWN (`yard`) | town square | ten shopfronts round a paved plaza, crossing street with crosswalks, eight lamps, parked truck, street clutter, ten-block skyline |
+| FOUNDRY (`foundry`) | heavy plant | four sheds, two silos, water tower, 22 m chimney, machinery blocks, turrets, hazard pad on concrete |
+
+- Pick in the manager = `arena1/2/3` -> `MAPS[0..2]` (`TUNING.mapSelection = "select"`); all three
+  unlocked. `?map=depot|yard|foundry` still forces one for tests.
+- One brand board per map at `map.sign`; buildings scaled from `KENNEY_SIZE` footprints with lit
+  window bands; colliders + nav built from the same numbers before the GLB resolves.
+- `tools/mapselection.mjs` drives the real manager: **3/3 distinct** (depot 30 / yard 21 / foundry 23 colliders).
+
 ## Verified numbers at this snapshot
 
 - 10 seeded runs (`node tools/tune.mjs 10 180`): median **169.7 s**, **5 cards**, boss reached **100 %**,
@@ -60,6 +79,9 @@ Banking lives in `bankRun()`. No click-to-earn screen exists and there must not 
 - Assets (`tools/asset_check.py`): 28 plates at stated sizes (5 photos 768×512, 2 stills 1536×864,
   OG 1200×630, 5 enemy portraits 256×256, 15 weapon silhouettes 512×256).
 - Unit gate: **348 checks**.
+- Pathing (`node tools/pathing.mjs`): **3/3 maps**, 7-8 of 8 bodies arrive, **0 % backpedal** (live too).
+- Combat (`node tools/combat.mjs`): **26/26** including unarmed bodies close to melee (0.5 m) and melee draws blood.
+- Map selection (`node tools/mapselection.mjs`): **3/3 distinct** maps.
 
 ## Hooks available for tests (`window.__forgeSmokeTest`)
 
