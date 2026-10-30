@@ -55,6 +55,13 @@ Follow-ups after playtest feedback ("walking backwards", "stuck doing nothing"):
   follow/look smoothing relaxed and shot dwell 10-15 s so the framing stops pumping.
 - `combat.mjs` now asserts unarmed bodies close to melee (0.5 m) and draw blood.
 
+Map selection bug (reported: "choosing a different map does not change the map"): the manager's
+arena ids (arena1/2/3) were never mapped to the maps — `TUNING.mapSelection` defaulted to `"rotate"`,
+so the map rotated by run number regardless of the pick, and two of the three tiles were score-locked
+so they could not even be selected. `mapSelection` is `"select"`, the tiles are named DEPOT / TOWN /
+FOUNDRY and all three are unlocked. New `tools/mapselection.mjs` clicks each tile, launches, and reads
+back the map: **3/3 distinct** (depot 30 colliders, yard 21, foundry 23).
+
 ## Third pass (same day) — measured the fight, then tuned it
 
 New tool: `node tools/fightlab.mjs` drives the real loop and reports TTK per weapon style, incoming
