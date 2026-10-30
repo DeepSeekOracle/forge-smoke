@@ -82,6 +82,41 @@ try {
   assert('enemies are alive and engaged', last.n > 0 && last.kills > 0, `${last.n} bodies, ${last.kills} kills`);
   assert('run survives 20 s', last.phase === 'playing', last.phase);
 
+  // airdrop: the crate must open a resolvable card window and the card system must survive it
+  // clear any open level-up tray first, or the airdrop would overwrite it and the check would race
+  for (let i = 0; i < 4; i += 1) {
+    const open = await page.evaluate(() => window.__forgeSmokeTest.getCardsState().window);
+    if (!open) break;
+    await page.evaluate(() => { const el = document.querySelector('#fs-cards .card'); if (el) el.click(); });
+    await page.waitForTimeout(400);
+  }
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    T.getCards().queuedCards.length = 0;
+    T.setSpawns(true); T.setRunTime(54.5);
+  });
+  await page.waitForTimeout(3000);
+  const airOpen = await page.evaluate(() => window.__forgeSmokeTest.getCardsState());
+  assert('airdrop opens a card window', airOpen.window === true && airOpen.source === 'airdrop' && airOpen.options.length >= 1, JSON.stringify(airOpen.options));
+  assert('airdrop cards have names', airOpen.options.every((o) => o.name), JSON.stringify(airOpen.options.map((o) => o.name)));
+  await page.evaluate(() => { const el = document.querySelector('#fs-cards .card'); if (el) el.click(); });
+  await page.waitForTimeout(800);
+  const airAfter = await page.evaluate(() => window.__forgeSmokeTest.getCardsState());
+  // the airdrop window itself must be gone; a queued level-up tray may legitimately open next
+  assert('airdrop card window closes', airAfter.source !== 'airdrop' && airAfter.airdrop === false, JSON.stringify(airAfter));
+  assert('airdrop card is banked', airAfter.cardsPlayed >= 1, `${airAfter.cardsPlayed} cards`);
+  // and a level-up tray still opens afterwards (the old stuck window blocked every later card)
+  await page.evaluate(() => {
+    const T = window.__forgeSmokeTest;
+    const cs = T.getCards();
+    cs.queuedCards.push([{ type: 'part', name: 'Test Part', part: { id: 'fast_mag', rarity: 'common', effect: { reloadMult: 0.72 } } }]);
+  });
+  await page.waitForTimeout(1200);
+  const lvl = await page.evaluate(() => window.__forgeSmokeTest.getCardsState());
+  assert('card system still serves level-ups after an airdrop', lvl.window === true && lvl.source === 'level', JSON.stringify(lvl));
+  await page.evaluate(() => { const el = document.querySelector('#fs-cards .card'); if (el) el.click(); });
+  await page.waitForTimeout(600);
+
   // mortar: a shell must detonate on the ground, not on the mortar
   await page.evaluate(() => {
     const T = window.__forgeSmokeTest;
@@ -105,7 +140,10 @@ try {
   const bossB = await page.evaluate(() => ({ boss: window.__forgeSmokeTest.getBoss(), hp: Math.round(window.__forgeSmokeTest.getState().health) }));
   assert('boss spawns at the body cap', bossA.boss.spawned === true && bossA.boss.hp > 0, JSON.stringify(bossA.boss));
   assert('boss is airborne', bossA.boss.y > 5, `y=${bossA.boss.y}`);
+  assert('boss spawns inside the arena', bossA.boss.r > 0 && bossA.boss.r < 54, `r=${bossA.boss.r}`);
   assert('boss takes damage', bossB.boss.hp < bossA.boss.hp, `${bossA.boss.hp} -> ${bossB.boss.hp}`);
+  const bossMoved = Math.hypot(bossB.boss.x - bossA.boss.x, bossB.boss.z - bossA.boss.z);
+  assert('boss actually moves', bossMoved > 2, `${bossMoved.toFixed(2)} m in 8 s`);
 
   assert('no page errors', errors.length === 0, errors.slice(0, 3).join(' | '));
 } catch (e) {

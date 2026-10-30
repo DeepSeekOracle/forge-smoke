@@ -18,6 +18,31 @@ preview server with Playwright on the **real GPU** (ANGLE / D3D11, RTX 4060 Ti),
 ![Fight after the pass](after-fight.jpg)
 ![Boss framing](after-boss.jpg)
 
+## Second pass (same day) — the arena was the wrong lever
+
+The first pass shrank the play radius from 54 m to 30 m to make the fight readable. That was a
+mistake and it broke the maps: the fixture ring (17-33 m) landed on the boundary, the fighter got
+clamped inside his own cover, and because spawns are measured from the PLAYER a boss could appear
+20 m outside the wall. The radius is now **54 m again** and the spatial rules are enforced properly:
+
+| Bug | Cause | Fix |
+|---|---|---|
+| Boss hovered in place | `updateGunship()` returned `{type:"strafe"}` and never wrote a velocity | holds a 14-24 m ring at `strafeSpeed`, verified **27 m in 8 s** |
+| Mech froze at range | velocity forced to 0 inside 25 m | keeps a firing line (close to 14 m, open to 9 m, else strafes) |
+| Enemies outside the ring | spawn offset from the player, unclamped | clamped to `arenaRadius - 4`, min 9 m from the player; walkers clamped to the deck |
+| Fighter "stuck on every edge" | head-on prop contact cancelled the whole step; hard radial clamp with no slide | **contact slide** (project velocity onto the surface tangent) + **rim slide**; `tools/traverse.mjs`: 5/5 legs, 0 stalls in the open |
+| Empty 33-50 m band | map cover only reached 33 m | outer-ring containers/barriers on all three maps (validated 17-52 m) |
+| Edge was a black void | 4.6 m wall at 56 m + flat black sky | 8 m wall, lit rail on the inner face, gradient sky dome |
+| Airdrop **froze the card system** | the crate set `cardPickWindow` with no tray/timer, then auto-picked an empty level-up queue and returned early — no card could ever open again | real 2-card window, drawer/pick routed to `beatDirector.pickAirdrop`, window always closes; crate no longer re-spawns every frame |
+| Airdrop cards nameless | `rollAirdropOptions` never set `name` | named weapon/part cards; crate upgrades the ACTIVE weapon |
+| Six of eight archetypes never seen | beat rosters were rifleman-only until 158 s | roster ramp: spotter @0 s, sapper @35 s, shieldbearer/drone @70 s, mortar @128 s |
+| Spotter had no ability | `state.painted` was set by nobody and read by nobody | a **connected** sniper round paints (+15 % incoming, tighter enemy fire, HUD chip); ~26 % uptime |
+| Texture count climbed every spawn | every enemy rig cloned its materials and re-baked 3 textures | per-(type,tint) material cache |
+| `THREATS` label | it printed the kill count | `KILLS`; boss bar only for the real boss |
+
+Verification for this pass: `node tools/combat.mjs` **23/23**, `node tools/traverse.mjs` **5/5**,
+`python tools/gate.py` green, 80 s run: 5 archetypes + boss, airdrop fires, 0 errors.
+
 ## What was actually broken, and why
 
 ### 1. The arena was a black void (the root of "I can't see the fight")
