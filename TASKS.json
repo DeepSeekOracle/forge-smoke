@@ -2293,7 +2293,9 @@
         "facing computed for every body from travel when routing/backpedalling (mech/mortar/aircraft included)",
         "TUNING.mapSelection 'select' + all arenas unlocked; tools/mapselection.mjs 3/3 distinct maps (30/21/23 colliders)",
         "camera raised ~0.5-1 m per shot, float halved, follow 2.8 / look 3.6, dwell 10-15 s",
-        "live https://excavationpro.ca/games/forgesmoke/?v=202610327q verified; gate green, TRAVERSE 5/5"
+        "live https://excavationpro.ca/games/forgesmoke/?v=202610327q verified; gate green, TRAVERSE 5/5",
+        "results screen: floating damage numbers (z-index 70) and the bark no longer render outside phase 'playing'; live FOUNDRY re-check clean at ?v=202610327s",
+        "final live build 202610327s (source bfad8e5, site c7fc303), 0 page errors"
       ],
       "artifacts": [
         "src/maps.js",
@@ -2304,7 +2306,8 @@
         "src/main.js",
         "tools/pathing.mjs",
         "tools/mapselection.mjs",
-        "docs/ASSETS-SOURCES.md"
+        "docs/ASSETS-SOURCES.md",
+        "docs/evidence/combat-2026-10-30/results-clean.png"
       ]
     }
   ]

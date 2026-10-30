@@ -10,7 +10,7 @@ updating this file.
 | Project repo | `C:\Users\justi\AI Games\forge-smoke` |
 | Deployed copy | `D:\excavationpro-ca\games\forgesmoke` |
 | Live URL | `https://excavationpro.ca/games/forgesmoke/` |
-| Module version at snapshot | `?v=202610327q` (all modules bumped together by `tools/bump.py`) |
+| Module version at snapshot | `?v=202610327s` (all modules bumped together by `tools/bump.py`) |
 | Build stamp | `console.info("[forge] BUILD …")`, `window.__forgeBuild`, red error strip reads it |
 | Verify one command | `python tools/gate.py` → SYNTAX + ASSETS + UNIT + REGRESS |
 
@@ -82,6 +82,7 @@ licences at `assets/ki`, `assets/kc`, `assets/kr` and recorded in `docs/ASSETS-S
 - Pathing (`node tools/pathing.mjs`): **3/3 maps**, 7-8 of 8 bodies arrive, **0 % backpedal** (live too).
 - Combat (`node tools/combat.mjs`): **26/26** including unarmed bodies close to melee (0.5 m) and melee draws blood.
 - Map selection (`node tools/mapselection.mjs`): **3/3 distinct** maps.
+- Results screen: combat numbers and barks render only while playing; verified clean on a live FOUNDRY run at 202610327s (`results-clean.png`).
 
 ## Hooks available for tests (`window.__forgeSmokeTest`)
 
