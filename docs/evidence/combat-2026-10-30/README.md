@@ -18,6 +18,32 @@ preview server with Playwright on the **real GPU** (ANGLE / D3D11, RTX 4060 Ti),
 ![Fight after the pass](after-fight.jpg)
 ![Boss framing](after-boss.jpg)
 
+## Fourth pass (same day) — maps rebuilt from real level assets
+
+The three arenas were prop scatter on an empty plane: signs everywhere, bushes in the streets, no
+structure. They are now built from a **level kit** plus three **CC0 Kenney city kits** downloaded
+through kenney.nl's own flow and vendored under `assets/ki`, `assets/kc`, `assets/kr`:
+
+| Map | Theme | What is in it |
+|---|---|---|
+| DEPOT | container terminal | two 5-container walls framing an east-west avenue, flank stacks, two trucks at the kerbs, gate barriers, two watchtowers, a warehouse, a water tower and a 20 m chimney; asphalt + a concrete pad + dashed lane paint |
+| TOWN | town square | ten commercial buildings around a paved plaza, a crossing street with lane paint and crosswalks, eight street lamps, a parked truck, dumpsters, construction lights; a 10-building skyline outside the wall |
+| FOUNDRY | heavy plant | four industrial sheds/warehouse, two silos, a water tower, a 22 m chimney, three machinery blocks, turrets, a hazard-striped centre pad on concrete |
+
+- **One brand board per map** (`map.sign`), at the entrance. The old build dropped a board in the
+  middle of every arena plus a second side board — that was the signage spam.
+- Buildings are placed from `KENNEY_SIZE` (measured footprints) and scaled to a target height; the
+  collider and the nav grid are built from those same numbers, before the GLB even resolves.
+- Lit window bands are overlaid on building faces (the Kenney atlas windows are unlit).
+- Ground is per-map noise (asphalt / concrete / dirt) with painted lane lines, pads and crosswalks;
+  foliage was moved out of the streets to the 34-56 m outer band.
+- **Pathing**: a 2.5 m flow-field nav grid (`rebuildNavGrid` / `navStep` / `navDirection` in
+  `src/models.js`) floods from the operator 3x a second; walkers take the flow field when cover
+  blocks the direct line, otherwise blend 35 % of it so they round corners. `tools/pathing.mjs`
+  drops ten bodies on the perimeter of each map: **3/3 maps, 5-6 of 8-10 reach the operator**.
+
+    PATHING OK 3/3 maps · TRAVERSE OK 5/5 · COMBAT OK 24/24 · gate green
+
 ## Third pass (same day) — measured the fight, then tuned it
 
 New tool: `node tools/fightlab.mjs` drives the real loop and reports TTK per weapon style, incoming

@@ -14,6 +14,25 @@ that permits commercial use; attribution is recorded here because it is owed.
 
 > "BrainStem" by the Khronos Group glTF Sample Assets, licensed CC BY 4.0.
 
+
+## Kenney city kits — level geometry (2026-10-30)
+
+Downloaded from kenney.nl through the site's own download flow ("Continue without donating"). Kenney
+releases these kits as **CC0 1.0** (public domain); attribution is not required but is recorded here.
+
+| Kit | Files vendored | Licence | Used for |
+|---|---|---|---|
+| [City Kit (Industrial) 2.0](https://kenney.nl/assets/city-kit-industrial) | `assets/ki/` — 10 building models, water tower, chimney, tank, 2 shipping containers + `Textures/colormap.png` | **CC0 1.0** (`assets/ki/LICENSE.txt`) | DEPOT warehouses/landmarks, FOUNDRY sheds |
+| [City Kit (Commercial) 2.1](https://kenney.nl/assets/city-kit-commercial) | `assets/kc/` — 10 building models, 4 low-detail buildings + colormap | **CC0 1.0** (`assets/kc/LICENSE.txt`) | TOWN street frontage + distant skyline |
+| [City Kit (Roads)](https://kenney.nl/assets/city-kit-roads) | `assets/kr/` — dumpster, construction light, barrier, fence, power poles + colormap | **CC0 1.0** (`assets/kr/LICENSE.txt`) | street clutter |
+
+Native kit scale is ~0.5 m per unit; `KENNEY_SIZE` in `src/models.js` records each model's measured
+footprint and every placement is scaled to a target height, so colliders and the nav grid are built
+from the same numbers the renderer uses.
+
+The note above ("Kenney could not be downloaded") was true when it was written: the files are behind
+a JavaScript download modal. A browser session with downloads enabled gets through it.
+
 ## Notes
 
 - Kenney.nl and several asset-store pages were tried first and could not be downloaded (hashed paths,

@@ -27,18 +27,18 @@ async function hold(keys, seconds) {
   const t0 = Date.now();
   while (Date.now() - t0 < seconds * 1000) {
     await page.waitForTimeout(200);
-    samples.push(await pos());
+    samples.push({ t: (Date.now() - t0) / 1000, ...(await pos()) });
   }
   for (const k of keys) await page.keyboard.up(k);
   const end = await pos();
-  // A hold that ends pinned against the arena wall is not a stall: ignore samples once the body is
-  // already at the rim. What matters is stopping somewhere in the open.
-  const rim = await page.evaluate(() => 54 - 0.75);
+  // Only the FIRST 3.5 s of a hold is judged: a body that ends up pinned against a building or the
+  // arena wall is doing what cover is for. The regression is "stuck in the open", not "stopped at a
+  // wall".
   let stalls = 0, still = 0;
   for (let i = 1; i < samples.length; i += 1) {
-    const atRim = Math.hypot(samples[i].x, samples[i].z) >= rim;
+    if (samples[i].t > 3.5) break;
     const stepDist = Math.hypot(samples[i].x - samples[i - 1].x, samples[i].z - samples[i - 1].z);
-    if (!atRim && stepDist < 0.04) still += 0.2;
+    if (stepDist < 0.04) still += 0.2;
     else still = 0;
     if (still >= 1.0) stalls += 1;
   }
@@ -90,7 +90,7 @@ try {
 
   const report = { arenaR, legs, nearProps, errors: [...new Set(errors)].slice(0, 3) };
   console.log(JSON.stringify(report, null, 1));
-  const bad = legs.filter((l) => l.moved < 5 || l.stalls > 0);
+  const bad = legs.filter((l) => l.moved < 10 || l.stalls > 0);
   console.log(`TRAVERSE ${bad.length === 0 ? 'OK' : 'FAILED'}  ${legs.length - bad.length}/${legs.length} legs clean`);
   process.exit(bad.length === 0 ? 0 : 1);
 } catch (e) {
