@@ -18,6 +18,31 @@ preview server with Playwright on the **real GPU** (ANGLE / D3D11, RTX 4060 Ti),
 ![Fight after the pass](after-fight.jpg)
 ![Boss framing](after-boss.jpg)
 
+## Third pass (same day) — measured the fight, then tuned it
+
+New tool: `node tools/fightlab.mjs` drives the real loop and reports TTK per weapon style, incoming
+fire volume/hit rate, and whether each enemy rig is actually animating.
+
+| Measurement | Result |
+|---|---|
+| TTK, rifleman at 9 m | spray 0.83 s · pierce 0.73 · cone 0.62 · burst 2.16 · beam 2.10 · spinup 0.42 · rail 0.10 · arc 1.55 |
+| Enemy rigs animating | every rigged type moves a sampled hand bone 0.4-1.8 units over 0.7 s (drone is a rotor mesh, mortar is a static emplacement) |
+| Impact effects | muzzle flash lands 0.13 m past the barrel tip, tracer starts at the muzzle, **0 impact effects existed before this pass** |
+| Incoming fire (4 riflemen, stationary) | 0 shots before the fix; 5 shots / 3 hits / 18 damage in 3 s after |
+
+Fixes:
+- **`fx.js` was dead code** — `fxController` was created and never called, so hits had no spark.
+  Added a 28-point 3D impact-spark pool (4-5 sparks per hit, 10 + a ground ring on a kill).
+- Casing pool was **6**; an SMG burst recycled the whole pool. Now 24.
+- The early shooter ramp started at **12 %**, so a four-rifleman squad could fire zero rounds
+  (measured). 35 % at t=0, 85 % by ~1.5 min.
+- Card tray scrim + the darkness wave together left the screen nearly black; the tray is much
+  lighter now and the fight stays visible while choosing.
+- Boss gate 75 s / 75 kills -> **65 s / 60 kills** (the harsher ramp shortened the median run; the
+  boss is a mid-run event again). Measured run: boss at ~65 s, dead at 78 s with the gunship on
+  156/900 — a genuine "so close" finish.
+- Regression: `combat.mjs` now also asserts every hit spawns an impact burst (24/24 checks).
+
 ## Second pass (same day) — the arena was the wrong lever
 
 The first pass shrank the play radius from 54 m to 30 m to make the fight readable. That was a

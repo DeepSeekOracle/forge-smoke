@@ -81,6 +81,8 @@ try {
   assert('never frozen while trying to move', worstStill <= 1.2, `worst ${worstStill.toFixed(1)} s`);
   assert('enemies are alive and engaged', last.n > 0 && last.kills > 0, `${last.n} bodies, ${last.kills} kills`);
   assert('run survives 20 s', last.phase === 'playing', last.phase);
+  const impacts = await page.evaluate(() => window.__forgeSmokeTest.getImpacts());
+  assert('every hit spawns an impact burst', impacts > 20, `${impacts} sparks`);
 
   // airdrop: the crate must open a resolvable card window and the card system must survive it
   // clear any open level-up tray first, or the airdrop would overwrite it and the check would race
